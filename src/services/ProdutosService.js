@@ -5,6 +5,12 @@ class ProdutosService {
     // Cria um novo produto
     static async criarProduto(dadosProduto) {
         try {
+            const produtoExistente = await Produtos.findOne({ where: { cEAN: dadosProduto.cEAN } });
+
+            if (produtoExistente) {
+                throw new Error(`Produto: ${(dadosProduto.cEAN)} já cadastrado`);
+              }
+
             const produto = await Produtos.create(dadosProduto);
             return produto;
         } catch (error) {
