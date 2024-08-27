@@ -1,5 +1,7 @@
 async function dividirNotaFiscal(jsonData) {
   try {
+
+
     // Verifica se jsonData é um objeto
     if (typeof jsonData !== 'object' || jsonData === null) {
       throw new Error('jsonData deve ser um objeto JSON válido');
@@ -12,7 +14,6 @@ async function dividirNotaFiscal(jsonData) {
     const nfe = data.nfeProc?.NFe?.[0]?.infNFe?.[0]?.ide;
     const nfeFornecedor = data.nfeProc?.NFe?.[0]?.infNFe?.[0]?.emit;
 
-    console.log('nfeFornecedor estrutura: ' + JSON.stringify(nfeFornecedor, null, 2));
 
     if (!nfe || !nfeFornecedor) {
       throw new Error('Estrutura do JSON não corresponde ao esperado.');
@@ -55,7 +56,10 @@ async function dividirNotaFiscal(jsonData) {
 
 
     // Extraindo informações da nota fiscal
-    const resultado = {
+    // Imprimindo as informações para depuração
+
+    // Retorne os campos necessários
+    return {
       cUF: getValue(informacoesIde, ['cUF', 0]),
       cNF: getValue(informacoesIde, ['cNF', 0]),
       natOp: getValue(informacoesIde, ['natOp', 0]),
@@ -80,12 +84,6 @@ async function dividirNotaFiscal(jsonData) {
       xJust: getValue(informacoesIde, ['xJust', 0]),
       fornecedor: fornecedor // Incluindo as informações do fornecedor no resultado
     };
-
-    // Imprimindo as informações para depuração
-    console.log('Informações Nota Fiscal: ' + JSON.stringify(resultado, null, 2));
-
-    // Retorne os campos necessários
-    return resultado;
   } catch (error) {
     console.error('Erro ao dividir Nota Fiscal:', error);
     throw error; // Lance o erro para ser tratado por quem chamou a função

@@ -62,6 +62,7 @@ class NotaFiscalController {
                         }
 
                         parser.parseString(xmlContent.trim(), (err, result) => {
+                            console.log('Enviando result: '+JSON.stringify(result))
                             if (err) {
                                 console.error('Erro ao parsear o XML:', err);
                                 return reject({ error: 'Erro ao parsear o XML' });
@@ -78,6 +79,7 @@ class NotaFiscalController {
             const notasFiscais = await Promise.all(processFilePromises);
 
             // Responde com sucesso
+            console.log('Dados Returno Create NF'+ JSON.stringify(notasFiscais));
             res.status(201).json({ message: 'Notas fiscais criadas com sucesso', notasFiscais });
 
         } catch (err) {

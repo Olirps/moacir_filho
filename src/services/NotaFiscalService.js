@@ -3,15 +3,17 @@ const sequelize = require('../db');
 const NotaFiscal = require('../models/NotaFiscal');
 const { dividirNotaFiscal } = require('../util/importaNotaFiscal');
 const Fornecedores = require('../models/Fornecedores');
+const Produtos = require('../models/Produtos');
+const ProdutosService = require('../services/ProdutosService');
 const FornecedoresService = require('../services/FornecedoresService');
-const Veiculos = require("../models/Veiculos");
+const getInformacoesProduto = require("../util/informacoesProduto");
+const MovimentacoesEstoque = require("../models/MovimentacoesEstoque");
 
 class NotaFiscalService {
 
   static async criarNotaFiscal(xmlData) {
     try {
       const dadosXml = await dividirNotaFiscal(xmlData);
-
       let nroNotaFiscal = dadosXml.nNF;
       let cnpjFornecedor = dadosXml.fornecedor.CNPJ;
 
@@ -34,7 +36,6 @@ class NotaFiscalService {
         }
 
         const originalJson = dadosXml.fornecedor;
-        console.log('Dados Xml antes Normalizacao: ' + JSON.stringify(dadosXml.fornecedor, null, 2));
 
         function normalizeJson(json, mapping) {
           const normalizedJson = {};
@@ -65,21 +66,40 @@ class NotaFiscalService {
         const normalizedJson = normalizeJson(reestruturado, mapping);
 
         const FornecedorCreated = await FornecedoresService.criarFornecedores(normalizedJson);
-        console.log('ForncedorCreated: ' + JSON.stringify(FornecedorCreated.id, null, 2));
         dadosXml.codFornecedor = FornecedorCreated.id;
 
-        console.log('XML com CodFornecedor: ' + JSON.stringify(dadosXml, null, 2));
       } else {
         const notaFiscalExistente = await existeNF(dadosXml.nNF, fornecedoresExistente.id);
         dadosXml.codFornecedor = fornecedoresExistente.id;
-        console.log('NF Existente: '+notaFiscalExistente);
         if (notaFiscalExistente) {
           throw new Error('Nota Fiscal Já Cadastrada.');
         }
       }
 
-      console.log('Dados Xml para criação do NFe: ' + JSON.stringify(dadosXml, null, 2));
-      return await NotaFiscal.create(dadosXml);
+
+      const nfCreated = await NotaFiscal.create(dadosXml);
+
+      xmlData.nota_id = nfCreated.id
+      //produtos
+      let produtoInfo = getInformacoesProduto(xmlData);
+
+      if (produtoInfo && typeof produtoInfo === 'object') {
+
+        //verifica a quantidade de objetos
+        let projetoTamanho = produtoInfo.length
+        for(let i = 0 ;i < projetoTamanho; i++){
+          produtoInfo[i].nota_id = nfCreated.id;
+        }
+
+
+      } else {
+        console.error('Erro: produtoInfo não é um objeto válido.');
+      }
+
+      verificarProdutos(produtoInfo);
+      //Fim produtos
+
+      return nfCreated
     } catch (err) {
       throw new Error(err.message);
     }
@@ -87,7 +107,6 @@ class NotaFiscalService {
 
   static async criarNotaFiscalManual(dados) {
 
-    console.log('Entrou no dados: '+JSON.stringify(dados))
     const notaFiscalExistente = await existeNF(dados.nNF, dados.codFornecedor);
 
     if (notaFiscalExistente) {
@@ -120,5 +139,43 @@ async function atualizaProdutos(dadosJson){
     return false;
   }
 }
+
+async function verificarProdutos(produtosJSON) {
+  for (let produto of produtosJSON) {
+    const { cEAN, nome } = produto;
+    const cEANNumber = parseInt(cEAN, 10);
+
+    if (Number.isInteger(cEANNumber)) {
+      try {
+        const produtoEncontrado = await Produtos.findOne({
+          where: { cEAN: cEAN }
+        });
+
+        if (produtoEncontrado) {
+
+          produto.produto_id  = produtoEncontrado.id
+          produto.tipo_movimentacao  = 'entrada'
+          produto.quantidade  = produto.qCom
+
+          //atualiza o estoque do produto !
+          const atualizaEstoque = MovimentacoesEstoque.create(produto)
+
+        } else {
+          //cadastro o produto novo
+          console.log('Dados passados para criar Produto Chamada: '+JSON.stringify(produto));
+
+          ProdutosService.criarProduto(produto);
+
+          console.log(`Produto com cEAN ${cEAN} não encontrado.`);
+        }
+      } catch (error) {
+        console.error(`Erro ao buscar produto com cEAN ${cEAN}:`, error);
+      }
+    } else {
+      console.log(`cEAN para o produto ${nome} não definido.`);
+    }
+  }
+}
+
 
 module.exports = NotaFiscalService;

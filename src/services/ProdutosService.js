@@ -1,17 +1,23 @@
 // src/services/ProdutosService.js
 const Produtos = require('../models/Produtos');
+const MovimentacoesEstoque = require("../models/MovimentacoesEstoque");
 
 class ProdutosService {
     // Cria um novo produto
     static async criarProduto(dadosProduto) {
         try {
             const produtoExistente = await Produtos.findOne({ where: { cEAN: dadosProduto.cEAN } });
-
             if (produtoExistente) {
                 throw new Error(`Produto: ${(dadosProduto.cEAN)} já cadastrado`);
-              }
+            }
 
-            const produto = await Produtos.create(dadosProduto);
+            let produto = await Produtos.create(dadosProduto);
+
+            dadosProduto.produto_id = produto.id;
+            dadosProduto.tipo_movimentacao  = 'entrada'
+            dadosProduto.quantidade  = dadosProduto.qCom
+            const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
+
             return produto;
         } catch (error) {
             throw new Error('Erro ao criar o produto: ' + error.message);

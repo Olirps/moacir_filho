@@ -18,31 +18,31 @@ const Produtos = sequelize.define('Produtos', {
     },
     xProd: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     NCM: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     CFOP: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     uCom: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     qCom: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
+        allowNull: true,
     },
     vUnCom: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
+        allowNull: true,
     },
     vProd: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
+        allowNull: true,
     },
     validade: {
         type: DataTypes.DATE,
@@ -52,14 +52,78 @@ const Produtos = sequelize.define('Produtos', {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
-    estoque: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-    },
     marca: {
         type: DataTypes.STRING,
         allowNull: true,
-    }
+    },
+    EXTIPI: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    CEST: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    indEscala: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    cEANTrib: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    uTrib: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    qTrib: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+    },
+    vUnTrib: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+    },
+    vDesc: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+    },
+    indTot: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    cProdANP: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    descANP: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    UFCons: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    nBico: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    nTanque: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    vEncIni: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+    },
+    vEncFin: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+    },
+    pBio: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: true,
+    },
 }, {
     tableName: 'produtos',
     timestamps: true,

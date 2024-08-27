@@ -2,6 +2,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db');
 const Produtos = require('../models/Produtos');
+const NotaFiscal = require('../models/NotaFiscal');
 
 
 const MovimentacoesEstoque = sequelize.define('MovimentacoesEstoque', {
@@ -16,6 +17,16 @@ const MovimentacoesEstoque = sequelize.define('MovimentacoesEstoque', {
         allowNull: false,
         references: {
             model: 'Produtos', // Nome da tabela associada
+            key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+    },
+    nota_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'nota_fiscal', // Nome da tabela associada
             key: 'id'
         },
         onUpdate: 'CASCADE',

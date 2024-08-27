@@ -5,6 +5,7 @@ class ProdutosController {
     // Criação de um novo produto
     static async criarProduto(req, res) {
         try {
+            console.log('Dados passados para criar Produto Controller: '+JSON.stringify(req));
             const novoProduto = await ProdutosService.criarProduto(req.body);
             res.status(201).json(novoProduto);
         } catch (error) {
