@@ -5,6 +5,8 @@ const NotaFiscalService = require('../services/NotaFiscalService');
 const xml2js = require('xml2js');
 const fs = require('fs');
 const {limpaDocumento} = require("../util/util");
+const NotaFiscal = require("../models/NotaFiscal");
+const Fornecedores = require("../models/Fornecedores");
 
 
 // Cria a pasta /uploads se ela não existir
@@ -39,70 +41,98 @@ const upload = multer({
     }
 });
 
+    const options = {
+    explicitArray: false, // Remove arrays quando não necessário
+    ignoreAttrs: false,   // Mantém os atributos dos nós
+    mergeAttrs: true      // Junta os atributos com o objeto pai
+};
+
 class NotaFiscalController {
     static async importarNotaFiscal(req, res) {
         try {
-            const files = req.files; // Array de arquivos enviados
+            const files = req.files;
 
             if (!files || files.length === 0) {
                 return res.status(400).json({ error: 'Nenhum arquivo foi enviado' });
             }
 
-            // Cria uma array de promessas para processar cada arquivo
+            for (let i = 0; i < files.length; i++) {
+                const filePath = files[i].path;
+
+                if (typeof filePath === 'string') {
+                    try {
+                        const fileContent = fs.readFileSync(filePath, 'utf8');
+                        const parser = new xml2js.Parser(options);
+
+                        const result = await new Promise((resolve, reject) => {
+                            parser.parseString(fileContent, (err, parsedResult) => {
+                                if (err) {
+                                    return reject(err);
+                                }
+                                resolve(parsedResult);
+                            });
+                        });
+
+                        const data = JSON.parse(JSON.stringify(result));
+                        const identNF = data.nfeProc?.NFe?.infNFe?.ide?.nNF;
+                        const identForn = data.nfeProc?.NFe?.infNFe?.emit?.CNPJ;
+
+                        // Aguardando a verificação de cada nota antes de continuar
+                        const existeNf = await existeNF(identNF, identForn);
+                        if (existeNf) {
+                            console.log('Nota fiscal já cadastrada, abortando importação.');
+                            return res.status(400).json({
+                                error: `Nota Fiscal ${identNF} do Fornecedor ${identForn} já cadastrada. Importação abortada.`
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Erro ao processar o arquivo:', error);
+                        return res.status(500).json({ error: 'Erro ao processar o arquivo XML' });
+                    }
+                } else {
+                    console.error('O caminho do arquivo não é uma string:', filePath);
+                }
+            }
+
+            // Se chegou aqui, significa que nenhuma nota estava cadastrada previamente
+            // Continua com o processamento das notas
+
             const processFilePromises = files.map(file => {
                 return new Promise((resolve, reject) => {
                     const parser = new xml2js.Parser();
                     const xmlFilePath = path.join(uploadDir, file.filename);
 
-                    // Lê o conteúdo do arquivo salvo
                     fs.readFile(xmlFilePath, 'utf-8', (err, xmlContent) => {
                         if (err) {
                             console.error('Erro ao ler o arquivo XML:', err);
                             return reject({ error: 'Erro ao ler o arquivo XML' });
                         }
 
-                        parser.parseString(xmlContent.trim(), (err, result) => {
-                            console.log('Enviando result: '+JSON.stringify(result))
+                        parser.parseString(xmlContent.trim(), async (err, result) => {
                             if (err) {
                                 console.error('Erro ao parsear o XML:', err);
                                 return reject({ error: 'Erro ao parsear o XML' });
                             }
-                            // Passa o XML parseado para o NotaFiscalService
-                            const notaFiscal = NotaFiscalService.criarNotaFiscal(result);
+
+                            const notaFiscal = await NotaFiscalService.criarNotaFiscal(result, files.length);
                             resolve(notaFiscal);
                         });
                     });
                 });
             });
 
-            // Espera que todos os arquivos sejam processados
             const notasFiscais = await Promise.all(processFilePromises);
 
-            // Responde com sucesso
-            console.log('Dados Returno Create NF'+ JSON.stringify(notasFiscais));
             res.status(201).json({ message: 'Notas fiscais criadas com sucesso', notasFiscais });
 
         } catch (err) {
             res.status(400).json({ error: err.message });
-
-            /*console.error('Erro ao importar nota fiscal:', error);
-            // Verifica se a resposta já foi enviada
-            if (!res.headersSent) {
-                res.status(500).json({ error: 'Ocorreu um erro ao importar a nota fiscal' });
-            }*/
         }
     }
 
     static async criarNotaFiscal(req, res) {
         try {
-
-            console.log('Chamou para Criar');
-
             const notafiscalcriacao = limpaDocumento(req.body);
-
-            console.log('Chamou para Criar'+JSON.stringify(notafiscalcriacao));
-
-
             // Passar os dados para o serviço
             const notafiscal = await NotaFiscalService.criarNotaFiscalManual(notafiscalcriacao);
 
@@ -126,6 +156,19 @@ function handleMulterErrors(err, req, res, next) {
 // Função para sanitizar o nome do arquivo
 function sanitizeFilename(filename) {
     return filename.replace(/[^a-zA-Z0-9_\-\.]/g, '');
+}
+
+async function existeNF(nroNf, ident) {
+    const fornecedoresExistente = await Fornecedores.findOne({
+        where: { cpfCnpj: ident }
+    });
+    if (!fornecedoresExistente){
+        return false;
+    }else {
+        const exist = await NotaFiscal.findOne({ where: {nNF: nroNf,codFornecedor: fornecedoresExistente.id }});
+        return !!exist;
+    }
+
 }
 
 module.exports = { NotaFiscalController, upload, handleMulterErrors };

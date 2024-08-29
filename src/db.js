@@ -24,7 +24,6 @@ sequelize.authenticate()
     const ItensNaoIdentificados= require('./models/ItensNaoIdentificados.js'); // Ajuste o caminho conforme necessário
 
 
-
     // Sincronizar os modelos com o banco de dados
     sequelize.sync({ force: false})
     .then(() => {
