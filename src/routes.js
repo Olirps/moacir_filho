@@ -7,6 +7,7 @@ const FornecedoresController = require('./controllers/FornecedoresController');
 const LoginController = require('./controllers/LoginController');
 const {NotaFiscalController ,handleMulterErrors,upload}= require('./controllers/NotaFiscalController');
 const ProdutosController = require('./controllers/ProdutosController');
+const NotaFiscalController = require('./controllers/NotaFiscalController');
 
 
 const multer = require('multer');
@@ -41,9 +42,6 @@ router.delete('/fornecedores/:id', FornecedoresController.deletarFornecedores);
 router.post('/auth/register', LoginController.register);
 router.post('/auth/login', LoginController.login);
 
-// Rotas para nota fiscal
-router.post('/importanf',upload.array('xml'),handleMulterErrors,NotaFiscalController.importarNotaFiscal);
-router.post('/criarnf',NotaFiscalController.criarNotaFiscal);
 
 // Rotas para produtos
 router.post('/produtos', ProdutosController.criarProduto);
@@ -51,5 +49,13 @@ router.get('/produtos', ProdutosController.listarProdutos);
 router.get('/produtos/:id', ProdutosController.obterProdutoPorId);
 router.put('/produtos/:id', ProdutosController.atualizarProduto);
 router.delete('/produtos/:id', ProdutosController.excluirProduto);
+
+// Rotas para nota fiscal eletronica
+router.post('/notafiscalimport',upload.array('xml'),handleMulterErrors,NotaFiscalController.importarNotaFiscal);
+router.post('/notafiscal',NotaFiscalController.criarNotaFiscal);
+router.get('/notafiscal', NotaFiscalController.listarNotaFiscal);
+router.get('/notafiscal/:id', NotaFiscalController.obterNotaFiscalPorId);
+router.put('/notafiscal/:id', NotaFiscalController.atualizarNotaFiscal);
+router.delete('/notafiscal/:id', NotaFiscalController.excluirNotaFiscal);
 
 module.exports = router;

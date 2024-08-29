@@ -12,7 +12,7 @@ const ItensNaoIdentificados = require("../models/ItensNaoIdentificados");
 
 class NotaFiscalService {
 
-  static async criarNotaFiscal(xmlData,quantidadeNf) {
+  static async criarNotaFiscal(xmlData, quantidadeNf) {
     const transaction = await sequelize.transaction();
     try {
       const notasFiscais = xmlData.nfeProc.NFe;
@@ -94,6 +94,56 @@ class NotaFiscalService {
       throw new Error(err.message);
     }
   }
+
+  // Método para buscar todas as notas fiscais
+  static async getAllNotasFiscais() {
+    try {
+      return await NotaFiscal.findAll();
+    } catch (err) {
+      throw new Error('Erro ao buscar todas as notas fiscais');
+    }
+  }
+
+  // Método para buscar uma nota fiscal por ID
+  static async getNotaFiscalById(id) {
+    try {
+      return await NotaFiscal.findByPk(id);
+    } catch (err) {
+      throw new Error('Erro ao buscar a nota fiscal por ID');
+    }
+  }
+
+  // Método para atualizar uma nota fiscal existente
+  static async updateNotaFiscal(id, notaFiscalData) {
+    try {
+      const notaFiscal = await NotaFiscal.findByPk(id);
+
+      if (!notaFiscal) {
+        return null;
+      }
+
+      return await notaFiscal.update(notaFiscalData);
+    } catch (err) {
+      throw new Error('Erro ao atualizar a nota fiscal');
+    }
+  }
+
+  // Método para deletar uma nota fiscal por ID
+  static async deleteNotaFiscal(id) {
+    try {
+      const notaFiscal = await NotaFiscal.findByPk(id);
+
+      if (!notaFiscal) {
+        return null;
+      }
+
+      await notaFiscal.destroy();
+      return true;
+    } catch (err) {
+      throw new Error('Erro ao deletar a nota fiscal');
+    }
+  }
+
 }
 
 async function existeNF(nroNf, codFornecedor) {

@@ -21,7 +21,7 @@ sequelize.authenticate()
     const Municipio = require('./models/Municipio'); // Ajuste o caminho conforme necessário
     const ImpostoProduto = require('./models/ImpostoProduto'); // Ajuste o caminho conforme necessário
     const MovimentacoesEstoque= require('./models/MovimentacoesEstoque'); // Ajuste o caminho conforme necessário
-    const ItensNaoIdentificados= require('./models/ItensNaoIdentificados.js'); // Ajuste o caminho conforme necessário
+    const ItensNaoIdentificados= require('./models/ItensNaoIdentificados'); // Ajuste o caminho conforme necessário
 
 
     // Sincronizar os modelos com o banco de dados

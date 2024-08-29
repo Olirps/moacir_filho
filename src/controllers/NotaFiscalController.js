@@ -4,7 +4,7 @@ const NotaFiscalService = require('../services/NotaFiscalService');
 
 const xml2js = require('xml2js');
 const fs = require('fs');
-const {limpaDocumento} = require("../util/util");
+const { limpaDocumento } = require("../util/util");
 const NotaFiscal = require("../models/NotaFiscal");
 const Fornecedores = require("../models/Fornecedores");
 
@@ -41,7 +41,7 @@ const upload = multer({
     }
 });
 
-    const options = {
+const options = {
     explicitArray: false, // Remove arrays quando não necessário
     ignoreAttrs: false,   // Mantém os atributos dos nós
     mergeAttrs: true      // Junta os atributos com o objeto pai
@@ -143,6 +143,65 @@ class NotaFiscalController {
             res.status(400).json({ error: err.message });
         }
     }
+
+    // Método GET para listar todas as notas fiscais
+    static async listarNotaFiscal(req, res) {
+        try {
+            const notasFiscais = await NotaFiscalService.getAllNotasFiscais();
+            res.status(200).json(notasFiscais);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    // Método GET para buscar uma nota fiscal por ID
+    static async obterNotaFiscalPorId(req, res) {
+        try {
+            const { id } = req.params;
+            const notaFiscal = await NotaFiscalService.getNotaFiscalById(id);
+
+            if (!notaFiscal) {
+                return res.status(404).json({ error: 'Nota Fiscal não encontrada' });
+            }
+
+            res.status(200).json(notaFiscal);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+    // Método PUT para atualizar uma nota fiscal existente
+    static async atualizarNotaFiscal(req, res) {
+        try {
+            const { id } = req.params;
+            const notaFiscalData = limpaDocumento(req.body);
+            const notaFiscalAtualizada = await NotaFiscalService.updateNotaFiscal(id, notaFiscalData);
+
+            if (!notaFiscalAtualizada) {
+                return res.status(404).json({ error: 'Nota Fiscal não encontrada' });
+            }
+
+            res.status(200).json(notaFiscalAtualizada);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
+
+    // Método DELETE para remover uma nota fiscal por ID
+    static async excluirNotaFiscal(req, res) {
+        try {
+            const { id } = req.params;
+            const notaFiscal = await NotaFiscalService.getNotaFiscalById(id);
+
+            if (!notaFiscal) {
+                return res.status(404).json({ error: 'Nota Fiscal não encontrada' });
+            }
+
+            await NotaFiscalService.deleteNotaFiscal(id);
+            res.status(204).send();
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
 }
 
 // Middleware para lidar com erros do multer
@@ -162,10 +221,10 @@ async function existeNF(nroNf, ident) {
     const fornecedoresExistente = await Fornecedores.findOne({
         where: { cpfCnpj: ident }
     });
-    if (!fornecedoresExistente){
+    if (!fornecedoresExistente) {
         return false;
-    }else {
-        const exist = await NotaFiscal.findOne({ where: {nNF: nroNf,codFornecedor: fornecedoresExistente.id }});
+    } else {
+        const exist = await NotaFiscal.findOne({ where: { nNF: nroNf, codFornecedor: fornecedoresExistente.id } });
         return !!exist;
     }
 
