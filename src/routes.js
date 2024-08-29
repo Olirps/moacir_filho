@@ -7,8 +7,6 @@ const FornecedoresController = require('./controllers/FornecedoresController');
 const LoginController = require('./controllers/LoginController');
 const {NotaFiscalController ,handleMulterErrors,upload}= require('./controllers/NotaFiscalController');
 const ProdutosController = require('./controllers/ProdutosController');
-const NotaFiscalController = require('./controllers/NotaFiscalController');
-
 
 const multer = require('multer');
 
