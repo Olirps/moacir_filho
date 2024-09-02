@@ -30,7 +30,6 @@ const upload = multer({
     storage: storage,
     fileFilter: (req, file, cb) => {
         const fileExtension = path.extname(file.originalname).toLowerCase();
-
         if (fileExtension !== '.xml') {
             const error = new Error('Apenas arquivos XML são permitidos');
             error.status = 400; // Define o status HTTP como 400
@@ -58,7 +57,6 @@ class NotaFiscalController {
 
             for (let i = 0; i < files.length; i++) {
                 const filePath = files[i].path;
-
                 if (typeof filePath === 'string') {
                     try {
                         const fileContent = fs.readFileSync(filePath, 'utf8');
@@ -77,6 +75,11 @@ class NotaFiscalController {
                         const identNF = data.nfeProc?.NFe?.infNFe?.ide?.nNF;
                         const identForn = data.nfeProc?.NFe?.infNFe?.emit?.CNPJ;
 
+                        if (data.nfeProc == undefined) {
+                            return res.status(400).json({
+                                error: 'Foi enviado um arquivo que não é Nota Fiscal. Por favor, verifique!'
+                            });
+                        }
                         // Aguardando a verificação de cada nota antes de continuar
                         const existeNf = await existeNF(identNF, identForn);
                         if (existeNf) {

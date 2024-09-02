@@ -17,8 +17,6 @@ class NotaFiscalService {
     try {
       const notasFiscais = xmlData.nfeProc.NFe;
       const jsonEntrada = notasFiscais.length;
-      console.log('tamanho json de entrada no service: ' + jsonEntrada);
-
       const dadosXml = await dividirNotaFiscal(xmlData);
 
       const fornecedoresExistente = await Fornecedores.findOne({
