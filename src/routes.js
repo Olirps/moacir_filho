@@ -7,12 +7,17 @@ const FornecedoresController = require('./controllers/FornecedoresController');
 const LoginController = require('./controllers/LoginController');
 const {NotaFiscalController ,handleMulterErrors,upload}= require('./controllers/NotaFiscalController');
 const ProdutosController = require('./controllers/ProdutosController');
+const authenticateToken = require('./middlewares/authenticateToken'); // Importa o middleware de autenticação
 
-const multer = require('multer');
+
+// Aplica o middleware de autenticação globalmente a todas as rotas, exceto as rotas de login e registro
+
+router.post('/auth/register', LoginController.register);
+router.post('/auth/login', LoginController.login); // Exclui as rotas de autenticação do middleware
 
 
-// Se você quiser armazenar o arquivo na memória ao invés do sistema de arquivos
-
+// Aplica o middleware de autenticação para proteger todas as rotas abaixo
+router.use(authenticateToken);
 
 // Rotas para manipulação de Veiculos
 router.post('/veiculos', VeiculosController.criarVeiculos);
@@ -35,11 +40,6 @@ router.get('/fornecedores', FornecedoresController.obterTodasFornecedores);
 router.get('/fornecedores/:id', FornecedoresController.obterFornecedoresPorId);
 router.put('/fornecedores/:id', FornecedoresController.atualizarFornecedores);
 router.delete('/fornecedores/:id', FornecedoresController.deletarFornecedores);
-
-// Rotas para login
-router.post('/auth/register', LoginController.register);
-router.post('/auth/login', LoginController.login);
-
 
 // Rotas para produtos
 router.post('/produtos', ProdutosController.criarProduto);
