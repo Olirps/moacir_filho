@@ -59,4 +59,10 @@ const MovimentacoesEstoque = sequelize.define('MovimentacoesEstoque', {
     timestamps: false // Desabilita os timestamps automáticos
 });
 
+// Associação com Produtos
+MovimentacoesEstoque.belongsTo(Produtos, {
+    foreignKey: 'produto_id',
+    as: 'produto'
+});
+
 module.exports = MovimentacoesEstoque;

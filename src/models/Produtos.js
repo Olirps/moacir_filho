@@ -2,6 +2,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db');
 
+
 const Produtos = sequelize.define('Produtos', {
     id: {
         type: DataTypes.INTEGER,
@@ -125,8 +126,10 @@ const Produtos = sequelize.define('Produtos', {
         allowNull: true,
     },
 }, {
+    sequelize,
+    modelName: 'Produtos',
     tableName: 'produtos',
-    timestamps: true,
+    timestamps: true
 });
 
 module.exports = Produtos;

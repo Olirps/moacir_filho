@@ -8,6 +8,8 @@ const LoginController = require('./controllers/LoginController');
 const {NotaFiscalController ,handleMulterErrors,upload}= require('./controllers/NotaFiscalController');
 const ProdutosController = require('./controllers/ProdutosController');
 const authenticateToken = require('./middlewares/authenticateToken'); // Importa o middleware de autenticação
+const { getProdutosPorNotaFiscal } = require('./controllers/ProdutosNFController'); // Ajuste o caminho conforme necessário
+
 
 
 // Aplica o middleware de autenticação globalmente a todas as rotas, exceto as rotas de login e registro
@@ -55,5 +57,10 @@ router.get('/notafiscal', NotaFiscalController.listarNotaFiscal);
 router.get('/notafiscal/:id', NotaFiscalController.obterNotaFiscalPorId);
 router.put('/notafiscal/:id', NotaFiscalController.atualizarNotaFiscal);
 router.delete('/notafiscal/:id', NotaFiscalController.excluirNotaFiscal);
+
+// Rotas para produtos nota fiscal
+
+router.get('/produtosnf/:notaFiscalId', getProdutosPorNotaFiscal);
+
 
 module.exports = router;
