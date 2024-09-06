@@ -11,8 +11,8 @@ async function dividirNotaFiscal(jsonData) {
     const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
 
     // Verifique se a estrutura é a esperada
-    const nfe = data.nfeProc?.NFe?.[0]?.infNFe?.[0]?.ide;
-    const nfeFornecedor = data.nfeProc?.NFe?.[0]?.infNFe?.[0]?.emit;
+    const nfe = data.nfeProc?.NFe?.infNFe?.ide;
+    const nfeFornecedor = data.nfeProc?.NFe?.infNFe?.emit;
 
 
     if (!nfe || !nfeFornecedor) {
@@ -27,29 +27,29 @@ async function dividirNotaFiscal(jsonData) {
 
     function getFornecedorInfo(informacoesFornecedor) {
       return {
-        CNPJ: informacoesFornecedor.CNPJ?.[0]|| '',
-        xNome: informacoesFornecedor.xNome?.[0]|| '',
-        xFant: informacoesFornecedor.xFant?.[0]|| '',
+        CNPJ: informacoesFornecedor.CNPJ|| '',
+        xNome: informacoesFornecedor.xNome|| '',
+        xFant: informacoesFornecedor.xFant|| '',
         // ... outros campos
         endereco: {
-          xLgr: informacoesFornecedor.enderEmit[0].xLgr?.[0]|| '',
-          nro: informacoesFornecedor.enderEmit[0].nro?.[0]|| '',
-          xBairro: informacoesFornecedor.enderEmit[0].xBairro?.[0]|| '',
-          cMun: informacoesFornecedor.enderEmit[0].cMun?.[0]|| '',
-          xMun: informacoesFornecedor.enderEmit[0].xMun?.[0]|| '',
-          UF: informacoesFornecedor.enderEmit[0].UF?.[0]|| '',
-          CEP: informacoesFornecedor.enderEmit[0].CEP?.[0]|| '',
-          cPais: informacoesFornecedor.enderEmit[0].cPais?.[0]|| '',
-          xPais: informacoesFornecedor.enderEmit[0].xPais?.[0]|| '',
-          fone: informacoesFornecedor.enderEmit[0].fone?.[0]|| '',
+          xLgr: informacoesFornecedor.enderEmit.xLgr|| '',
+          nro: informacoesFornecedor.enderEmit.nro|| '',
+          xBairro: informacoesFornecedor.enderEmit.xBairro|| '',
+          cMun: informacoesFornecedor.enderEmit.cMun|| '',
+          xMun: informacoesFornecedor.enderEmit.xMun|| '',
+          UF: informacoesFornecedor.enderEmit.UF|| '',
+          CEP: informacoesFornecedor.enderEmit.CEP|| '',
+          cPais: informacoesFornecedor.enderEmit.cPais|| '',
+          xPais: informacoesFornecedor.enderEmit.xPais|| '',
+          fone: informacoesFornecedor.enderEmit.fone|| '',
           // ... outros campos do endereço
         }
       };
     }
 
     // Obtendo as informações do ide com fallback
-    const informacoesIde = nfe[0] || {};
-    const informacoesFornecedor = nfeFornecedor[0] || {};
+    const informacoesIde = nfe|| {};
+    const informacoesFornecedor = nfeFornecedor|| {};
 
     // Extraindo informações do emit (fornecedor)
     const fornecedor = getFornecedorInfo(informacoesFornecedor);
@@ -60,28 +60,7 @@ async function dividirNotaFiscal(jsonData) {
 
     // Retorne os campos necessários
     return {
-      cUF: getValue(informacoesIde, ['cUF', 0]),
-      cNF: getValue(informacoesIde, ['cNF', 0]),
-      natOp: getValue(informacoesIde, ['natOp', 0]),
-      mod: getValue(informacoesIde, ['mod', 0]),
-      serie: getValue(informacoesIde, ['serie', 0]),
-      nNF: getValue(informacoesIde, ['nNF', 0]),
-      dhEmi: getValue(informacoesIde, ['dhEmi', 0]),
-      tpNF: getValue(informacoesIde, ['tpNF', 0]),
-      idDest: getValue(informacoesIde, ['idDest', 0]),
-      cMunFG: getValue(informacoesIde, ['cMunFG', 0]),
-      tpImp: getValue(informacoesIde, ['tpImp', 0]),
-      tpEmis: getValue(informacoesIde, ['tpEmis', 0]),
-      cDV: getValue(informacoesIde, ['cDV', 0]),
-      tpAmb: getValue(informacoesIde, ['tpAmb', 0]),
-      finNFe: getValue(informacoesIde, ['finNFe', 0]),
-      indFinal: getValue(informacoesIde, ['indFinal', 0]),
-      indPres: getValue(informacoesIde, ['indPres', 0]),
-      indIntermed: getValue(informacoesIde, ['indIntermed', 0]),
-      procEmi: getValue(informacoesIde, ['procEmi', 0]),
-      verProc: getValue(informacoesIde, ['verProc', 0]),
-      dhCont: getValue(informacoesIde, ['dhCont', 0]),
-      xJust: getValue(informacoesIde, ['xJust', 0]),
+      informacoesIde,
       fornecedor: fornecedor // Incluindo as informações do fornecedor no resultado
     };
   } catch (error) {

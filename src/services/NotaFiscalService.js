@@ -1,5 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../db');
+const { Mutex } = require('async-mutex');
+const mutex = new Mutex();
 const NotaFiscal = require('../models/NotaFiscal');
 const { dividirNotaFiscal } = require('../util/importaNotaFiscal');
 const Fornecedores = require('../models/Fornecedores');
@@ -10,57 +12,72 @@ const getInformacoesProduto = require("../util/informacoesProduto");
 const MovimentacoesEstoque = require("../models/MovimentacoesEstoque");
 const ItensNaoIdentificados = require("../models/ItensNaoIdentificados");
 
-class NotaFiscalService {
+const fornecedoresCriados = [];
+let fornecedorCreated;
 
+class NotaFiscalService {
   static async criarNotaFiscal(xmlData, quantidadeNf) {
     const transaction = await sequelize.transaction();
+    
     try {
+      console.log('Transação criada:', transaction);
+
       const notasFiscais = xmlData.nfeProc.NFe;
       const jsonEntrada = notasFiscais.length;
       const dadosXml = await dividirNotaFiscal(xmlData);
 
-      const fornecedoresExistente = await Fornecedores.findOne({
-        where: { cpfCnpj: dadosXml.fornecedor.CNPJ }
+      // Verifica se o fornecedor já existe
+      let fornecedor;
+      await mutex.runExclusive(async () => {
+        fornecedor = await Fornecedores.findOne({ where: { cpfCnpj: dadosXml.fornecedor.CNPJ } });
+        
+        if (!fornecedor) {
+          const originalJson = dadosXml.fornecedor;
+          const mapping = {
+            "CNPJ": "cpfCnpj",
+            "xNome": "nome",
+            "xFant": "nomeFantasia",
+            "xLgr": "logradouro",
+            "nro": "numero",
+            "xBairro": "bairro",
+            "xMun": "municipio",
+            "cMun": "codMunIBGE",
+            "UF": "uf",
+            "CEP": "cep",
+            "fone": "celular"
+          };
+
+          const normalizedJson = normalizeJson(flattenJson(originalJson), mapping);
+          console.log('Fornecedor não encontrado. Criando novo fornecedor...');
+          
+          fornecedorCreated = await FornecedoresService.criarFornecedores(normalizedJson);
+          adicionarFornecedor(fornecedorCreated.cpfCnpj);
+          dadosXml.codFornecedor = fornecedorCreated.id;
+        } else {
+          dadosXml.codFornecedor = fornecedor.id;
+        }
       });
 
-      if (!fornecedoresExistente) {
-        const originalJson = dadosXml.fornecedor;
-        const mapping = {
-          "CNPJ": "cpfCnpj",
-          "xNome": "nome",
-          "xFant": "nomeFantasia",
-          "xLgr": "logradouro",
-          "nro": "numero",
-          "xBairro": "bairro",
-          "xMun": "municipio",
-          "cMun": "codMunIBGE",
-          "UF": "uf",
-          "CEP": "cep",
-          "fone": "celular"
-        };
-
-        const normalizedJson = normalizeJson(flattenJson(originalJson), mapping);
-
-        const fornecedorCreated = await FornecedoresService.criarFornecedores(normalizedJson);
-        dadosXml.codFornecedor = fornecedorCreated.id;
-
-      } else {
-        const notaFiscalExistente = await existeNF(dadosXml.nNF, fornecedoresExistente.id);
-        dadosXml.codFornecedor = fornecedoresExistente.id;
-
-        if (notaFiscalExistente) {
-          throw new Error('Nota Fiscal Já Cadastrada.');
-        }
+      // Verifica se a nota fiscal já existe
+      const notaFiscalExistente = await existeNF(dadosXml.informacoesIde.nNF, dadosXml.codFornecedor);
+      if (notaFiscalExistente) {
+        throw new Error('Nota Fiscal Já Cadastrada.');
       }
 
-      const nfCreated = await NotaFiscal.create(dadosXml, { transaction });
+      // Cria a nota fiscal
+      console.log('Criando Nota Fiscal...');
+      let jsonCreateNF = dadosXml.informacoesIde;
+      jsonCreateNF.codFornecedor = dadosXml.codFornecedor;
+      const nfCreated = await NotaFiscal.create(jsonCreateNF, { transaction });
+      console.log('Nota Fiscal criada:', nfCreated.id);
 
+      // Processa produtos associados
       let produtoInfo = getInformacoesProduto(xmlData);
 
       if (produtoInfo && typeof produtoInfo === 'object') {
-        for (let i = 0; i < produtoInfo.length; i++) {
-          produtoInfo[i].nota_id = nfCreated.id;
-        }
+        produtoInfo.forEach(produto => {
+          produto.nota_id = nfCreated.id;
+        });
       } else {
         console.error('Erro: produtoInfo não é um objeto válido.');
       }
@@ -79,7 +96,6 @@ class NotaFiscalService {
     const transaction = await sequelize.transaction();
     try {
       const notaFiscalExistente = await existeNF(dados.nNF, dados.codFornecedor);
-
       if (notaFiscalExistente) {
         throw new Error('Nota Fiscal Já Cadastrada.');
       }
@@ -93,7 +109,7 @@ class NotaFiscalService {
     }
   }
 
-  // Método para buscar todas as notas fiscais
+  // Métodos de CRUD para Nota Fiscal
   static async getAllNotasFiscais() {
     try {
       return await NotaFiscal.findAll();
@@ -102,7 +118,6 @@ class NotaFiscalService {
     }
   }
 
-  // Método para buscar uma nota fiscal por ID
   static async getNotaFiscalById(id) {
     try {
       return await NotaFiscal.findByPk(id);
@@ -111,44 +126,37 @@ class NotaFiscalService {
     }
   }
 
-  // Método para atualizar uma nota fiscal existente
   static async updateNotaFiscal(id, notaFiscalData) {
     try {
       const notaFiscal = await NotaFiscal.findByPk(id);
-
       if (!notaFiscal) {
         return null;
       }
-
       return await notaFiscal.update(notaFiscalData);
     } catch (err) {
       throw new Error('Erro ao atualizar a nota fiscal');
     }
   }
 
-  // Método para deletar uma nota fiscal por ID
   static async deleteNotaFiscal(id) {
     try {
       const notaFiscal = await NotaFiscal.findByPk(id);
-
       if (!notaFiscal) {
         return null;
       }
-
       await notaFiscal.destroy();
       return true;
     } catch (err) {
       throw new Error('Erro ao deletar a nota fiscal');
     }
   }
-
 }
 
 async function existeNF(nroNf, codFornecedor) {
   const exist = await NotaFiscal.findOne({
     where: { nNF: nroNf, codFornecedor: codFornecedor }
   });
-  return exist ? true : false;
+  return !!exist;
 }
 
 async function verificarProdutos(produtosJSON, transaction) {
@@ -168,7 +176,6 @@ async function verificarProdutos(produtosJSON, transaction) {
           produto.quantidade = produto.qCom;
 
           await MovimentacoesEstoque.create(produto, { transaction });
-
         } else {
           await ProdutosService.criarProduto(produto, transaction);
           console.log(`Produto com cEAN ${cEAN} não encontrado.`);
@@ -207,6 +214,16 @@ function normalizeJson(json, mapping) {
     }
   }
   return normalizedJson;
+}
+
+async function adicionarFornecedor(cnpj) {
+  if (!fornecedoresCriados.includes(cnpj)) {
+    fornecedoresCriados.push(cnpj);
+    console.log('Fornecedor adicionado:', cnpj);
+  } else {
+    console.log('Fornecedor já existe no array:', cnpj);
+  }
+  return fornecedoresCriados;
 }
 
 module.exports = NotaFiscalService;

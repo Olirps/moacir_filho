@@ -39,7 +39,11 @@ class FornecedoresService {
       // Cria novo fornecedores
 
       console.log('Entrou no Try create: '+ JSON.stringify(dados, null, 2));
-      return await Fornecedores.create({ ...dados, cpfCnpj: (dados.cpfCnpj ?? dados.CNPJ) });
+      const createdFornecedor =await Fornecedores.create({ ...dados, cpfCnpj: (dados.cpfCnpj ?? dados.CNPJ) });
+      console.log('Saio do Try create: '+ JSON.stringify(createdFornecedor));
+
+      return createdFornecedor
+      console.log('')
     } catch (err) {
       throw new Error(err.message);
     }

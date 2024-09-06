@@ -1,52 +1,38 @@
-const getInformacoesProduto = (jsonData) => {
-    const nfe = jsonData?.nfeProc?.NFe?.[0]?.infNFe?.[0]?.det;
+function getInformacoesProduto(notaFiscal) {
+    let produtos = notaFiscal?.nfeProc?.NFe?.infNFe?.det;
+    console.log(JSON.stringify(produtos));
+    // Verifica se 'produtos' é um array ou um único objeto
+    const detalhesProdutos = Array.isArray(produtos) ? produtos : [produtos];
 
-    const getValue = (obj, path, defaultValue = null) => {
-        try {
-            if (!Array.isArray(path) || path.length === 0) {
-                throw new Error('Caminho deve ser um array com pelo menos um elemento');
-            }
+    // Verifica se o campo "prod" é um array ou um objeto
+    if (!Array.isArray(produtos)) {
+        produtos = [produtos]; // Se for um objeto, transforma em array
+        console.log(JSON.stringify(produtos));
+    }
 
-            return path.reduce((acc, key) => {
-                if (acc && typeof acc === 'object' && acc[key] !== undefined) {
-                    return acc[key];
-                }
-                return defaultValue;
-            }, obj);
-        } catch (error) {
-            console.error(`Erro ao acessar o caminho ${path.join(' -> ')}:`, error.message);
-            return defaultValue;
-        }
-    };
+    // Mapeia e extrai as informações de cada produto
+    return detalhesProdutos.map((produto) => {
+        const { prod } = produto; // Acessa a chave 'prod' dentro de cada objeto do array
 
-    return nfe.map(item => ({
-        cProd: getValue(item, ['prod', 0, 'cProd', 0]),
-        cEAN: getValue(item, ['prod', 0, 'cEAN', 0]),
-        xProd: getValue(item, ['prod', 0, 'xProd', 0]),
-        NCM: getValue(item, ['prod', 0, 'NCM', 0]),
-        EXTIPI: getValue(item, ['prod', 0, 'EXTIPI', 0]),
-        CEST: getValue(item, ['prod', 0, 'CEST', 0]),
-        indEscala: getValue(item, ['prod', 0, 'indEscala', 0]),
-        CFOP: getValue(item, ['prod', 0, 'CFOP', 0]),
-        uCom: getValue(item, ['prod', 0, 'uCom', 0]),
-        qCom: getValue(item, ['prod', 0, 'qCom', 0]),
-        vUnCom: getValue(item, ['prod', 0, 'vUnCom', 0]),
-        vProd: getValue(item, ['prod', 0, 'vProd', 0]),
-        cEANTrib: getValue(item, ['prod', 0, 'cEANTrib', 0]),
-        uTrib: getValue(item, ['prod', 0, 'uTrib', 0]),
-        qTrib: getValue(item, ['prod', 0, 'qTrib', 0]),
-        vUnTrib: getValue(item, ['prod', 0, 'vUnTrib', 0]),
-        vDesc: getValue(item, ['prod', 0, 'vDesc', 0]),
-        indTot: getValue(item, ['prod', 0, 'indTot', 0]),
-        cProdANP: getValue(item, ['prod', 0, 'comb', 0, 'cProdANP', 0]),
-        descANP: getValue(item, ['prod', 0, 'comb', 0, 'descANP', 0]),
-        UFCons: getValue(item, ['prod', 0, 'comb', 0, 'UFCons', 0]),
-        nBico: getValue(item, ['prod', 0, 'comb', 0, 'encerrante', 0, 'nBico', 0]),
-        nTanque: getValue(item, ['prod', 0, 'comb', 0, 'encerrante', 0, 'nTanque', 0]),
-        vEncIni: getValue(item, ['prod', 0, 'comb', 0, 'encerrante', 0, 'vEncIni', 0]),
-        vEncFin: getValue(item, ['prod', 0, 'comb', 0, 'encerrante', 0, 'vEncFin', 0]),
-        pBio: getValue(item, ['prod', 0, 'comb', 0, 'pBio', 0])
-    }));
-};
-
+        // Retorna o objeto com as informações do produto ou 'undefined' se alguma chave não existir
+        return {
+            cProd: prod?.cProd,
+            cEAN: prod?.cEAN,
+            xProd: prod?.xProd,
+            NCM: prod?.NCM,
+            CEST: prod?.CEST,
+            CFOP: prod?.CFOP,
+            uCom: prod?.uCom,
+            qCom: prod?.qCom,
+            vUnCom: prod?.vUnCom,
+            vProd: prod?.vProd,
+            cEANTrib: prod?.cEANTrib,
+            uTrib: prod?.uTrib,
+            qTrib: prod?.qTrib,
+            vUnTrib: prod?.vUnTrib,
+            vDesc: prod?.vDesc,
+            indTot: prod?.indTot,
+        };
+    });
+}
 module.exports = getInformacoesProduto;

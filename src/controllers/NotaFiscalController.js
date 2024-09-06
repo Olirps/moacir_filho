@@ -7,6 +7,8 @@ const fs = require('fs');
 const { limpaDocumento } = require("../util/util");
 const NotaFiscal = require("../models/NotaFiscal");
 const Fornecedores = require("../models/Fornecedores");
+let filaDeArquivos = [];
+let processando = false; // Flag para verificar se já está processando
 
 
 // Cria a pasta /uploads se ela não existir
@@ -55,84 +57,45 @@ class NotaFiscalController {
                 return res.status(400).json({ error: 'Nenhum arquivo foi enviado' });
             }
 
-            for (let i = 0; i < files.length; i++) {
-                const filePath = files[i].path;
-                if (typeof filePath === 'string') {
-                    try {
-                        const fileContent = fs.readFileSync(filePath, 'utf8');
-                        const parser = new xml2js.Parser(options);
-
-                        const result = await new Promise((resolve, reject) => {
-                            parser.parseString(fileContent, (err, parsedResult) => {
-                                if (err) {
-                                    return reject(err);
-                                }
-                                resolve(parsedResult);
-                            });
-                        });
-
-                        const data = JSON.parse(JSON.stringify(result));
-                        const identNF = data.nfeProc?.NFe?.infNFe?.ide?.nNF;
-                        const identForn = data.nfeProc?.NFe?.infNFe?.emit?.CNPJ;
-
-                        if (data.nfeProc == undefined) {
-                            return res.status(400).json({
-                                error: 'Foi enviado um arquivo que não é Nota Fiscal. Por favor, verifique!'
-                            });
-                        }
-                        // Aguardando a verificação de cada nota antes de continuar
-                        const existeNf = await existeNF(identNF, identForn);
-                        if (existeNf) {
-                            console.log('Nota fiscal já cadastrada, abortando importação.');
-                            return res.status(400).json({
-                                error: `Nota Fiscal ${identNF} do Fornecedor ${identForn} já cadastrada. Importação abortada.`
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Erro ao processar o arquivo:', error);
-                        return res.status(500).json({ error: 'Erro ao processar o arquivo XML' });
-                    }
-                } else {
-                    console.error('O caminho do arquivo não é uma string:', filePath);
-                }
-            }
-
-            // Se chegou aqui, significa que nenhuma nota estava cadastrada previamente
-            // Continua com o processamento das notas
-
-            const processFilePromises = files.map(file => {
-                return new Promise((resolve, reject) => {
-                    const parser = new xml2js.Parser();
-                    const xmlFilePath = path.join(uploadDir, file.filename);
-
-                    fs.readFile(xmlFilePath, 'utf-8', (err, xmlContent) => {
-                        if (err) {
-                            console.error('Erro ao ler o arquivo XML:', err);
-                            return reject({ error: 'Erro ao ler o arquivo XML' });
-                        }
-
-                        parser.parseString(xmlContent.trim(), async (err, result) => {
-                            if (err) {
-                                console.error('Erro ao parsear o XML:', err);
-                                return reject({ error: 'Erro ao parsear o XML' });
-                            }
-
-                            const notaFiscal = await NotaFiscalService.criarNotaFiscal(result, files.length);
-                            resolve(notaFiscal);
-                        });
-                    });
-                });
+            // Adiciona os arquivos na fila
+            files.forEach(file => {
+                filaDeArquivos.push(file);
             });
 
-            const notasFiscais = await Promise.all(processFilePromises);
-
-            res.status(201).json({ message: 'Notas fiscais criadas com sucesso', notasFiscais });
+            // Inicia o processamento da fila, se já não estiver processando
+            if (!processando) {
+                await NotaFiscalController.processarFila(res); // Referenciando o método estaticamente
+            } else {
+                res.status(202).json({ message: 'Arquivos adicionados à fila para processamento' });
+            }
 
         } catch (err) {
             res.status(400).json({ error: err.message });
         }
     }
 
+    static async processarFila(res) {
+        processando = true; // Indica que o processamento está em andamento
+        let resultados = [];
+
+        while (filaDeArquivos.length > 0) {
+            const file = filaDeArquivos.shift(); // Remove o primeiro arquivo da fila
+            try {
+                await processarArquivo(file);
+                resultados.push({ arquivo: file.originalname, status: "sucesso" });
+            } catch (error) {
+                console.error('Erro ao processar o arquivo:', error);
+                resultados.push({ arquivo: file.originalname, status: "erro", mensagem: error.message });
+            }
+        }
+
+        // Após processar todos os arquivos, envia a resposta com os resultados
+        if (!res.headersSent) {
+            res.status(200).json({ message: 'Processamento concluído', resultados });
+        }
+
+        processando = false; // Reseta a flag de processamento
+    }
     static async criarNotaFiscal(req, res) {
         try {
             const notafiscalcriacao = limpaDocumento(req.body);
@@ -205,7 +168,73 @@ class NotaFiscalController {
             res.status(500).json({ error: err.message });
         }
     }
+
+
+    /// ------ NOVAS FUNÇÕES -------///////
+
+
+    // Função para processar a fila
+    /*static async processarFila(res) {
+        processando = true; // Indica que o processamento está em andamento
+        let resultados = [];
+
+        while (filaDeArquivos.length > 0) {
+            const file = filaDeArquivos.shift(); // Remove o primeiro arquivo da fila
+            try {
+                await processarArquivo(file);
+                resultados.push({ arquivo: file.originalname, status: "sucesso" });
+            } catch (error) {
+                console.error('Erro ao processar o arquivo:', error);
+                resultados.push({ arquivo: file.originalname, status: "erro", mensagem: error.message });
+            }
+        }
+
+        // Após processar todos os arquivos, envia a resposta com os resultados
+        if (!res.headersSent) {
+            res.status(200).json({ message: 'Processamento concluído', resultados });
+        }
+
+        processando = false; // Reseta a flag de processamento
+    }*/
 }
+
+async function processarArquivo(file) {
+    const filePath = file.path;
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const parser = new xml2js.Parser(options);
+
+    const result = await new Promise((resolve, reject) => {
+        parser.parseString(fileContent, (err, parsedResult) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve(parsedResult);
+        });
+    });
+
+    const data = JSON.parse(JSON.stringify(result));
+    const identNF = data.nfeProc?.NFe?.infNFe?.ide?.nNF;
+    const identForn = data.nfeProc?.NFe?.infNFe?.emit?.CNPJ;
+
+    if (data.nfeProc == undefined) {
+        throw new Error('Foi enviado um arquivo que não é Nota Fiscal. Por favor, verifique!');
+    }
+
+    // Verificação de duplicidade
+    const existeNf = await existeNF(identNF, identForn);
+    if (existeNf) {
+        throw new Error(`Nota Fiscal ${identNF} do Fornecedor ${identForn} já cadastrada.`);
+    }
+
+    // Processa a nota fiscal
+    await NotaFiscalService.criarNotaFiscal(result, file.length);
+}
+
+
+
+/// ------ NOVAS FUNÇÕES -------///////
+
+
 
 // Middleware para lidar com erros do multer
 function handleMulterErrors(err, req, res, next) {
