@@ -17,10 +17,9 @@ let fornecedorCreated;
 
 class NotaFiscalService {
   static async criarNotaFiscal(xmlData, quantidadeNf) {
-    const transaction = await sequelize.transaction();
+    //const transaction = await sequelize.transaction();
     
     try {
-      console.log('Transação criada:', transaction);
 
       const notasFiscais = xmlData.nfeProc.NFe;
       const jsonEntrada = notasFiscais.length;
@@ -68,9 +67,8 @@ class NotaFiscalService {
       console.log('Criando Nota Fiscal...');
       let jsonCreateNF = dadosXml.informacoesIde;
       jsonCreateNF.codFornecedor = dadosXml.codFornecedor;
-      const nfCreated = await NotaFiscal.create(jsonCreateNF, { transaction });
+      const nfCreated = await NotaFiscal.create(jsonCreateNF);
       console.log('Nota Fiscal criada:', nfCreated.id);
-
       // Processa produtos associados
       let produtoInfo = getInformacoesProduto(xmlData);
 
@@ -82,29 +80,29 @@ class NotaFiscalService {
         console.error('Erro: produtoInfo não é um objeto válido.');
       }
 
-      await verificarProdutos(produtoInfo, transaction);
+      await verificarProdutos(produtoInfo);
 
-      await transaction.commit();
+      //await transaction.commit();
       return nfCreated;
     } catch (err) {
-      await transaction.rollback();
+      //await transaction.rollback();
       throw new Error(err.message);
     }
   }
 
   static async criarNotaFiscalManual(dados) {
-    const transaction = await sequelize.transaction();
+    //const transaction = await sequelize.transaction();
     try {
       const notaFiscalExistente = await existeNF(dados.nNF, dados.codFornecedor);
       if (notaFiscalExistente) {
         throw new Error('Nota Fiscal Já Cadastrada.');
       }
 
-      const nfCreated = await NotaFiscal.create(dados, { transaction });
-      await transaction.commit();
+      const nfCreated = await NotaFiscal.create(dados);
+      //await transaction.commit();
       return nfCreated;
     } catch (err) {
-      await transaction.rollback();
+      //await transaction.rollback();
       throw new Error(err.message);
     }
   }
@@ -159,7 +157,7 @@ async function existeNF(nroNf, codFornecedor) {
   return !!exist;
 }
 
-async function verificarProdutos(produtosJSON, transaction) {
+async function verificarProdutos(produtosJSON) {
   for (let produto of produtosJSON) {
     const { cEAN, nome } = produto;
     const cEANNumber = parseInt(cEAN, 10);
@@ -174,17 +172,19 @@ async function verificarProdutos(produtosJSON, transaction) {
           produto.produto_id = produtoEncontrado.id;
           produto.tipo_movimentacao = 'entrada';
           produto.quantidade = produto.qCom;
-
-          await MovimentacoesEstoque.create(produto, { transaction });
+          console.log(JSON.stringify(produto));
+          await MovimentacoesEstoque.create(produto);
         } else {
-          await ProdutosService.criarProduto(produto, transaction);
+          console.log(JSON.stringify(produto))
+          let prodConsolidado = consolidarProdutosPorCEAN(produto)
+          await ProdutosService.criarProduto(produto);
           console.log(`Produto com cEAN ${cEAN} não encontrado.`);
         }
       } catch (error) {
         console.error(`Erro ao buscar produto com cEAN ${cEAN}:`, error);
       }
     } else {
-      await ItensNaoIdentificados.create(produto, { transaction });
+      await ItensNaoIdentificados.create(produto);
       console.log(`cEAN para o produto ${nome} não definido.`);
     }
   }
@@ -224,6 +224,22 @@ async function adicionarFornecedor(cnpj) {
     console.log('Fornecedor já existe no array:', cnpj);
   }
   return fornecedoresCriados;
+}
+
+
+async function consolidarProdutosPorCEAN(produto) {
+  const produtosConsolidados = {};
+  
+  const { cEAN, qCom, vProd } = produto;
+  
+  if (!produtosConsolidados[cEAN]) {
+    produtosConsolidados[cEAN] = { qCom: 0, vProd: 0 };
+  }
+  
+  produtosConsolidados[cEAN].qCom += qCom;
+  produtosConsolidados[cEAN].vProd += vProd;
+  
+  return produtosConsolidados;
 }
 
 module.exports = NotaFiscalService;
