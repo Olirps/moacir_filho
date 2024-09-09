@@ -113,6 +113,14 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
     xJust: {
         type: DataTypes.STRING(100),
         allowNull: true // Assuming NFref is optional
+    },
+    lancto: {
+        type: DataTypes.ENUM('automatico', 'manual'),
+        allowNull: true // Assuming NFref is optional
+    },
+    status: {
+        type: DataTypes.ENUM('aberta', 'andamento','fechada'),
+        allowNull: true // Assuming NFref is optional
     }
 }, {
   tableName: 'nota_fiscal' // Adjust table name if needed

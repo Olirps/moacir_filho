@@ -67,6 +67,8 @@ class NotaFiscalService {
       console.log('Criando Nota Fiscal...');
       let jsonCreateNF = dadosXml.informacoesIde;
       jsonCreateNF.codFornecedor = dadosXml.codFornecedor;
+      jsonCreateNF.lancto = 'automatico';
+      jsonCreateNF.status = 'fechada';
       const nfCreated = await NotaFiscal.create(jsonCreateNF);
       console.log('Nota Fiscal criada:', nfCreated.id);
       // Processa produtos associados
@@ -97,6 +99,8 @@ class NotaFiscalService {
       if (notaFiscalExistente) {
         throw new Error('Nota Fiscal Já Cadastrada.');
       }
+      dados.lancto = 'manual';
+      dados.status = 'aberta';
 
       const nfCreated = await NotaFiscal.create(dados);
       //await transaction.commit();
