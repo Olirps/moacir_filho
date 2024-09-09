@@ -24,27 +24,27 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
     },
     cNF: {
         type: DataTypes.STRING(15),
-        allowNull: false
+        allowNull: true
     },
     natOp: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     mod: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     serie: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     nNF: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     dhEmi: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: true
     },
     dhSaiEnt: {
         type: DataTypes.DATE,
@@ -52,43 +52,43 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
     },
     tpNF: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     idDest: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     cMunFG: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     tpImp: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     tpEmis: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     cDV: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     tpAmb: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     finNFe: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     indFinal: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     indPres: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     indIntermed: {
         type: DataTypes.INTEGER,
@@ -96,11 +96,11 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
     },
     procEmi: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     verProc: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     dhCont: {
         type: DataTypes.STRING(50),
