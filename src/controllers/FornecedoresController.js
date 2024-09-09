@@ -26,17 +26,25 @@ class FornecedoresController {
   
   static async obterTodasFornecedores(req, res) {
     try {
-      const { cpfCnpf } = req.query; // Obtém os parâmetros da requisição
+      const { cpfCnpj, nome } = req.query; // Obtém os parâmetros da requisição
       const where = {};
-      if (cpfCnpf) where.cpfCnpf =  { [Op.like]: `%${cpfCnpf}%` };
-
+  
+      // Aplica filtro de CPF/CNPJ se fornecido
+      if (cpfCnpj) {
+        where.cpfCnpj = { [Op.like]: `%${cpfCnpj}%` };
+      }
+  
+      // Aplica filtro de nome se fornecido
+      if (nome) {
+        where.nome = { [Op.like]: `%${nome}%` };
+      }
+  
       const fornecedores = await FornecedoresService.obterTodasFornecedores(where);
       res.status(200).json(fornecedores);
     } catch (err) {
       res.status(400).json({ error: err.message });
     }
   }
-
   static async obterFornecedoresPorId(req, res) {
     try {
       const fornecedores = await FornecedoresService.obterFornecedoresPorId(req.params.id);
