@@ -12,11 +12,12 @@ class ProdutosService {
             }
 
             let produto = await Produtos.create(dadosProduto);
-
-            dadosProduto.produto_id = produto.id;
-            dadosProduto.tipo_movimentacao  = 'entrada'
-            dadosProduto.quantidade  = dadosProduto.qCom
-            const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
+            if (dadosProduto.nota_id){
+                dadosProduto.produto_id = produto.id;
+                dadosProduto.tipo_movimentacao  = 'entrada'
+                dadosProduto.quantidade  = dadosProduto.qCom
+                const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
+            }
 
             return produto;
         } catch (error) {
