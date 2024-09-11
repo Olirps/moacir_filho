@@ -11,7 +11,7 @@ const Produtos = sequelize.define('Produtos', {
     },
     cProd: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     cEAN: {
         type: DataTypes.STRING,

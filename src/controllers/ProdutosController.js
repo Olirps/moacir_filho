@@ -1,11 +1,14 @@
 // src/controllers/ProdutosController.js
 const ProdutosService = require('../services/ProdutosService');
 
+console.log('Entrou no Controller Produtos')
 class ProdutosController {
+
+    
     // Criação de um novo produto
     static async criarProduto(req, res) {
         try {
-            console.log('Dados passados para criar Produto Controller: '+JSON.stringify(req));
+            console.log('Dados passados para criar Produto Controller: '+req);
             const novoProduto = await ProdutosService.criarProduto(req.body);
             res.status(201).json(novoProduto);
         } catch (error) {
