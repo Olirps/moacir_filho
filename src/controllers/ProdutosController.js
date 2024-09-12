@@ -24,7 +24,7 @@ class ProdutosController {
             const where = {};
             // Aplica filtro por ID se fornecido
             if (id) {
-                where.id = { [Op.like]: `%${id}%` };
+                where.id = {  id };
             }
             // Aplica filtro de Cód. Barras se fornecido
             if (cEAN) {
