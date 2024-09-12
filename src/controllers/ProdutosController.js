@@ -4,11 +4,11 @@ const ProdutosService = require('../services/ProdutosService');
 console.log('Entrou no Controller Produtos')
 class ProdutosController {
 
-    
+
     // Criação de um novo produto
     static async criarProduto(req, res) {
         try {
-            console.log('Dados passados para criar Produto Controller: '+req);
+            console.log('Dados passados para criar Produto Controller: ' + req);
             const novoProduto = await ProdutosService.criarProduto(req.body);
             res.status(201).json(novoProduto);
         } catch (error) {
@@ -19,7 +19,23 @@ class ProdutosController {
     // Listagem de todos os produtos
     static async listarProdutos(req, res) {
         try {
-            const produtos = await ProdutosService.listarProdutos();
+            const { id, cEAN, nome } = req.query; // Obtém os parâmetros da requisição
+            const where = {};
+            // Aplica filtro por ID se fornecido
+            if (id) {
+                where.id = { [Op.like]: `%${id}%` };
+            }
+            // Aplica filtro de Cód. Barras se fornecido
+            if (cEAN) {
+                where.cEAN = { [Op.like]: `%${cEAN}%` };
+            }
+
+            // Aplica filtro de nome se fornecido
+            if (nome) {
+                where.nome = { [Op.like]: `%${nome}%` };
+            }
+
+            const produtos = await ProdutosService.listarProdutos(where);
             res.status(200).json(produtos);
         } catch (error) {
             res.status(400).json({ erro: error.message });

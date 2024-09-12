@@ -26,9 +26,9 @@ class ProdutosService {
     }
 
     // Obtém todos os produtos
-    static async listarProdutos() {
+    static async listarProdutos(filtro) {
         try {
-            return await Produtos.findAll();
+            return await Produtos.findAll({ where: filtro });
         } catch (error) {
             throw new Error('Erro ao listar os produtos: ' + error.message);
         }
