@@ -33,7 +33,7 @@ class ProdutosController {
 
             // Aplica filtro de nome se fornecido
             if (nome) {
-                where.nome = { [Op.like]: `%${nome}%` };
+                where.xProd = { [Op.like]: `%${nome}%` };
             }
 
             const produtos = await ProdutosService.listarProdutos(where);
