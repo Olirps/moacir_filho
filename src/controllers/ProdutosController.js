@@ -1,5 +1,6 @@
 // src/controllers/ProdutosController.js
 const ProdutosService = require('../services/ProdutosService');
+const { Op } = require('sequelize');
 
 console.log('Entrou no Controller Produtos')
 class ProdutosController {
