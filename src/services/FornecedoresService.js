@@ -71,7 +71,7 @@ class FornecedoresService {
 
     // Validar o CPF
     if (!validarCpf(fornecedores.cpfCnpj)) {
-        throw new Error(`CPF: ${pessoas.cpf} é inválido`);
+        throw new Error(`CPF: ${fornecedores.cpfCnpj} é inválido`);
     }
 
     const fornecedoresExistente = await Fornecedores.findOne({ where: { cpfCnpj: fornecedores.cpfCnpj } });
@@ -103,7 +103,7 @@ class FornecedoresService {
 
 
 
-  static async deletarPessoa(id) {
+  static async deletarFornecedores(id) {
     try {
       return await Fornecedores.destroy({
         where: { id }
