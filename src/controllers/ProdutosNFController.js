@@ -30,8 +30,8 @@ class ProdutosNFController {
             // Retornar os produtos como resposta
             res.json(produtos);
         } catch (error) {
-            console.error('Erro ao obter produtos:', error);
-            res.status(500).send('Erro ao obter produtos');
+            console.error('Erro ao vincular produtos:', error);
+            res.status(500).send('Erro ao vincular produtos');
         }
     };
 
