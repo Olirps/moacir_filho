@@ -2,6 +2,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db');
 const NotaFiscal = require('../models/NotaFiscal');
+const Produtos = require('../models/Produtos');
 
 
 const ItensNaoIdentificados = sequelize.define('ItensNaoIdentificados', {
@@ -25,7 +26,7 @@ const ItensNaoIdentificados = sequelize.define('ItensNaoIdentificados', {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'produto', // Nome da tabela associada
+            model: 'produtos', // Nome da tabela associada
             key: 'id'
         },
         onUpdate: 'CASCADE',
