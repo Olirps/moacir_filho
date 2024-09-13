@@ -45,7 +45,9 @@ class ProdutosNFService {
                 id: item.id,
                 descricao: item.xProd,
                 quantidade: item.qCom, // Ajuste se necessário
-                identificador: '0' // Inclua o identificador não identificado
+                identificador: '0', // Inclua o identificador não identificado
+                nota_id: nota_id
+
 
             }));
 
@@ -54,7 +56,8 @@ class ProdutosNFService {
                     id: movimentacao.produto.id,
                     descricao: movimentacao.produto.xProd,
                     quantidade: movimentacao.quantidade,
-                    identificador: '1' // Inclua o identificador não identificado
+                    identificador: '1', // Inclua o identificador não identificado
+                    nota_id: nota_id
 
                 };
                 produtos.push(produto);
@@ -67,27 +70,37 @@ class ProdutosNFService {
         }
     };
 
-    static async vincularProdutoNF(produto) {
+    static async vincularProdutoNF(id,dadosProduto) {
 
         try {
-            const atualizaEstoque = MovimentacoesEstoque.create(produto);
-            const id = produto.prodId
-            // Tentar atualizar o registro no banco de dados
-            const [updated] = await ItensNaoIdentificados.update({
-                where: { id } // Filtro para encontrar o registro pelo ID
-            });
-
-            if (updated) {
-                // Se o registro foi atualizado, buscar e retornar a pessoa atualizada
-                return await ItensNaoIdentificados.findByPk(id);
+            console.log('Entrou no service NI com os seguintes dados: ' + JSON.stringify(dadosProduto));
+        
+            // Buscar produto por ID
+            const produto = await ItensNaoIdentificados.findByPk(id);
+            
+            // Verificar se o produto foi encontrado
+            if (!produto) {
+                throw new Error(`Produto com id ${id} não foi encontrado.`);
             }
-
-            // Se não foi atualizado, retornar null
-            return null;
+        
+            // Mostrar o produto encontrado (opcional)
+            console.log('Produto encontrado: ', produto);
+        
+            // Atualizar o produto com os novos dados
+            await produto.update(dadosProduto);
+            console.log('Produto atualizado com os seguintes dados: ' + JSON.stringify(dadosProduto));
+        
+            // Criar movimentação de estoque com os mesmos dados
+            const atualizaEstoque = await MovimentacoesEstoque.create(dadosProduto);
+            console.log('Movimentação de estoque criada com sucesso: ', atualizaEstoque);
+        
+            return true;
         } catch (err) {
-            // Lançar um erro com a mensagem original
+            // Exibir a mensagem de erro completa
+            console.error('Erro ao atualizar o produto: ', err.message);
             throw new Error(err.message);
         }
+        
 
 
     }
