@@ -21,6 +21,17 @@ const ItensNaoIdentificados = sequelize.define('ItensNaoIdentificados', {
         onDelete: 'CASCADE'
     }
     ,
+    produto_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'produto', // Nome da tabela associada
+            key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+    }
+    ,
     cProd: {
         type: DataTypes.STRING,
         allowNull: false,
