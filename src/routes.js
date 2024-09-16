@@ -9,6 +9,7 @@ const {NotaFiscalController ,handleMulterErrors,upload}= require('./controllers/
 const ProdutosController = require('./controllers/ProdutosController');
 const authenticateToken = require('./middlewares/authenticateToken'); // Importa o middleware de autenticação
 const ProdutosNFController = require('./controllers/ProdutosNFController'); // Ajuste o caminho conforme necessário
+const UFMunicipiosController = require('./controllers/UFMunicipiosController'); // Ajuste o caminho conforme necessário
 
 
 
@@ -57,10 +58,15 @@ router.get('/notafiscal', NotaFiscalController.listarNotaFiscal);
 router.get('/notafiscal/:id', NotaFiscalController.obterNotaFiscalPorId);
 router.put('/notafiscal/:id', NotaFiscalController.atualizarNotaFiscal);
 router.delete('/notafiscal/:id', NotaFiscalController.excluirNotaFiscal);
-// Rotas para produtos nota fiscal
 
+// Rotas para produtos nota fiscal
 router.get('/produtosnf/:notaFiscalId', ProdutosNFController.getProdutosPorNotaFiscal);
 router.put('/produtosnf/vincular/:id', ProdutosNFController.vincularProdutoNF);
+
+//Rotas UFs e Municipios
+router.get('/uf', UFMunicipiosController.obterTodasUF);
+router.get('/municipios', UFMunicipiosController.obterTodosMunicipios);
+
 
 
 module.exports = router;
