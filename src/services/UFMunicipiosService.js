@@ -18,12 +18,17 @@ class UFMunicipiosService {
       throw new Error(err.message);
     }
   }
-  static async obterMunicipiosPorUF(uf) {
-    try {
-      return await Municipios.findAll({ where: uf });
-    } catch (err) {
-      throw new Error(err.message);
-    }
+  static async obterMunicipiosPorUF(codUfId) {
+    console.log('Vamos Ver o Service agora : '+JSON.stringify(codUfId));
+                // Buscar produtos na tabela ItensNaoIdentificados
+                const municipios = await Municipios.findAll({
+                  where: {
+                    codUfId
+                  }// Ajuste conforme os campos da tabela
+              });
+              console.log('MunicipioS: '+municipios);
+              return municipios;
+
   }
 }
 

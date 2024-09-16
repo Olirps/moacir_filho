@@ -22,11 +22,8 @@ class UFMunicipiosController {
       
       static async obterMunicipiosPorUF(req, res) {
         try {
-          const { codUfId } = req.query; // Obtém os parâmetros da requisição
-          const where = {};
-          where.codUfId = codUfId;
-          
-          const municipios = await UFMunicipiosService.obterMunicipiosPorUF(where);
+        
+          const municipios = await UFMunicipiosService.obterMunicipiosPorUF(req.params.codUfId);
           if (municipios) {
             res.status(200).json(municipios);
           } else {
