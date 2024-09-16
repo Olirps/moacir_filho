@@ -6,16 +6,22 @@ class ProdutosService {
     // Cria um novo produto
     static async criarProduto(dadosProduto) {
         try {
+            if (!dadosProduto.cEAN & dadosProduto.produto_ori_id) {
+                const itensNaoIdentificados = await ItensNaoIdentificados.findOne({where: {id: dadosProduto.produto_ori_id}
+                });
+                console.log('itensNaoIdentificados: '+ JSON.stringify(itensNaoIdentificados))
+            }
+
             const produtoExistente = await Produtos.findOne({ where: { cEAN: dadosProduto.cEAN } });
             if (produtoExistente) {
                 throw new Error(`Produto: ${(dadosProduto.cEAN)} já cadastrado`);
             }
 
             let produto = await Produtos.create(dadosProduto);
-            if (dadosProduto.nota_id){
+            if (dadosProduto.nota_id) {
                 dadosProduto.produto_id = produto.id;
-                dadosProduto.tipo_movimentacao  = 'entrada'
-                dadosProduto.quantidade  = dadosProduto.qCom
+                dadosProduto.tipo_movimentacao = 'entrada'
+                dadosProduto.quantidade = dadosProduto.qCom
                 const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
             }
 
