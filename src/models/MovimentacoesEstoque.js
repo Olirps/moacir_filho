@@ -37,10 +37,10 @@ const MovimentacoesEstoque = sequelize.define('MovimentacoesEstoque', {
         allowNull: false
     },
     quantidade: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL(10, 5), // Aceita números com até 10 dígitos, sendo 2 casas decimais
         allowNull: false,
         validate: {
-            min: 1
+            min: 0.00001 // Ajuste o valor mínimo se precisar aceitar valores fracionados
         }
     },
     data_movimentacao: {

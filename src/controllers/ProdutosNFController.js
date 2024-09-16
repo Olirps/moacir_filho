@@ -22,10 +22,9 @@ class ProdutosNFController {
 
     static async vincularProdutoNF (req, res){
         try {
-            const produto = req.body;
-
+            console.log('entrou controler: ')
             // Obter produtos através do serviço
-            const produtos = await ProdutosNFService.vincularProdutoNF(produto);
+            const produtos = await ProdutosNFService.vincularProdutoNF(req.params.id,req.body);
 
             // Retornar os produtos como resposta
             res.json(produtos);

@@ -60,7 +60,7 @@ router.delete('/notafiscal/:id', NotaFiscalController.excluirNotaFiscal);
 // Rotas para produtos nota fiscal
 
 router.get('/produtosnf/:notaFiscalId', ProdutosNFController.getProdutosPorNotaFiscal);
-router.put('/produtosnf/vincular', ProdutosNFController.vincularProdutoNF);
+router.put('/produtosnf/vincular/:id', ProdutosNFController.vincularProdutoNF);
 
 
 module.exports = router;
