@@ -4,21 +4,27 @@ const Municipios = require('../models/Municipio');
 
 class UFMunicipiosService {
 
-static async obterTodasUfs() {
+  static async obterTodasUfs() {
     try {
       return await UF.findAll();
     } catch (err) {
       throw new Error(err.message);
     }
   }
-static async obterTodosMunicipios() {
+  static async obterTodosMunicipios() {
     try {
       return await Municipios.findAll();
     } catch (err) {
       throw new Error(err.message);
     }
   }
-
+  static async obterMunicipiosPorUF(uf) {
+    try {
+      return await Municipios.findAll({ where: uf });
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
 }
 
 module.exports = UFMunicipiosService;

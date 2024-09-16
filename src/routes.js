@@ -65,7 +65,7 @@ router.put('/produtosnf/vincular/:id', ProdutosNFController.vincularProdutoNF);
 
 //Rotas UFs e Municipios
 router.get('/uf', UFMunicipiosController.obterTodasUF);
-router.get('/municipios', UFMunicipiosController.obterTodosMunicipios);
+router.get('/municipios', UFMunicipiosController.obterMunicipiosPorUF);
 
 
 
