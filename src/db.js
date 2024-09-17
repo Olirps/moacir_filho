@@ -16,7 +16,7 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
 
 
 sequelize.authenticate()
-  .then(() => {
+  .then(async () => {
     console.log(`Conexão bem-sucedida ao banco de dados: ${process.env.DB_NAME}`);
 
     const sequelize = require('./db'); // Ajuste o caminho conforme necessário
@@ -30,6 +30,11 @@ sequelize.authenticate()
     const MovimentacoesEstoque= require('./models/MovimentacoesEstoque'); // Ajuste o caminho conforme necessário
     const ItensNaoIdentificados= require('./models/ItensNaoIdentificados'); // Ajuste o caminho conforme necessário
 
+    // Sincronizar tabelas que não podem ser excluídas
+    await UF.sync({ force: false });
+    await Municipio.sync({ force: false });
+    await UserLogin.sync({ force: false });
+    await GrupoAcesso.sync({ force: false });
 
     // Sincronizar os modelos com o banco de dados
     sequelize.sync({ force: false})

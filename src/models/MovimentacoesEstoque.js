@@ -51,6 +51,10 @@ const MovimentacoesEstoque = sequelize.define('MovimentacoesEstoque', {
     observacoes: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 }, {
     sequelize,

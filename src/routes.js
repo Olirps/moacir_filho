@@ -62,6 +62,7 @@ router.delete('/notafiscal/:id', NotaFiscalController.excluirNotaFiscal);
 // Rotas para produtos nota fiscal
 router.get('/produtosnf/:notaFiscalId', ProdutosNFController.getProdutosPorNotaFiscal);
 router.put('/produtosnf/vincular/:id', ProdutosNFController.vincularProdutoNF);
+router.put('/produtosnf/desvincular/:id', ProdutosNFController.desvincularProdutoNF);
 
 //Rotas UFs e Municipios
 router.get('/uf', UFMunicipiosController.obterTodasUF);

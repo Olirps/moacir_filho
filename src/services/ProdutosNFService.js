@@ -27,7 +27,10 @@ class ProdutosNFService {
 
             // Buscar produtos cadastrados na tabela Produtos e MovimentacoesEstoque
             const movimentacoesEstoque = await MovimentacoesEstoque.findAll({
-                where: { nota_id },
+                where: {
+                    nota_id,
+                    status: 0
+                },
                 include: [{
                     model: Produtos,
                     as: 'produto', // Nome da associação deve ser 'produto'
@@ -70,40 +73,57 @@ class ProdutosNFService {
         }
     };
 
-    static async vincularProdutoNF(id,dadosProduto) {
+    static async vincularProdutoNF(id, dadosProduto) {
 
         try {
-            console.log('Entrou no service NI com os seguintes dados: ' + JSON.stringify(dadosProduto));
-        
+
             // Buscar produto por ID
             const produto = await ItensNaoIdentificados.findByPk(id);
-            
+
             // Verificar se o produto foi encontrado
             if (!produto) {
                 throw new Error(`Produto com id ${id} não foi encontrado.`);
             }
-        
+
             // Mostrar o produto encontrado (opcional)
             console.log('Produto encontrado: ', produto);
-        
+
             // Atualizar o produto com os novos dados
             await produto.update(dadosProduto);
             console.log('Produto atualizado com os seguintes dados: ' + JSON.stringify(dadosProduto));
-        
+
             // Criar movimentação de estoque com os mesmos dados
             const atualizaEstoque = await MovimentacoesEstoque.create(dadosProduto);
             console.log('Movimentação de estoque criada com sucesso: ', atualizaEstoque);
-        
+
             return true;
         } catch (err) {
             // Exibir a mensagem de erro completa
             console.error('Erro ao atualizar o produto: ', err.message);
             throw new Error(err.message);
         }
-        
+    }
+    static async desvincularProdutoNF(id, dadosProduto) {
+        console.log('Chegou no Service Desvincular: ' + JSON.stringify(dadosProduto));
+        const produto = await ItensNaoIdentificados.findByPk(id);
+        // Verificar se o produto foi encontrado
+        if (produto) {
+            await produto.update(dadosProduto.produto_id);
+        }
+
+        console.log('Produto atualizado com os seguintes dados: ' + JSON.stringify(dadosProduto));
+        const produto_mov = await MovimentacoesEstoque.findOne({
+            where: { produto_id: id }
+        });        // Criar movimentação de estoque com os mesmos dados
+        const atualizaEstoque = await produto_mov.update({ status: 1 });
+        console.log('Movimentação de estoque criada com sucesso: ', atualizaEstoque);
+
+        return true;
 
 
     }
+
+
 }
 
 

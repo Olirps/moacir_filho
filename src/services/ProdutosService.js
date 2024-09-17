@@ -12,12 +12,13 @@ class ProdutosService {
             let prodOri_nf = 0;
             let qCom = 0;
 
-            if (dadosProduto.produto_ori_id){
-                const itensNaoIdentificados = await ItensNaoIdentificados.findOne({where: {id: dadosProduto.produto_ori_id}
+            if (dadosProduto.produto_ori_id) {
+                const itensNaoIdentificados = await ItensNaoIdentificados.findOne({
+                    where: { id: dadosProduto.produto_ori_id }
                 });
                 prodOri_nf = itensNaoIdentificados.nota_id;
                 qCom = itensNaoIdentificados.qCom;
-                console.log('itensNaoIdentificados: '+ JSON.stringify(itensNaoIdentificados))
+                console.log('itensNaoIdentificados: ' + JSON.stringify(itensNaoIdentificados))
                 produto = await Produtos.create({
                     cProd: itensNaoIdentificados.cProd,
                     cEAN: itensNaoIdentificados.cEAN,
@@ -49,28 +50,31 @@ class ProdutosService {
                     vEncFin: itensNaoIdentificados.vEncFin,
                     pBio: itensNaoIdentificados.pBio
                 });
-                
+
                 if (prodOri_nf) {
                     dadosProduto.nota_id = prodOri_nf
                     dadosProduto.produto_id = produto.id;
                     dadosProduto.tipo_movimentacao = 'entrada'
                     dadosProduto.quantidade = qCom
+                    dadosProduto.status = 0
                     const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
                 }
-    
-            }else{
+
+            } else {
                 const produtoExistente = await Produtos.findOne({ where: { cEAN: dadosProduto.cEAN } });
                 if (produtoExistente) {
                     throw new Error(`Produto: ${(dadosProduto.cEAN)} já cadastrado`);
                 }
-    
+
                 produto = await Produtos.create(dadosProduto);
-            if (dadosProduto.nota_id) {
-                dadosProduto.produto_id = produto.id;
-                dadosProduto.tipo_movimentacao = 'entrada'
-                dadosProduto.quantidade = dadosProduto.qCom
-                const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
-            }
+                if (dadosProduto.nota_id) {
+                    dadosProduto.produto_id = produto.id;
+                    dadosProduto.tipo_movimentacao = 'entrada'
+                    dadosProduto.quantidade = dadosProduto.qCom
+                    dadosProduto.status = 0
+
+                    const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
+                }
             }
 
             return produto;

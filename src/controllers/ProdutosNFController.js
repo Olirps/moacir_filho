@@ -33,6 +33,20 @@ class ProdutosNFController {
             res.status(500).send('Erro ao vincular produtos');
         }
     };
+    
+    static async desvincularProdutoNF (req, res){
+        try {
+            console.log('entrou controler: ')
+            // Obter produtos através do serviço
+            const produtos = await ProdutosNFService.desvincularProdutoNF(req.params.id,req.body);
+
+            // Retornar os produtos como resposta
+            res.json(produtos);
+        } catch (error) {
+            console.error('Erro ao desvincular produtos:', error);
+            res.status(500).send('Erro ao desvincular produtos');
+        }
+    };
 
 }
 module.exports = ProdutosNFController;
