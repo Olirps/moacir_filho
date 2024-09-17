@@ -11,7 +11,8 @@ class ProdutosService {
             let produto = {};
             let prodOri_nf = 0;
             let qCom = 0;
-            if (dadosProduto.produto_ori_id != 0){
+
+            if (dadosProduto.produto_ori_id){
                 const itensNaoIdentificados = await ItensNaoIdentificados.findOne({where: {id: dadosProduto.produto_ori_id}
                 });
                 prodOri_nf = itensNaoIdentificados.nota_id;
