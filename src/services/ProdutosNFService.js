@@ -90,6 +90,7 @@ class ProdutosNFService {
 
             // Atualizar o produto com os novos dados
             await produto.update(dadosProduto);
+            dadosProduto.status = 0;
             console.log('Produto atualizado com os seguintes dados: ' + JSON.stringify(dadosProduto));
 
             // Criar movimentação de estoque com os mesmos dados

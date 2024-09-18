@@ -58,6 +58,10 @@ class ProdutosService {
                     dadosProduto.quantidade = qCom
                     dadosProduto.status = 0
                     const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
+                    const produto_mov = await ItensNaoIdentificados.findOne({
+                        where: { id: dadosProduto.produto_ori_id }
+                    });        // Criar movimentação de estoque com os mesmos dados
+                    const atualizaitemnaoidentificado = await produto_mov.update({ produto_id: produto.id });
                 }
 
             } else {
@@ -72,7 +76,6 @@ class ProdutosService {
                     dadosProduto.tipo_movimentacao = 'entrada'
                     dadosProduto.quantidade = dadosProduto.qCom
                     dadosProduto.status = 0
-
                     const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
                 }
             }
