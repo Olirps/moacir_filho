@@ -11,6 +11,7 @@ const FornecedoresService = require('../services/FornecedoresService');
 const getInformacoesProduto = require("../util/informacoesProduto");
 const MovimentacoesEstoque = require("../models/MovimentacoesEstoque");
 const ItensNaoIdentificados = require("../models/ItensNaoIdentificados");
+const { Op } = require('sequelize');
 
 const fornecedoresCriados = [];
 let fornecedorCreated;
@@ -47,7 +48,6 @@ class NotaFiscalService {
           };
 
           const normalizedJson = normalizeJson(flattenJson(originalJson), mapping);
-          console.log('Fornecedor não encontrado. Criando novo fornecedor...');
           
           fornecedorCreated = await FornecedoresService.criarFornecedores(normalizedJson);
           adicionarFornecedor(fornecedorCreated.cpfCnpj);
@@ -58,17 +58,18 @@ class NotaFiscalService {
       });
 
       // Verifica se a nota fiscal já existe
-      const notaFiscalExistente = await existeNF(dadosXml.informacoesIde.nNF, dadosXml.codFornecedor);
+      const notaFiscalExistente = await existeNF(dadosXml.informacoesIde.nNF, dadosXml.codFornecedor,);
+      console.log('Nota Existente: '+JSON.stringify(notaFiscalExistente));
       if (notaFiscalExistente) {
         throw new Error('Nota Fiscal Já Cadastrada.');
       }
 
       // Cria a nota fiscal
-      console.log('Criando Nota Fiscal...');
       let jsonCreateNF = dadosXml.informacoesIde;
       jsonCreateNF.codFornecedor = dadosXml.codFornecedor;
       jsonCreateNF.lancto = 'automatico';
       jsonCreateNF.status = 'fechada';
+      console.log('jsonCreateNF :'+ JSON.stringify(jsonCreateNF));
       const nfCreated = await NotaFiscal.create(jsonCreateNF);
       console.log('Nota Fiscal criada:', nfCreated.id);
       // Processa produtos associados
@@ -156,7 +157,7 @@ class NotaFiscalService {
 
 async function existeNF(nroNf, codFornecedor) {
   const exist = await NotaFiscal.findOne({
-    where: { nNF: nroNf, codFornecedor: codFornecedor }
+    where: { nNF: nroNf, codFornecedor: codFornecedor ,status: { [Op.ne]: 'cancelada' }}
   });
   return !!exist;
 }
@@ -176,20 +177,16 @@ async function verificarProdutos(produtosJSON) {
           produto.produto_id = produtoEncontrado.id;
           produto.tipo_movimentacao = 'entrada';
           produto.quantidade = produto.qCom;
-          console.log(JSON.stringify(produto));
           await MovimentacoesEstoque.create(produto);
         } else {
-          console.log(JSON.stringify(produto))
           let prodConsolidado = consolidarProdutosPorCEAN(produto)
           await ProdutosService.criarProduto(produto);
-          console.log(`Produto com cEAN ${cEAN} não encontrado.`);
         }
       } catch (error) {
         console.error(`Erro ao buscar produto com cEAN ${cEAN}:`, error);
       }
     } else {
       await ItensNaoIdentificados.create(produto);
-      console.log(`cEAN para o produto ${nome} não definido.`);
     }
   }
 }
@@ -223,9 +220,7 @@ function normalizeJson(json, mapping) {
 async function adicionarFornecedor(cnpj) {
   if (!fornecedoresCriados.includes(cnpj)) {
     fornecedoresCriados.push(cnpj);
-    console.log('Fornecedor adicionado:', cnpj);
   } else {
-    console.log('Fornecedor já existe no array:', cnpj);
   }
   return fornecedoresCriados;
 }

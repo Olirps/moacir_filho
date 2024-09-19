@@ -2,14 +2,11 @@
 const ProdutosService = require('../services/ProdutosService');
 const { Op } = require('sequelize');
 
-console.log('Entrou no Controller Produtos')
 class ProdutosController {
-
 
     // Criação de um novo produto
     static async criarProduto(req, res) {
         try {
-            console.log('Dados passados para criar Produto Controller: ' + req);
             const novoProduto = await ProdutosService.criarProduto(req.body);
             res.status(201).json(novoProduto);
         } catch (error) {

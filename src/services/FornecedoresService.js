@@ -8,12 +8,9 @@ const NotaFiscal = require("../models/NotaFiscal");
 class FornecedoresService {
 
   static async criarFornecedores(dados) {
-    console.log('Dados Recebidos Nota: ' + JSON.stringify(dados, null, 2));
 
     let sizeCpfCnpj = (dados.cpfCnpj ?? dados.CNPJ)?.length;
     let cpfCnpjLimpo = "";
-
-    console.log('Tamanho CpfCnpj: ' + sizeCpfCnpj)
 
     if (sizeCpfCnpj == 11) {
       cpfCnpjLimpo = (dados.cpfCnpj ?? dados.CNPJ)?.replace(/\D/g, ''); // Remove caracteres não numéricos
@@ -37,13 +34,8 @@ class FornecedoresService {
     }
     try {
       // Cria novo fornecedores
-
-      console.log('Entrou no Try create: ' + JSON.stringify(dados, null, 2));
       const createdFornecedor = await Fornecedores.create({ ...dados, cpfCnpj: (dados.cpfCnpj ?? dados.CNPJ) });
-      console.log('Saio do Try create: ' + JSON.stringify(createdFornecedor));
-
       return createdFornecedor
-      console.log('')
     } catch (err) {
       throw new Error(err.message);
     }

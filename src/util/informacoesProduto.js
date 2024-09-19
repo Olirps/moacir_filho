@@ -1,13 +1,11 @@
 function getInformacoesProduto(notaFiscal) {
     let produtos = notaFiscal?.nfeProc?.NFe?.infNFe?.det;
-    console.log(JSON.stringify(produtos));
     // Verifica se 'produtos' é um array ou um único objeto
     const detalhesProdutos = Array.isArray(produtos) ? produtos : [produtos];
 
     // Verifica se o campo "prod" é um array ou um objeto
     if (!Array.isArray(produtos)) {
         produtos = [produtos]; // Se for um objeto, transforma em array
-        console.log(JSON.stringify(produtos));
     }
 
     // Mapeia e extrai as informações de cada produto

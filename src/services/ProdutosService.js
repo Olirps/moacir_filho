@@ -18,7 +18,6 @@ class ProdutosService {
                 });
                 prodOri_nf = itensNaoIdentificados.nota_id;
                 qCom = itensNaoIdentificados.qCom;
-                console.log('itensNaoIdentificados: ' + JSON.stringify(itensNaoIdentificados))
                 produto = await Produtos.create({
                     cProd: itensNaoIdentificados.cProd,
                     cEAN: itensNaoIdentificados.cEAN,

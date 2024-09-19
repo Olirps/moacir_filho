@@ -7,6 +7,8 @@ const fs = require('fs');
 const { limpaDocumento } = require("../util/util");
 const NotaFiscal = require("../models/NotaFiscal");
 const Fornecedores = require("../models/Fornecedores");
+const { Op } = require('sequelize');
+
 let filaDeArquivos = [];
 let processando = false; // Flag para verificar se já está processando
 
@@ -256,7 +258,7 @@ async function existeNF(nroNf, ident) {
     if (!fornecedoresExistente) {
         return false;
     } else {
-        const exist = await NotaFiscal.findOne({ where: { nNF: nroNf, codFornecedor: fornecedoresExistente.id } });
+        const exist = await NotaFiscal.findOne({ where: { nNF: nroNf, codFornecedor: fornecedoresExistente.id ,status: { [Op.ne]: 'cancelada' }} });
         return !!exist;
     }
 

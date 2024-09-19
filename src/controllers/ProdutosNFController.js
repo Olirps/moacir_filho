@@ -22,7 +22,6 @@ class ProdutosNFController {
 
     static async vincularProdutoNF (req, res){
         try {
-            console.log('entrou controler: ')
             // Obter produtos através do serviço
             const produtos = await ProdutosNFService.vincularProdutoNF(req.params.id,req.body);
 
@@ -36,7 +35,6 @@ class ProdutosNFController {
     
     static async desvincularProdutoNF (req, res){
         try {
-            console.log('entrou controler: ')
             // Obter produtos através do serviço
             const produtos = await ProdutosNFService.desvincularProdutoNF(req.params.id,req.body);
 

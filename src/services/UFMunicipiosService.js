@@ -19,15 +19,13 @@ class UFMunicipiosService {
     }
   }
   static async obterMunicipiosPorUF(codUfId) {
-    console.log('Vamos Ver o Service agora : '+JSON.stringify(codUfId));
-                // Buscar produtos na tabela ItensNaoIdentificados
-                const municipios = await Municipios.findAll({
-                  where: {
-                    codUfId
-                  }// Ajuste conforme os campos da tabela
-              });
-              console.log('MunicipioS: '+municipios);
-              return municipios;
+    // Buscar produtos na tabela ItensNaoIdentificados
+    const municipios = await Municipios.findAll({
+      where: {
+        codUfId
+      }// Ajuste conforme os campos da tabela
+    });
+    return municipios;
 
   }
 }

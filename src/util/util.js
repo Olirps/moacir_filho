@@ -96,7 +96,6 @@ function validarCpf(cpf) {
 }
 
 function validarCnpj(cnpj) {
-    console.log('entrou aqui 004')
     const cnpjLimpo = cnpj.replace(/\D/g, ''); // Remove caracteres não numéricos
     let tamanhocnpj = cnpjLimpo.length
 

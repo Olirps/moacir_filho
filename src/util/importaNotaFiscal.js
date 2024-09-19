@@ -13,6 +13,7 @@ async function dividirNotaFiscal(jsonData) {
     // Verifique se a estrutura é a esperada
     const nfe = data.nfeProc?.NFe?.infNFe?.ide;
     const nfeFornecedor = data.nfeProc?.NFe?.infNFe?.emit;
+    const nfeImpostoNf = data.nfeProc?.NFe?.infNFe?.total?.ICMSTot;
 
 
     if (!nfe || !nfeFornecedor) {
@@ -50,7 +51,8 @@ async function dividirNotaFiscal(jsonData) {
     // Obtendo as informações do ide com fallback
     const informacoesIde = nfe|| {};
     const informacoesFornecedor = nfeFornecedor|| {};
-
+    informacoesIde.vNF = nfeImpostoNf.vNF || {};
+    console.log('informacoes id? '+JSON.stringify(informacoesIde))
     // Extraindo informações do emit (fornecedor)
     const fornecedor = getFornecedorInfo(informacoesFornecedor);
 

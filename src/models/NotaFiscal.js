@@ -110,6 +110,10 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         type: DataTypes.STRING,
         allowNull: true // Assuming NFref is optional
     },
+    vNF: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: false // Assuming NFref is optional
+    },
     xJust: {
         type: DataTypes.STRING(100),
         allowNull: true // Assuming NFref is optional
@@ -119,7 +123,7 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         allowNull: true // Assuming NFref is optional
     },
     status: {
-        type: DataTypes.ENUM('aberta', 'andamento','fechada'),
+        type: DataTypes.ENUM('aberta', 'andamento','fechada','cancelada'),
         allowNull: true // Assuming NFref is optional
     }
 }, {
