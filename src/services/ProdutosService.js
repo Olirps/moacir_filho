@@ -55,6 +55,7 @@ class ProdutosService {
                     dadosProduto.produto_id = produto.id;
                     dadosProduto.tipo_movimentacao = 'entrada'
                     dadosProduto.quantidade = qCom
+                    dadosProduto.valor_unit = produto.vUnCom
                     dadosProduto.status = 0
                     const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
                     const produto_mov = await ItensNaoIdentificados.findOne({
@@ -70,11 +71,15 @@ class ProdutosService {
                 }
 
                 produto = await Produtos.create(dadosProduto);
+
                 if (dadosProduto.nota_id) {
                     dadosProduto.produto_id = produto.id;
                     dadosProduto.tipo_movimentacao = 'entrada'
                     dadosProduto.quantidade = dadosProduto.qCom
                     dadosProduto.status = 0
+                    dadosProduto.valor_unit = dadosProduto.vUnCom
+                    console.log('informacoes do produto movimenta: '+JSON.stringify(dadosProduto));
+
                     const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
                 }
             }

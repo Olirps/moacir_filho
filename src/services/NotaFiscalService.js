@@ -73,6 +73,7 @@ class NotaFiscalService {
       const nfCreated = await NotaFiscal.create(jsonCreateNF);
       console.log('Nota Fiscal criada:', nfCreated.id);
       // Processa produtos associados
+
       let produtoInfo = getInformacoesProduto(xmlData);
 
       if (produtoInfo && typeof produtoInfo === 'object') {
@@ -177,6 +178,8 @@ async function verificarProdutos(produtosJSON) {
           produto.produto_id = produtoEncontrado.id;
           produto.tipo_movimentacao = 'entrada';
           produto.quantidade = produto.qCom;
+          produto.valor_unit = produto.vUnCom;
+          produto.status = 0;
           await MovimentacoesEstoque.create(produto);
         } else {
           let prodConsolidado = consolidarProdutosPorCEAN(produto)

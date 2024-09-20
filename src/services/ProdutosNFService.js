@@ -40,7 +40,7 @@ class ProdutosNFService {
                         [literal("'1'"), 'nI'] // Inclui o valor fixo '0' para o campo nI
                     ] // Ajuste conforme os campos da tabela Produtos
                 }],
-                attributes: ['quantidade','status','id']
+                attributes: ['quantidade','status','id','valor_unit']
             });
 
             // Combine os resultados
@@ -60,6 +60,8 @@ class ProdutosNFService {
                     id: movimentacao.produto.id,
                     descricao: movimentacao.produto.xProd,
                     quantidade: movimentacao.quantidade,
+                    valor_unit: movimentacao.valor_unit,
+                    valor_total: movimentacao.quantidade * movimentacao.valor_unit,
                     identificador: '1', // Inclua o identificador não identificado
                     nota_id: nota_id,
                     status: movimentacao.status
