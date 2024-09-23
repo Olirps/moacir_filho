@@ -59,7 +59,6 @@ class NotaFiscalService {
 
       // Verifica se a nota fiscal já existe
       const notaFiscalExistente = await existeNF(dadosXml.informacoesIde.nNF, dadosXml.codFornecedor,);
-      console.log('Nota Existente: '+JSON.stringify(notaFiscalExistente));
       if (notaFiscalExistente) {
         throw new Error('Nota Fiscal Já Cadastrada.');
       }
@@ -69,9 +68,7 @@ class NotaFiscalService {
       jsonCreateNF.codFornecedor = dadosXml.codFornecedor;
       jsonCreateNF.lancto = 'automatico';
       jsonCreateNF.status = 'fechada';
-      console.log('jsonCreateNF :'+ JSON.stringify(jsonCreateNF));
       const nfCreated = await NotaFiscal.create(jsonCreateNF);
-      console.log('Nota Fiscal criada:', nfCreated.id);
       // Processa produtos associados
 
       let produtoInfo = getInformacoesProduto(xmlData);

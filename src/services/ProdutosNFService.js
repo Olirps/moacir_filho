@@ -52,7 +52,6 @@ class ProdutosNFService {
                 nota_id: nota_id,
                 status: item.status
             }));
-            console.log('Mov. Estoque Json: '+ JSON.stringify(movimentacoesEstoque));
 
             movimentacoesEstoque.forEach(movimentacao => {
                 const produto = {
@@ -68,7 +67,6 @@ class ProdutosNFService {
                 };
                 produtos.push(produto);
             });
-            console.log('produtos mov: '+ JSON.stringify(produtos))
             return produtos;
         } catch (error) {
             console.error('Erro ao obter produtos:', error);
@@ -82,13 +80,11 @@ class ProdutosNFService {
             const produto = await ItensNaoIdentificados.findByPk(id);
             // Verificar se o produto foi encontrado
             if (!produto) {
-                console.log('if vincular: ')
                 throw new Error(`Produto com id ${id} não foi encontrado.`);
             }
             // Atualizar o produto com os novos dados
             await produto.update(dadosProduto);
             dadosProduto.status = 0;
-            console.log('vincula produto: '+JSON.stringify(dadosProduto));
             // Criar movimentação de estoque com os mesmos dados
             const atualizaEstoque = await MovimentacoesEstoque.create(dadosProduto);
 
@@ -102,7 +98,6 @@ class ProdutosNFService {
     static async desvincularProdutoNF(id, dadosProduto) {
         const produto = await ItensNaoIdentificados.findByPk(id);
         // Verificar se o produto foi encontrado
-        console.log('chegou no desvincular: '+JSON.stringify(id)+' '+JSON.stringify(dadosProduto))
         if (produto) {
             await produto.update(dadosProduto.produto_id);
         }
@@ -110,9 +105,7 @@ class ProdutosNFService {
         const produto_mov = await MovimentacoesEstoque.findOne({
             where: { id: dadosProduto.id}
         });        // Criar movimentação de estoque com os mesmos dados
-        console.log('Produto Movimento: '+JSON.stringify(produto_mov))
         const atualizaEstoque = await produto_mov.update({ status: 1 });
-        console.log(atualizaEstoque)
         return true;
 
 

@@ -52,7 +52,6 @@ async function dividirNotaFiscal(jsonData) {
     const informacoesIde = nfe|| {};
     const informacoesFornecedor = nfeFornecedor|| {};
     informacoesIde.vNF = nfeImpostoNf.vNF || {};
-    console.log('informacoes id? '+JSON.stringify(informacoesIde))
     // Extraindo informações do emit (fornecedor)
     const fornecedor = getFornecedorInfo(informacoesFornecedor);
 
