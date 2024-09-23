@@ -79,7 +79,7 @@ class ProdutosService {
                     dadosProduto.status = 0
                     dadosProduto.valor_unit = dadosProduto.vUnCom
 
-                    const atualizaEstoque = MovimentacoesEstoque.create(dadosProduto);
+                    const atualizaEstoque = await MovimentacoesEstoque.create(dadosProduto);
                 }
             }
 
