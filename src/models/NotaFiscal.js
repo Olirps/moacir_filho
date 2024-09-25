@@ -114,6 +114,30 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         type: DataTypes.DECIMAL(10,2),
         allowNull: false // Assuming NFref is optional
     },
+    vProd: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    vDesc: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    vFrete: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    vBC: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    vICMS: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    vTotTrib: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
     xJust: {
         type: DataTypes.STRING(100),
         allowNull: true // Assuming NFref is optional
@@ -126,11 +150,10 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         type: DataTypes.ENUM('aberta', 'andamento','fechada','cancelada'),
         allowNull: true // Assuming NFref is optional
     }
-}, {
-  tableName: 'nota_fiscal' // Adjust table name if needed
-});
+},{
+    tableName: 'nota_fiscal',
+    timestamps: true,
+  });
+  
 
-NotaFiscal.belongsTo(Fornecedores, { foreignKey: 'codFornecedor' });
-
-
-module.exports = NotaFiscal;
+module.exports = NotaFiscal; 

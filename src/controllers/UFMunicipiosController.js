@@ -33,6 +33,20 @@ class UFMunicipiosController {
           res.status(400).json({ error: err.message });
         }
       }
+      
+      static async obterMunicipioPorId(req, res) {
+        try {
+        
+          const municipios = await UFMunicipiosService.obterMunicipioPorId(req.params.codUfId);
+          if (municipios) {
+            res.status(200).json(municipios);
+          } else {
+            res.status(404).json({ error: 'Municipios não encontrados' });
+          }
+        } catch (err) {
+          res.status(400).json({ error: err.message });
+        }
+      }
     
 }
 

@@ -20,6 +20,7 @@ class ProdutosNFService {
                     'id',
                     'xProd',
                     'qCom',
+                    'vUnCom',
                     [literal("'0'"), 'nI'] // Inclui o valor fixo '0' para o campo nI
 
                 ] // Ajuste conforme os campos da tabela
@@ -40,7 +41,7 @@ class ProdutosNFService {
                         [literal("'1'"), 'nI'] // Inclui o valor fixo '0' para o campo nI
                     ] // Ajuste conforme os campos da tabela Produtos
                 }],
-                attributes: ['quantidade','status','id','valor_unit']
+                attributes: ['quantidade', 'status', 'id', 'valor_unit']
             });
 
             // Combine os resultados
@@ -48,6 +49,7 @@ class ProdutosNFService {
                 id: item.id,
                 descricao: item.xProd,
                 quantidade: item.qCom, // Ajuste se necessário
+                valor_unit: item.vUnCom, // Ajuste se necessário
                 identificador: '0', // Inclua o identificador não identificado
                 nota_id: nota_id,
                 status: item.status
@@ -55,7 +57,7 @@ class ProdutosNFService {
 
             movimentacoesEstoque.forEach(movimentacao => {
                 const produto = {
-                    idx:movimentacao.id,
+                    idx: movimentacao.id,
                     id: movimentacao.produto.id,
                     descricao: movimentacao.produto.xProd,
                     quantidade: movimentacao.quantidade,
@@ -79,11 +81,14 @@ class ProdutosNFService {
             // Buscar produto por ID
             const produto = await ItensNaoIdentificados.findByPk(id);
             // Verificar se o produto foi encontrado
-            if (!produto) {
+            /*if (!produto) {
                 throw new Error(`Produto com id ${id} não foi encontrado.`);
+            }*/
+            if (produto) {
+                // Atualizar o produto com os novos dados
+                await produto.update(dadosProduto);
             }
-            // Atualizar o produto com os novos dados
-            await produto.update(dadosProduto);
+
             dadosProduto.status = 0;
             // Criar movimentação de estoque com os mesmos dados
             const atualizaEstoque = await MovimentacoesEstoque.create(dadosProduto);
@@ -103,7 +108,7 @@ class ProdutosNFService {
         }
 
         const produto_mov = await MovimentacoesEstoque.findOne({
-            where: { id: dadosProduto.id}
+            where: { id: dadosProduto.id }
         });        // Criar movimentação de estoque com os mesmos dados
         const atualizaEstoque = await produto_mov.update({ status: 1 });
         return true;

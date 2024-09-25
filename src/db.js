@@ -30,11 +30,6 @@ sequelize.authenticate()
     const MovimentacoesEstoque= require('./models/MovimentacoesEstoque'); // Ajuste o caminho conforme necessário
     const ItensNaoIdentificados= require('./models/ItensNaoIdentificados'); // Ajuste o caminho conforme necessário
 
-    // Sincronizar tabelas que não podem ser excluídas
-    await UF.sync({ force: false });
-    await Municipio.sync({ force: false });
-    await UserLogin.sync({ force: false });
-    await GrupoAcesso.sync({ force: false });
 
     // Sincronizar os modelos com o banco de dados
     sequelize.sync({ force: false})

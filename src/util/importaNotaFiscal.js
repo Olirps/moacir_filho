@@ -51,7 +51,13 @@ async function dividirNotaFiscal(jsonData) {
     // Obtendo as informações do ide com fallback
     const informacoesIde = nfe|| {};
     const informacoesFornecedor = nfeFornecedor|| {};
-    informacoesIde.vNF = nfeImpostoNf.vNF || {};
+    informacoesIde.vProd = nfeImpostoNf?.vProd || {}; // valor nf sem desconto
+    informacoesIde.vNF = nfeImpostoNf?.vNF || 0; // valor nf com desconto
+    informacoesIde.vDesc = nfeImpostoNf?.vDesc || 0;
+    informacoesIde.vFrete = nfeImpostoNf?.vFrete || 0;
+    informacoesIde.vBC = nfeImpostoNf?.vBC || 0; //base de calculo icms
+    informacoesIde.vICMS = nfeImpostoNf?.vICMS || 0;
+    informacoesIde.vTotTrib = nfeImpostoNf?.vTotTrib || 0; //total tributos sem icms
     // Extraindo informações do emit (fornecedor)
     const fornecedor = getFornecedorInfo(informacoesFornecedor);
 

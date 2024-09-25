@@ -77,7 +77,7 @@ class ProdutosService {
                     dadosProduto.tipo_movimentacao = 'entrada'
                     dadosProduto.quantidade = dadosProduto.qCom
                     dadosProduto.status = 0
-                    dadosProduto.valor_unit = dadosProduto.vUnCom
+                    dadosProduto.valor_unit = dadosProduto.vUnCom// dadosProduto.valor_unit ajustado ppara importacao de nf 24/09/2024
 
                     const atualizaEstoque = await MovimentacoesEstoque.create(dadosProduto);
                 }
@@ -118,10 +118,12 @@ class ProdutosService {
             if (!produto) {
                 throw new Error('Produto não encontrado');
             }
-            if (dadosAtualizados.cEAN !== 'SEM GTIN'){
+            if (dadosAtualizados.cEAN !== 'SEM GTIN') {
                 const produtoExistente = await Produtos.findOne({ where: { cEAN: dadosAtualizados.cEAN } });
                 if (produtoExistente) {
-                    throw new Error(`Produto: ${(dadosAtualizados.cEAN)} já cadastrado`);
+                    if (id != produtoExistente.id) {
+                        throw new Error(`Produto: ${(dadosAtualizados.cEAN)} já cadastrado`);
+                    }
                 }
             }
 

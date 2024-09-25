@@ -100,7 +100,9 @@ class NotaFiscalService {
       }
       dados.lancto = 'manual';
       dados.status = 'aberta';
-
+      dados.dhEmi = dados.dataEmissao;
+      dados.dhSaiEnt =dados.dataSaida;
+      console.log('dados create nf manual? '+JSON.stringify(dados))
       const nfCreated = await NotaFiscal.create(dados);
       //await transaction.commit();
       return nfCreated;
@@ -126,7 +128,7 @@ class NotaFiscalService {
       throw new Error('Erro ao buscar a nota fiscal por ID');
     }
   }
-
+  
   static async updateNotaFiscal(id, notaFiscalData) {
     try {
       const notaFiscal = await NotaFiscal.findByPk(id);

@@ -28,6 +28,14 @@ class UFMunicipiosService {
     return municipios;
 
   }
+
+  static async obterMunicipioPorId(id) {
+    try {
+      return await UFMunicipiosService.findByPk(id);
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
 }
 
 module.exports = UFMunicipiosService;
