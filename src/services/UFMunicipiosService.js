@@ -28,7 +28,13 @@ class UFMunicipiosService {
     return municipios;
 
   }
-
+  static async obterUFPorId(dados) {
+    try {
+      return await UF.findOne({ where: { codIBGE: dados.codIBGE } });
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
   static async obterMunicipioPorId(dados) {
     try {
       console.log('entrou service mun. '+JSON.stringify(dados))
