@@ -4,14 +4,14 @@ on: [push]
 jobs:
   deploy:
     name: Deploy
-    runs-on: windows-latest  # Altere para um runner Windows
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
       - name: FTP Deploy Locaweb
-        uses: SamKirkland/FTP-Deploy-Action@4.1.0
+        uses: locaweb/ftp-deploy@1.0.0
         with:
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
           password: ${{ secrets.PASS }}
-          localDir: "dist"  # Altere conforme a estrutura do seu projeto
+          localDir: "dist"
