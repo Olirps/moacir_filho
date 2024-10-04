@@ -67,6 +67,7 @@ router.put('/produtosnf/desvincular/:id', ProdutosNFController.desvincularProdut
 //Rotas UFs e Municipios
 router.get('/uf', UFMunicipiosController.obterTodasUF);
 router.get('/municipios/:codUfId', UFMunicipiosController.obterMunicipiosPorUF);
+router.get('/uf/uf/:id', UFMunicipiosController.obterUFPorId);
 router.get('/municipios/mun/:id', UFMunicipiosController.obterMunicipioPorId);
 
 
