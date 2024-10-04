@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: FTP Deploy Locaweb
-        uses: locaweb/ftp-deploy@1.0.0
+        uses: SamKirkland/FTP-Deploy-Action@4.1.0
         with:
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
