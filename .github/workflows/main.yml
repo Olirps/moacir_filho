@@ -4,7 +4,7 @@ on: [push]
 jobs:
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # Altere para um runner Windows
     steps:
       - uses: actions/checkout@v2
 
@@ -14,4 +14,4 @@ jobs:
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
           password: ${{ secrets.PASS }}
-          localDir: "dist"
+          localDir: "dist"  # Altere conforme a estrutura do seu projeto
