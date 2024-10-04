@@ -14,6 +14,6 @@ jobs:
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
           password: ${{ secrets.PASS }}
-          localDir: ./dist
-          remote-dir: /path/to/remote/dir
+          localDir: "./dist"
+          remote-dir: "/path/to/remote/dir"
 
