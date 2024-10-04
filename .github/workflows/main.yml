@@ -1,19 +1,38 @@
-name: Deploy via ftp
-on: [push]
+name: Deploy to Locaweb
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
-    name: Deploy
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
 
-      - name: FTP Deploy Locaweb
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Check if dist directory exists
+        run: ls -l ./dist  # Verifica se o diretório dist existe
+
+      - name: Deploy to Locaweb
         uses: locaweb/ftp-deploy@1.0.0
         with:
-          host: ${{ secrets.HOST }}
-          user: ${{ secrets.USER }}
-          password: ${{ secrets.PASS }}
-          localDir: "./dist"
-          remote-dir: "/path/to/remote/dir"
-
+          host: ${{ secrets.FTP_HOST }}
+          user: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          localDir: ./dist
+          remote-dir: public_html
+          forceSsl: false
