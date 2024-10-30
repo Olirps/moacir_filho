@@ -10,6 +10,8 @@ const ProdutosController = require('./controllers/ProdutosController');
 const authenticateToken = require('./middlewares/authenticateToken'); // Importa o middleware de autenticação
 const ProdutosNFController = require('./controllers/ProdutosNFController'); // Ajuste o caminho conforme necessário
 const UFMunicipiosController = require('./controllers/UFMunicipiosController'); // Ajuste o caminho conforme necessário
+const GrupoProdutoController = require('./controllers/GrupoProdutoController'); // Ajuste o caminho conforme necessário
+const SubgrupoprodutoController = require('./controllers/SubgrupoprodutoController'); // Ajuste o caminho conforme necessário
 
 
 
@@ -43,6 +45,20 @@ router.get('/fornecedores', FornecedoresController.obterTodasFornecedores);
 router.get('/fornecedores/:id', FornecedoresController.obterFornecedoresPorId);
 router.put('/fornecedores/:id', FornecedoresController.atualizarFornecedores);
 router.delete('/fornecedores/:id', FornecedoresController.deletarFornecedores);
+
+// Rotas para Grupo produtos
+router.post('/produtos', GrupoProdutoController.criarGrupoProduto);
+router.get('/produtos', GrupoProdutoController.listarGruposProduto);
+router.get('/produtos/:id', GrupoProdutoController.obterGrupoProdutoPorId);
+router.put('/produtos/:id', GrupoProdutoController.atualizarGrupoProduto);
+router.delete('/produtos/:id', GrupoProdutoController.excluirGrupoProduto);
+
+// Rotas para Sub Grupo produtos
+router.post('/produtos', SubgrupoprodutoController.criarSubgrupoproduto);
+router.get('/produtos', SubgrupoprodutoController.listarSubgruposProduto);
+router.get('/produtos/:id', SubgrupoprodutoController.obterSubgrupoprodutoPorId);
+router.put('/produtos/:id', SubgrupoprodutoController.atualizarSubgrupoproduto);
+router.delete('/produtos/:id', SubgrupoprodutoController.excluirSubgrupoproduto);
 
 // Rotas para produtos
 router.post('/produtos', ProdutosController.criarProduto);

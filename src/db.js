@@ -29,10 +29,12 @@ sequelize.authenticate()
     const ImpostoProduto = require('./models/ImpostoProduto'); // Ajuste o caminho conforme necessário
     const MovimentacoesEstoque= require('./models/MovimentacoesEstoque'); // Ajuste o caminho conforme necessário
     const ItensNaoIdentificados= require('./models/ItensNaoIdentificados'); // Ajuste o caminho conforme necessário
+    const GrupoProduto= require('./models/GrupoProduto'); // Ajuste o caminho conforme necessário
+    const Subgrupoproduto= require('./models/Subgrupoproduto'); // Ajuste o caminho conforme necessário
 
 
     // Sincronizar os modelos com o banco de dados
-    sequelize.sync({ force: false})
+    sequelize.sync({ force: true})
     .then(() => {
       console.log("Modelos sincronizados com sucesso.");
       })
