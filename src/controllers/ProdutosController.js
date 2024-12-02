@@ -17,6 +17,9 @@ class ProdutosController {
     // Listagem de todos os produtos
     static async listarProdutos(req, res) {
         try {
+
+            console.log('Entrou FindAll Produtos controller: ' + JSON.stringify(req.body));
+
             const { id, cEAN, nome } = req.query; // Obtém os parâmetros da requisição
             const where = {};
             // Aplica filtro por ID se fornecido
@@ -52,7 +55,10 @@ class ProdutosController {
 
     // Atualização de um produto por ID
     static async atualizarProduto(req, res) {
+        console.log('Entrou Atualizar Produtos controller: ' + JSON.stringify(req.body))
+
         try {
+            console.log('Entrou Atualizar Produtos controller: ' + JSON.stringify(req.body))
             const produtoAtualizado = await ProdutosService.atualizarProduto(req.params.id, req.body);
             res.status(200).json(produtoAtualizado);
         } catch (error) {
@@ -67,6 +73,22 @@ class ProdutosController {
             res.status(200).json(mensagem);
         } catch (error) {
             res.status(404).json({ erro: error.message });
+        }
+    }
+
+    static async exportProdutos(req, res) {
+        try {
+            const produtos = await ProdutosService.listarProdutos();
+            const fileName = 'export.json';
+            res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+            res.setHeader('Content-Type', 'application/json');
+            console.log('Exportou: '+fileName);
+        
+            // Envia o JSON diretamente
+            res.send(produtos);
+            //res.status(200).json(produtos);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
         }
     }
 }

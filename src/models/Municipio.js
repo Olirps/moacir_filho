@@ -1,7 +1,7 @@
 // src/models/Municipio.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db');
-const UF = require('../models/UF');
+const UF = require('./Uf');
 
 const Municipio = sequelize.define('Municipio', {
   id: {
@@ -17,11 +17,11 @@ const Municipio = sequelize.define('Municipio', {
   codUfId: {
     type: DataTypes.INTEGER,
     references: {
-        model: UF,
-        key: 'codIBGE',
+      model: UF,
+      key: 'codIBGE',
     },
     allowNull: false,
-},
+  },
   nome: {
     type: DataTypes.STRING(50),
     allowNull: false,
@@ -31,7 +31,11 @@ const Municipio = sequelize.define('Municipio', {
   tableName: 'municipio',
   timestamps: true,
 });
-
-Municipio.belongsTo(UF, { foreignKey: 'codUfId' });
+Municipio.associate = (models) => {
+  Municipio.belongsTo(models.UF, {
+    foreignKey: 'codUfId',
+    as: 'uf',
+  });
+};
 
 module.exports = Municipio;

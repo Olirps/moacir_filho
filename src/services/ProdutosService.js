@@ -92,6 +92,7 @@ class ProdutosService {
     // Obtém todos os produtos
     static async listarProdutos(filtro) {
         try {
+            //console.log('Entrou FindAll Produtos: '+ JSON.stringify(filtro));
             return await Produtos.findAll({ where: filtro });
         } catch (error) {
             throw new Error('Erro ao listar os produtos: ' + error.message);
