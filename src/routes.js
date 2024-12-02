@@ -12,6 +12,7 @@ const ProdutosNFController = require('./controllers/ProdutosNFController'); // A
 const UFMunicipiosController = require('./controllers/UFMunicipiosController'); // Ajuste o caminho conforme necessário
 const GrupoProdutoController = require('./controllers/GrupoProdutoController'); // Ajuste o caminho conforme necessário
 const SubgrupoprodutoController = require('./controllers/SubgrupoprodutoController'); // Ajuste o caminho conforme necessário
+const VendasController = require('./controllers/VendasController'); // Ajuste o caminho conforme necessário
 
 
 
@@ -47,22 +48,23 @@ router.put('/fornecedores/:id', FornecedoresController.atualizarFornecedores);
 router.delete('/fornecedores/:id', FornecedoresController.deletarFornecedores);
 
 // Rotas para Grupo produtos
-router.post('/produtos', GrupoProdutoController.criarGrupoProduto);
-router.get('/produtos', GrupoProdutoController.listarGruposProduto);
-router.get('/produtos/:id', GrupoProdutoController.obterGrupoProdutoPorId);
-router.put('/produtos/:id', GrupoProdutoController.atualizarGrupoProduto);
-router.delete('/produtos/:id', GrupoProdutoController.excluirGrupoProduto);
+router.post('/grupoprodutos', GrupoProdutoController.criarGrupoProduto);
+router.get('/grupoprodutos', GrupoProdutoController.listarGruposProduto);
+router.get('/grupoprodutos/:id', GrupoProdutoController.obterGrupoProdutoPorId);
+router.put('/grupoprodutos/:id', GrupoProdutoController.atualizarGrupoProduto);
+router.delete('/grupoprodutos/:id', GrupoProdutoController.excluirGrupoProduto);
 
 // Rotas para Sub Grupo produtos
-router.post('/produtos', SubgrupoprodutoController.criarSubgrupoproduto);
-router.get('/produtos', SubgrupoprodutoController.listarSubgruposProduto);
-router.get('/produtos/:id', SubgrupoprodutoController.obterSubgrupoprodutoPorId);
-router.put('/produtos/:id', SubgrupoprodutoController.atualizarSubgrupoproduto);
-router.delete('/produtos/:id', SubgrupoprodutoController.excluirSubgrupoproduto);
+router.post('/subgrupoprodutos', SubgrupoprodutoController.criarSubgrupoproduto);
+router.get('/subgrupoprodutos', SubgrupoprodutoController.listarSubgruposProduto);
+router.get('/subgrupoprodutos/:id', SubgrupoprodutoController.obterSubgrupoprodutoPorId);
+router.put('/subgrupoprodutos/:id', SubgrupoprodutoController.atualizarSubgrupoproduto);
+router.delete('/subgrupoprodutos/:id', SubgrupoprodutoController.excluirSubgrupoproduto);
 
 // Rotas para produtos
 router.post('/produtos', ProdutosController.criarProduto);
 router.get('/produtos', ProdutosController.listarProdutos);
+router.get('/export/produtos', ProdutosController.exportProdutos);
 router.get('/produtos/:id', ProdutosController.obterProdutoPorId);
 router.put('/produtos/:id', ProdutosController.atualizarProduto);
 router.delete('/produtos/:id', ProdutosController.excluirProduto);
@@ -86,7 +88,9 @@ router.get('/municipios/:codUfId', UFMunicipiosController.obterMunicipiosPorUF);
 router.get('/uf/uf/:id', UFMunicipiosController.obterUFPorId);
 router.get('/municipios/mun/:id', UFMunicipiosController.obterMunicipioPorId);
 
-
+//Rotas de Vendas
+router.post('/vendas', VendasController.registraVenda);
+router.get('/vendas', VendasController.consultaVendas);
 
 
 module.exports = router;

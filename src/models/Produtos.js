@@ -125,6 +125,10 @@ const Produtos = sequelize.define('Produtos', {
         type: DataTypes.DECIMAL(5, 2),
         allowNull: true,
     },
+    vlrVenda: {
+        type: DataTypes.DECIMAL(15, 2),
+        allowNull: true,
+    },
 }, {
     sequelize,
     modelName: 'Produtos',
