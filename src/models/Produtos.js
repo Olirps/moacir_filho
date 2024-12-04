@@ -126,9 +126,13 @@ const Produtos = sequelize.define('Produtos', {
         allowNull: true,
     },
     vlrVenda: {
-        type: DataTypes.DECIMAL(15, 2),
+        type: DataTypes.DECIMAL(15,2),
         allowNull: true,
     },
+    margemSobreVlrCusto: {
+        type: DataTypes.DECIMAL(15,4),
+        allowNull: true,
+    }
 }, {
     sequelize,
     modelName: 'Produtos',

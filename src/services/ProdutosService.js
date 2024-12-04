@@ -69,6 +69,9 @@ class ProdutosService {
                 if (produtoExistente) {
                     throw new Error(`Produto: ${(dadosProduto.cEAN)} já cadastrado`);
                 }
+                let vlrVenda = Number(dadosProduto.vlrVenda);
+                let vUnCom = Number(dadosProduto.vUnCom);
+                dadosProduto.margemSobreVlrCusto = (vlrVenda / vUnCom) * 100;
 
                 produto = await Produtos.create(dadosProduto);
 
@@ -128,7 +131,10 @@ class ProdutosService {
                 }
             }
 
-
+            let vlrVenda = Number(dadosAtualizados.vlrVenda);
+            let vUnCom = Number(dadosAtualizados.vUnCom);
+            dadosAtualizados.margemSobreVlrCusto = (vlrVenda / vUnCom) * 100;
+            
             await produto.update(dadosAtualizados);
             return produto;
         } catch (error) {
