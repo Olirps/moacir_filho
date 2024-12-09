@@ -13,6 +13,7 @@ const UFMunicipiosController = require('./controllers/UFMunicipiosController'); 
 const GrupoProdutoController = require('./controllers/GrupoProdutoController'); // Ajuste o caminho conforme necessário
 const SubgrupoprodutoController = require('./controllers/SubgrupoprodutoController'); // Ajuste o caminho conforme necessário
 const VendasController = require('./controllers/VendasController'); // Ajuste o caminho conforme necessário
+const ClientesController = require('./controllers/ClientesController'); // Ajuste o caminho conforme necessário
 
 
 
@@ -46,6 +47,13 @@ router.get('/fornecedores', FornecedoresController.obterTodasFornecedores);
 router.get('/fornecedores/:id', FornecedoresController.obterFornecedoresPorId);
 router.put('/fornecedores/:id', FornecedoresController.atualizarFornecedores);
 router.delete('/fornecedores/:id', FornecedoresController.deletarFornecedores);
+
+// Rotas para clientes
+router.post('/clientes', ClientesController.criarClientes);
+router.get('/clientes', ClientesController.obterTodosClientes);
+router.get('/clientes/:id', ClientesController.obterClientePorId);
+router.put('/clientes/:id', ClientesController.atualizarCliente);
+router.delete('/clientes/:id', ClientesController.deletarCliente);
 
 // Rotas para Grupo produtos
 router.post('/grupoprodutos', GrupoProdutoController.criarGrupoProduto);
