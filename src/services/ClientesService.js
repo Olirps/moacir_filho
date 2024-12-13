@@ -38,7 +38,7 @@ class ClientesService {
       const offset = -4 * 60; // O fuso horário de Cuiabá é UTC-4, ou seja, -4 horas de UTC
       now.setMinutes(now.getMinutes() + now.getTimezoneOffset() + offset);
       
-      const createdAt = now.toLocaleString("pt-BR", {
+      let createdAt = now.toLocaleString("pt-BR", {
         timeZone: "America/Cuiaba",
         day: "2-digit",
         month: "2-digit",
