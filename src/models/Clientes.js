@@ -82,7 +82,12 @@ const Clientes = sequelize.define('Clientes', {
     status: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    createdAt:{
+        type: DataTypes.STRING(50),
+        allowNull: true
     }
+    
 }, {
     sequelize,
     modelName: 'Clientes',

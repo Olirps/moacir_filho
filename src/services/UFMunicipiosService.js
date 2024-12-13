@@ -1,4 +1,4 @@
-const UF = require('../models/UF');
+const UF = require('../models/Uf');
 const Municipios = require('../models/Municipio');
 
 

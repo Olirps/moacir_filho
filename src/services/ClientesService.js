@@ -34,7 +34,24 @@ class ClientesService {
     }
     try {
       // Cria novo fornecedores
-      const createdClient = await Clientes.create({ ...dados, cpfCnpj: (dados.cpfCnpj ?? dados.CNPJ) });
+      const now = new Date();
+      const offset = -4 * 60; // O fuso horário de Cuiabá é UTC-4, ou seja, -4 horas de UTC
+      now.setMinutes(now.getMinutes() + now.getTimezoneOffset() + offset);
+      
+      const createdAt = now.toLocaleString("pt-BR", {
+        timeZone: "America/Cuiaba",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false // Para usar o formato de 24 horas
+      });
+      
+      createdAt = createdAt.replace(",", "");
+
+      console.log('Now: ' + createdAt);
+      const createdClient = await Clientes.create({ ...dados, cpfCnpj: (dados.cpfCnpj ?? dados.CNPJ), status: '1', createdAt: createdAt });
       return createdClient
     } catch (err) {
       throw new Error(err.message);
@@ -72,7 +89,7 @@ class ClientesService {
       }
     }
 
-    const clientesExistente = await Clientes.findOne({ where: { cpfCnpj: fornecedores.cpfCnpj } });
+    const clientesExistente = await Clientes.findOne({ where: { cpfCnpj: cliente.cpfCnpj } });
     if (clientesExistente) {
       if (clientesExistente.id != id) {
         throw new Error(`CPF: ${dados.cpfCnpj} já cadastrado`);
