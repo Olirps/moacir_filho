@@ -30,7 +30,7 @@ const Vendas = sequelize.define('Vendas', {
         allowNull: true,
     },
     dataVenda: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: true,
     },
     status: {

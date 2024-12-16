@@ -30,7 +30,8 @@ class VendasService {
             return await Vendas.findAll({
                 where: {
                     status: 0 // Status igual a 0 (ativo)
-                }
+                },
+                order: [['id', 'DESC']] // Ordena pelo ID em ordem decrescente
             });
         } catch (err) {
             throw new Error('Erro ao buscar todas as vendas');
