@@ -99,6 +99,7 @@ router.get('/municipios/mun/:id', UFMunicipiosController.obterMunicipioPorId);
 //Rotas de Vendas
 router.post('/vendas', VendasController.registraVenda);
 router.get('/vendas', VendasController.consultaVendas);
+router.get('/vendas/:id', VendasController.consultaItensPorVenda);
 
 
 module.exports = router;

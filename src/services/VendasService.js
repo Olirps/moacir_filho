@@ -6,18 +6,16 @@ class VendasService {
     static async registraVenda(data) {
         // console.log('Entrou no Service: '+JSON.stringify(data))
         const itensVenda = data.products;
-        console.log('Produtos Vendidos' + JSON.stringify(data))
         const vendaRegistrada = await Vendas.create(data)
 
         // Mapeia os itens para associar com o ID da venda registrada
         const itensVendaRegistrada = itensVenda.map((item) => ({
             venda_id: vendaRegistrada.id, // ID da venda registrada
             produto_id: item.id,          // ID do produto vendido
-            quantidade: item.quantity,   // Quantidade do produto
+            quantity: parseFloat(item.quantity).toFixed(3), // Quantidade do produto
             vlrVenda: item.total            // Preço do produto
         }));
 
-        console.log('Itens da Venda Registrada: ' + JSON.stringify(itensVendaRegistrada));
 
         const itensVendidos = await VendasItens.bulkCreate(itensVendaRegistrada)
 
@@ -35,6 +33,32 @@ class VendasService {
             });
         } catch (err) {
             throw new Error('Erro ao buscar todas as vendas');
+        }
+    }
+
+    static async consultaItensPorVenda(id) {
+        try {
+            // Busca os itens da venda
+            let itensVenda = await VendasItens.findAll({
+                where: {
+                    venda_id: id
+                },
+                order: [['id', 'ASC']]
+            });
+
+            // Enriquecer os itens com o nome do produto (xProd)
+            for (let item of itensVenda) {
+                const produto = await Produtos.findByPk(item.produto_id);
+                if (produto) {
+                    item.dataValues.xProd = produto.xProd; // Adiciona o campo xProd ao item
+                    item.dataValues.vlrUnitario = produto.vlrVenda; // Adiciona o campo xProd ao item
+                }
+            }
+
+            console.log('Itens Venda:', JSON.stringify(itensVenda));
+            return itensVenda;
+        } catch (err) {
+            throw new Error('Erro ao buscar itens por venda');
         }
     }
 
