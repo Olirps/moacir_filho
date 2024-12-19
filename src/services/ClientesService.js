@@ -50,7 +50,6 @@ class ClientesService {
       
       createdAt = createdAt.replace(",", "");
 
-      console.log('Now: ' + createdAt);
       const createdClient = await Clientes.create({ ...dados, cpfCnpj: (dados.cpfCnpj ?? dados.CNPJ), status: '1', createdAt: createdAt });
       return createdClient
     } catch (err) {

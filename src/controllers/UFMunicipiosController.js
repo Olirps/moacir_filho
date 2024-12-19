@@ -35,10 +35,8 @@ class UFMunicipiosController {
   }
 
   static async obterUFPorId(req, res) {
-    console.log('entrou controler antes do try: ' + JSON.stringify(req.params.id, req.body))
     try {
       const codIBGE = { codIBGE: req.params.id }
-      console.log('entrou controler: ' + JSON.stringify(codIBGE))
       const uf = await UFMunicipiosService.obterUFPorId(codIBGE);
       if (uf) {
         res.status(200).json(uf);
@@ -51,10 +49,8 @@ class UFMunicipiosController {
   }
 
   static async obterMunicipioPorId(req, res) {
-    console.log('entrou controler antes do try: ' + JSON.stringify(req.params.id, req.body))
     try {
       const codMunIBGE = { codMunIBGE: req.params.id }
-      console.log('entrou controler: ' + JSON.stringify(codMunIBGE))
       const municipios = await UFMunicipiosService.obterMunicipioPorId(codMunIBGE);
       if (municipios) {
         res.status(200).json(municipios);

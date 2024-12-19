@@ -55,7 +55,6 @@ class VendasService {
                 }
             }
 
-            console.log('Itens Venda:', JSON.stringify(itensVenda));
             return itensVenda;
         } catch (err) {
             throw new Error('Erro ao buscar itens por venda');

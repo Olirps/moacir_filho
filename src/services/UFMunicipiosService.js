@@ -37,7 +37,6 @@ class UFMunicipiosService {
   }
   static async obterMunicipioPorId(dados) {
     try {
-      console.log('entrou service mun. '+JSON.stringify(dados))
       return await Municipios.findOne({ where: { codMunIBGE: dados.codMunIBGE } });
     } catch (err) {
       throw new Error(err.message);

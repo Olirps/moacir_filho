@@ -102,7 +102,6 @@ class NotaFiscalService {
       dados.status = 'aberta';
       dados.dhEmi = dados.dataEmissao;
       dados.dhSaiEnt =dados.dataSaida;
-      console.log('dados create nf manual? '+JSON.stringify(dados))
       const nfCreated = await NotaFiscal.create(dados);
       //await transaction.commit();
       return nfCreated;
