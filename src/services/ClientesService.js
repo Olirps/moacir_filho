@@ -37,7 +37,7 @@ class ClientesService {
       const now = new Date();
       const offset = -4 * 60; // O fuso horário de Cuiabá é UTC-4, ou seja, -4 horas de UTC
       now.setMinutes(now.getMinutes() + now.getTimezoneOffset() + offset);
-      
+
       let createdAt = now.toLocaleString("pt-BR", {
         timeZone: "America/Cuiaba",
         day: "2-digit",
@@ -47,7 +47,7 @@ class ClientesService {
         minute: "2-digit",
         hour12: false // Para usar o formato de 24 horas
       });
-      
+
       createdAt = createdAt.replace(",", "");
 
       const createdClient = await Clientes.create({ ...dados, cpfCnpj: (dados.cpfCnpj ?? dados.CNPJ), status: '1', createdAt: createdAt });
@@ -56,7 +56,7 @@ class ClientesService {
       throw new Error(err.message);
     }
   }
-
+  
   static async obterTodosClientes(filtro) {
     try {
       return await Clientes.findAll({ where: filtro });
