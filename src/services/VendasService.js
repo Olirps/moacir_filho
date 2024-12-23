@@ -6,6 +6,9 @@ class VendasService {
     static async registraVenda(data) {
         // console.log('Entrou no Service: '+JSON.stringify(data))
         const itensVenda = data.products;
+        if(data.cliente_id === ''){
+            data.cliente_id = 176
+        }
         const vendaRegistrada = await Vendas.create(data)
 
         // Mapeia os itens para associar com o ID da venda registrada

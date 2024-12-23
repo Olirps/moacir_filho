@@ -13,6 +13,16 @@ const Vendas = sequelize.define('Vendas', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    cliente_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'clientes', // Nome da tabela associada
+            key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+    },
     desconto: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true,
