@@ -46,5 +46,19 @@ class ProdutosNFController {
         }
     };
 
+    static async obterQuantidadeRestanteParaVinculo(req, res) {
+        try {
+            const notaFiscalId = req.params.notaFiscalId;
+
+            // Obter quantidade restante através do serviço
+            const quantidadeRestante = await ProdutosNFService.obterQuantidadeRestanteParaVinculo(notaFiscalId);
+
+            // Retornar a quantidade restante como resposta
+            res.json(quantidadeRestante);
+        } catch (error) {
+            console.error('Erro ao obter quantidade restante para vínculo:', error);
+            res.status(500).send('Erro ao obter quantidade restante para vínculo');
+        }
+    }
 }
 module.exports = ProdutosNFController;

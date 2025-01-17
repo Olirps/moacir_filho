@@ -9,6 +9,11 @@ const Produtos = sequelize.define('Produtos', {
         primaryKey: true,
         autoIncrement: true,
     },
+    tipo_produto: {
+        type: DataTypes.ENUM,
+        values: ['produto', 'servico'],
+        allowNull: false,
+    },
     cProd: {
         type: DataTypes.STRING,
         allowNull: true,

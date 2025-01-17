@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const VeiculosController = require('./controllers/VeiculosController');
+const TipoVeiculoController = require('./controllers/TipoVeiculoController');
+const VinculoProdVeiculoController = require('./controllers/VinculoProdVeiculoController');
 const MarcasController = require('./controllers/MarcasController');
 const FornecedoresController = require('./controllers/FornecedoresController');
 const LoginController = require('./controllers/LoginController');
@@ -33,6 +35,19 @@ router.get('/veiculos/:id', VeiculosController.obterVeiculosPorId);
 router.put('/veiculos/:id', VeiculosController.atualizarVeiculos);
 router.delete('/veiculos/:id', VeiculosController.deletarVeiculos);
 
+// Rotas para manipulação de Tipo Veiculos
+router.post('/tipoveiculo', TipoVeiculoController.criarTipoVeiculo);
+router.get('/tipoveiculo', TipoVeiculoController.obterTodosTipoVeiculo);
+router.get('/tipoveiculo/:id', TipoVeiculoController.obterTipoVeiculoPorId);
+router.put('/tipoveiculo/:id', TipoVeiculoController.atualizarTipoVeiculo);
+
+// Rotas para manipulação de Veiculos
+router.post('/vinculoprodveiculo', VinculoProdVeiculoController.criarVinculo);
+router.get('/vinculoprodveiculo', VinculoProdVeiculoController.obterTodasVinculos);
+router.get('/vinculoprodveiculo-lista', VinculoProdVeiculoController.getVinculoProdVeiculoAll);
+router.get('/vinculoprodveiculo/:id', VinculoProdVeiculoController.obterVinculoPorId);
+router.put('/vinculoprodveiculo/:id', VinculoProdVeiculoController.atualizarVinculo);
+router.get('/vinculoprodveiculo/produto/:produtoId', VinculoProdVeiculoController.obterVinculoPorProdutoId);
 
 // Rotas para marcas
 router.post('/marcas', MarcasController.criarMarca);
@@ -87,6 +102,7 @@ router.delete('/notafiscal/:id', NotaFiscalController.excluirNotaFiscal);
 
 // Rotas para produtos nota fiscal
 router.get('/produtosnf/:notaFiscalId', ProdutosNFController.getProdutosPorNotaFiscal);
+router.get('/produtosnf/quantidadeRestante/:notaFiscalId', ProdutosNFController.obterQuantidadeRestanteParaVinculo);
 router.put('/produtosnf/vincular/:id', ProdutosNFController.vincularProdutoNF);
 router.put('/produtosnf/desvincular/:id', ProdutosNFController.desvincularProdutoNF);
 
