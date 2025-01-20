@@ -1,0 +1,2 @@
+2025-01-20 14:46:29 - Starting C:\Program Files\nodejs\node.exe  --harmony C:\Users\Administrator\AppData\Roaming\npm\node_modules\node-windows\lib\wrapper.js --file C:\Projetos\apigerencial-dionegoulart\src\server.js --scriptoptions= --log "Dione Goulart - Backend wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
+2025-01-20 14:46:30 - Started 5592
