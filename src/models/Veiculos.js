@@ -19,9 +19,17 @@ const Veiculos = sequelize.define('Veiculos', {
     allowNull: false,
     unique: true,
   },
+  ano: {
+    type: DataTypes.STRING(4),
+    allowNull: true,
+  },
+  anomodelo: {
+    type: DataTypes.STRING(4),
+    allowNull: true,
+  },
   quilometragem: {
     type: DataTypes.STRING(50),
-    allowNull: false,
+    allowNull: true,
     unique: true,
   },
   marcaId: {

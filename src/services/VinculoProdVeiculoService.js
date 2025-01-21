@@ -21,7 +21,12 @@ class VinculoProdVeiculoService {
             throw new Error(`Veículo ${dados.modelo} Já Vinculado`);
         }*/
         try {
-            console.log('Entrou Service ' + JSON.stringify(dados));
+            console.log('Service Dados: ' + JSON.stringify(dados));
+            const movimenta_estoque = {id: dados.movimentacao_id,tipo_movimentacao :'saida',quantidade: dados.quantidade,valor_unit: dados.valor_unit,produto_id: dados.produto_id,nota_id: dados.nota_id} 
+            const vinculaSaida = await MovimentacoesEstoque.create(movimenta_estoque)
+            dados.movimentacaoestoque_id = vinculaSaida.id;
+
+
             return await VinculoProdVeiculo.create(dados);
         } catch (err) {
             throw new Error(err.message);
@@ -94,8 +99,10 @@ class VinculoProdVeiculoService {
                 // Buscar valor_unit do produto na MovimentacoesEstoque com base na nota e produto
                 const movimentacao = await MovimentacoesEstoque.findOne({
                     where: {
+                        id : vinculo.movimentacaoestoque_id,
                         produto_id: vinculo.produto_id,
-                        nota_id: vinculo.nota_id
+                        nota_id: vinculo.nota_id,
+                        tipo_movimentacao: 'saida'
                     },
                     attributes: ['valor_unit']
                 });

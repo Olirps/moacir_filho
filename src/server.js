@@ -28,10 +28,10 @@ const startServer = (port) => {
   }).on('error', (err) => {
     if (err.code === 'EACCES') {
       console.error(`Porta ${port} não tem permissão. Tentando usar a porta 3001...`);
-      startServer(3001); // Tentar a porta 3001
+      startServer(3002); // Tentar a porta 3002
     } else if (err.code === 'EADDRINUSE') {
       console.error(`Porta ${port} está em uso. Tentando usar a porta 3001...`);
-      startServer(3001); // Tentar a porta 3001
+      startServer(3002); // Tentar a porta 3002
     } else {
       console.error(err);
     }

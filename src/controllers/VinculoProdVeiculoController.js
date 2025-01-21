@@ -4,7 +4,6 @@ const VinculoProdVeiculoService = require('../services/VinculoProdVeiculoService
 class VinculoProdVeiculoController {
     static async criarVinculo(req, res) {
         try {
-            console.log('Entrou Controller ' + JSON.stringify(req.body));
             const vinculo = await VinculoProdVeiculoService.criarVinculo(req.body);
             res.status(201).json(vinculo);
         } catch (err) {

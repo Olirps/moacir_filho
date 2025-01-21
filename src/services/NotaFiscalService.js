@@ -114,7 +114,15 @@ class NotaFiscalService {
   // Métodos de CRUD para Nota Fiscal
   static async getAllNotasFiscais() {
     try {
-      return await NotaFiscal.findAll();
+      const notas = await NotaFiscal.findAll(); 
+
+      for (let nota of notas) {
+        const fornecedor = await Fornecedores.findOne({ where: { id: nota.codFornecedor } });
+        nota.dataValues.cpfCnpj = fornecedor ? fornecedor.cpfCnpj : null;
+        nota.dataValues.nomeFornecedor = fornecedor ? fornecedor.nome : null;
+      }
+      return notas;
+
     } catch (err) {
       throw new Error('Erro ao buscar todas as notas fiscais');
     }

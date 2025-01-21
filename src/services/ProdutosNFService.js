@@ -30,6 +30,7 @@ class ProdutosNFService {
             const movimentacoesEstoque = await MovimentacoesEstoque.findAll({
                 where: {
                     nota_id,
+                    tipo_movimentacao :'entrada',
                     status: 0
                 },
                 include: [{

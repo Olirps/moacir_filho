@@ -12,7 +12,7 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
     },
     cUF: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     codFornecedor: {
         type: DataTypes.INTEGER,
@@ -114,6 +114,10 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         type: DataTypes.DECIMAL(10,2),
         allowNull: false // Assuming NFref is optional
     },
+    apTribu: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
     vProd: {
         type: DataTypes.DECIMAL(10,2),
         allowNull: true // Assuming NFref is optional
@@ -122,7 +126,19 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         type: DataTypes.DECIMAL(10,2),
         allowNull: true // Assuming NFref is optional
     },
+    vOutro: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
     vFrete: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    vSeguro: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    vIPI: {
         type: DataTypes.DECIMAL(10,2),
         allowNull: true // Assuming NFref is optional
     },
@@ -130,12 +146,28 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         type: DataTypes.DECIMAL(10,2),
         allowNull: true // Assuming NFref is optional
     },
+    bICMS: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
     vICMS: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    bICMSSub: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    vICMSSub: {
         type: DataTypes.DECIMAL(10,2),
         allowNull: true // Assuming NFref is optional
     },
     vTotTrib: {
         type: DataTypes.DECIMAL(10,2),
+        allowNull: true // Assuming NFref is optional
+    },
+    chave: {
+        type: DataTypes.STRING(50),
         allowNull: true // Assuming NFref is optional
     },
     xJust: {
