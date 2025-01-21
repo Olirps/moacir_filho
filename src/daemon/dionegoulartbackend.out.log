@@ -1,0 +1,77 @@
+Conectando ao banco de dados: dbGerencialDioneGoulart
+Executing (default): SELECT 1+1 AS result
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'marcas' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Conexão bem-sucedida ao banco de dados.
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'marcas' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `marcas`
+Executing (default): SHOW INDEX FROM `marcas`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'tipoveiculo' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'tipoveiculo' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `tipoveiculo`
+Executing (default): SHOW INDEX FROM `tipoveiculo`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'veiculos' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'veiculos' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `veiculos`
+Executing (default): SHOW INDEX FROM `veiculos`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'produtos' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'produtos' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `produtos`
+Executing (default): SHOW INDEX FROM `produtos`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'fornecedores' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'fornecedores' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `fornecedores`
+Executing (default): SHOW INDEX FROM `fornecedores`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'nota_fiscal' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'nota_fiscal' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `nota_fiscal`
+Executing (default): SHOW INDEX FROM `nota_fiscal`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'vinculoprodveiculo' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'vinculoprodveiculo' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `vinculoprodveiculo`
+Executing (default): SHOW INDEX FROM `vinculoprodveiculo`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'movimentacoes_estoque' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'movimentacoes_estoque' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `movimentacoes_estoque`
+Executing (default): SHOW INDEX FROM `movimentacoes_estoque`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'grupo_acessos' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `grupo_acessos`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'grupo_acessos' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `grupo_acessos`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'user_login' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'user_login' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `user_login`
+Executing (default): SHOW INDEX FROM `user_login`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'itens_nao_identificados' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `itens_nao_identificados`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'itens_nao_identificados' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `itens_nao_identificados`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'uf' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `uf`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'uf' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `uf`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'municipio' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `municipio`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'municipio' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `municipio`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'clientes' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'clientes' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `clientes`
+Executing (default): SHOW INDEX FROM `clientes`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'vendas' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'vendas' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `vendas`
+Executing (default): SHOW INDEX FROM `vendas`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'vendaitens' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `vendaitens`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'vendaitens' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `vendaitens`
+Servidor rodando em: http://localhost:3002
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'imposto_produtos' AND TABLE_SCHEMA = 'dbGerencialDioneGoulart'
+Executing (default): SHOW INDEX FROM `imposto_produtos`
+Modelos sincronizados com sucesso.
+Executing (default): SELECT `id`, `username`, `cpfUser`, `password`, `grupoAcessoId` FROM `user_login` AS `UserLogin` WHERE `UserLogin`.`username` = 'olir_santos';
+Executing (default): SELECT `id`, `produto_id`, `veiculo_id`, `nota_id`, `quantidade`, `dataVinculo`, `status`, `createdAt`, `updatedAt` FROM `vinculoprodveiculo` AS `VinculoProdVeiculo` ORDER BY `VinculoProdVeiculo`.`id` DESC;
+Executing (default): SELECT `id`, `nome`, `createdAt`, `updatedAt` FROM `tipoveiculo` AS `TipoVeiculo` WHERE `TipoVeiculo`.`nome` = 'Automóvel';
+Executing (default): INSERT INTO `tipoveiculo` (`id`,`nome`,`createdAt`,`updatedAt`) VALUES (DEFAULT,?,?,?);
+Executing (default): SELECT `id`, `nome`, `createdAt`, `updatedAt` FROM `marcas` AS `Marcas` WHERE `Marcas`.`nome` = 'Fiat';
+Executing (default): INSERT INTO `marcas` (`id`,`nome`,`createdAt`,`updatedAt`) VALUES (DEFAULT,?,?,?);
