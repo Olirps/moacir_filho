@@ -1,1 +1,3 @@
 node_modules
+src/daemon/dionegoulartbackend.err.log
+src/daemon/dionegoulartbackend.out.log
