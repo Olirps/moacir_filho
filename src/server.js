@@ -27,19 +27,11 @@ const startServer = (port) => {
     console.log(`Servidor rodando em: http://localhost:${port}`);
   }).on('error', (err) => {
     if (err.code === 'EACCES') {
-<<<<<<< HEAD
-      console.error(`Porta ${port} não tem permissão. Tentando usar a porta 3001...`);
-      startServer(3002); // Tentar a porta 3002
-    } else if (err.code === 'EADDRINUSE') {
-      console.error(`Porta ${port} está em uso. Tentando usar a porta 3001...`);
-      startServer(3002); // Tentar a porta 3002
-=======
       console.error(`Porta ${port} não tem permissão. Tentando usar a porta 3002...`);
       startServer(3002); // Tentar a porta 3001
     } else if (err.code === 'EADDRINUSE') {
       console.error(`Porta ${port} está em uso. Tentando usar a porta 3002...`);
       startServer(3002); // Tentar a porta 3001
->>>>>>> 882af56cb55116a8b8f90169001ea9900861f0c3
     } else {
       console.error(err);
     }
