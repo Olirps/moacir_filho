@@ -45,7 +45,7 @@ const VinculoProdVeiculo = sequelize.define('VinculoProdVeiculo',{
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'veiculos',
+            model: 'movimentacoes_estoque',
             key: 'id'
         },
         onUpdate: 'CASCADE',
