@@ -45,7 +45,7 @@ class ProdutosService {
                         UFCons: itensNaoIdentificados.UFCons,
                         nBico: itensNaoIdentificados.nBico,
                         nTanque: itensNaoIdentificados.nTanque,
-                        tipo_produto : 'produto',
+                        tipo_produto: 'produto',
                         vEncIni: itensNaoIdentificados.vEncIni,
                         vEncFin: itensNaoIdentificados.vEncFin,
                         pBio: itensNaoIdentificados.pBio
@@ -89,8 +89,18 @@ class ProdutosService {
                     }
                 }
             } else {
+                
                 dadosProduto.tipo_produto = dadosProduto.tipoProduto;
                 produto = await Produtos.create(dadosProduto);
+                
+                if (dadosProduto.nota_id) {
+                    dadosProduto.produto_id = produto.id;
+                    dadosProduto.tipo_movimentacao = 'entrada'
+                    dadosProduto.quantidade = dadosProduto.qCom
+                    dadosProduto.status = 0
+                    dadosProduto.valor_unit = dadosProduto.vUnCom ||dadosProduto.valor_unit // dadosProduto.valor_unit ajustado ppara importacao de nf 24/09/2024
+                    const atualizaEstoque = await MovimentacoesEstoque.create(dadosProduto);
+                }
             }
 
             return produto;

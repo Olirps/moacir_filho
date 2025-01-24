@@ -32,10 +32,26 @@ class VinculoProdVeiculoController {
             res.status(400).json({ error: err.message });
         }
     }
+    
+    static async obterVinculoPorVeiculoId(req, res) {
+        try {
+            const vinculo = await VinculoProdVeiculoService.obterVinculoPorVeiculoId(produtoId,notaFiscalId);
+            if (vinculo) {
+                res.status(200).json(vinculo);
+            } else {
+                res.status(404).json({ error: 'Vinculo não encontrada' });
+            }
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
 
     static async obterVinculoPorProdutoId(req, res) {
         try {
-            const vinculo = await VinculoProdVeiculoService.getVinculoPorProdutoId(req.params.produtoId);
+            console.log('Log dos Parametro: '+JSON.stringify( req.params));
+            const { produtoId, notaFiscalId } = req.params;
+
+            const vinculo = await VinculoProdVeiculoService.getVinculoPorProdutoId(produtoId, notaFiscalId);
             if (vinculo) {
                 res.status(200).json(vinculo);
             } else {

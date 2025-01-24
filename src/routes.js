@@ -47,7 +47,7 @@ router.get('/vinculoprodveiculo', VinculoProdVeiculoController.obterTodasVinculo
 router.get('/vinculoprodveiculo-lista', VinculoProdVeiculoController.getVinculoProdVeiculoAll);
 router.get('/vinculoprodveiculo/:id', VinculoProdVeiculoController.obterVinculoPorId);
 router.put('/vinculoprodveiculo/:id', VinculoProdVeiculoController.atualizarVinculo);
-router.get('/vinculoprodveiculo/produto/:produtoId', VinculoProdVeiculoController.obterVinculoPorProdutoId);
+router.get('/vinculoprodveiculo/produto/:produtoId/nota/:notaFiscalId', VinculoProdVeiculoController.obterVinculoPorProdutoId);
 
 // Rotas para marcas
 router.post('/marcas', MarcasController.criarMarca);
@@ -109,7 +109,7 @@ router.put('/produtosnf/desvincular/:id', ProdutosNFController.desvincularProdut
 //Rotas UFs e Municipios
 router.get('/uf', UFMunicipiosController.obterTodasUF);
 router.get('/municipios/:codUfId', UFMunicipiosController.obterMunicipiosPorUF);
-router.get('/uf/uf/:id', UFMunicipiosController.obterUFPorId);
+router.get('/uf/uf/:codIBGE', UFMunicipiosController.obterUFPorId);
 router.get('/municipios/mun/:id', UFMunicipiosController.obterMunicipioPorId);
 
 //Rotas de Vendas

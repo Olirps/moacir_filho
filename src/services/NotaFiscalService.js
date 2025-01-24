@@ -19,7 +19,7 @@ let fornecedorCreated;
 class NotaFiscalService {
   static async criarNotaFiscal(xmlData, quantidadeNf) {
     //const transaction = await sequelize.transaction();
-    
+
     try {
 
       const notasFiscais = xmlData.nfeProc.NFe;
@@ -30,7 +30,7 @@ class NotaFiscalService {
       let fornecedor;
       await mutex.runExclusive(async () => {
         fornecedor = await Fornecedores.findOne({ where: { cpfCnpj: dadosXml.fornecedor.CNPJ } });
-        
+
         if (!fornecedor) {
           const originalJson = dadosXml.fornecedor;
           const mapping = {
@@ -48,7 +48,7 @@ class NotaFiscalService {
           };
 
           const normalizedJson = normalizeJson(flattenJson(originalJson), mapping);
-          
+
           fornecedorCreated = await FornecedoresService.criarFornecedores(normalizedJson);
           adicionarFornecedor(fornecedorCreated.cpfCnpj);
           dadosXml.codFornecedor = fornecedorCreated.id;
@@ -101,7 +101,7 @@ class NotaFiscalService {
       dados.lancto = 'manual';
       dados.status = 'aberta';
       dados.dhEmi = dados.dataEmissao;
-      dados.dhSaiEnt =dados.dataSaida;
+      dados.dhSaiEnt = dados.dataSaida;
       const nfCreated = await NotaFiscal.create(dados);
       //await transaction.commit();
       return nfCreated;
@@ -114,7 +114,9 @@ class NotaFiscalService {
   // Métodos de CRUD para Nota Fiscal
   static async getAllNotasFiscais() {
     try {
-      const notas = await NotaFiscal.findAll(); 
+      const notas = await NotaFiscal.findAll({
+        order: [['id', 'DESC']]
+      });
 
       for (let nota of notas) {
         const fornecedor = await Fornecedores.findOne({ where: { id: nota.codFornecedor } });
@@ -130,12 +132,19 @@ class NotaFiscalService {
 
   static async getNotaFiscalById(id) {
     try {
-      return await NotaFiscal.findByPk(id);
+      let notas = await NotaFiscal.findByPk(id);
+      let notaEncontrada = notas;
+
+      const fornecedor = await Fornecedores.findOne({ where: { id: notas.codFornecedor } });
+      notas.dataValues.nomeFantasia = fornecedor ? fornecedor.nomeFantasia : null;
+      notas.dataValues.nomeFornecedor = fornecedor ? fornecedor.nome : null;
+
+      return notas;
     } catch (err) {
       throw new Error('Erro ao buscar a nota fiscal por ID');
     }
   }
-  
+
   static async updateNotaFiscal(id, notaFiscalData) {
     try {
       const notaFiscal = await NotaFiscal.findByPk(id);
@@ -164,7 +173,7 @@ class NotaFiscalService {
 
 async function existeNF(nroNf, codFornecedor) {
   const exist = await NotaFiscal.findOne({
-    where: { nNF: nroNf, codFornecedor: codFornecedor ,status: { [Op.ne]: 'cancelada' }}
+    where: { nNF: nroNf, codFornecedor: codFornecedor, status: { [Op.ne]: 'cancelada' } }
   });
   return !!exist;
 }
@@ -237,16 +246,16 @@ async function adicionarFornecedor(cnpj) {
 
 async function consolidarProdutosPorCEAN(produto) {
   const produtosConsolidados = {};
-  
+
   const { cEAN, qCom, vProd } = produto;
-  
+
   if (!produtosConsolidados[cEAN]) {
     produtosConsolidados[cEAN] = { qCom: 0, vProd: 0 };
   }
-  
+
   produtosConsolidados[cEAN].qCom += qCom;
   produtosConsolidados[cEAN].vProd += vProd;
-  
+
   return produtosConsolidados;
 }
 

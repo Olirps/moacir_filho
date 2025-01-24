@@ -21,8 +21,19 @@ class VinculoProdVeiculoService {
             throw new Error(`Veículo ${dados.modelo} Já Vinculado`);
         }*/
         try {
-            console.log('Service Dados: ' + JSON.stringify(dados));
-            const movimenta_estoque = {id: dados.movimentacao_id,tipo_movimentacao :'saida',quantidade: dados.quantidade,valor_unit: dados.valor_unit,produto_id: dados.produto_id,nota_id: dados.nota_id} 
+
+            // Buscar valor_unit do produto na MovimentacoesEstoque com base na nota e produto
+            const movimentacao = await MovimentacoesEstoque.findOne({
+                where: {
+                    id: dados.movimentacao_id,
+                    produto_id: dados.produto_id,
+                    nota_id: dados.nota_id,
+                    tipo_movimentacao: 'entrada'
+                },
+                attributes: ['valor_unit']
+            });
+
+            const movimenta_estoque = { tipo_movimentacao: 'saida', quantidade: dados.quantidade, valor_unit: movimentacao.valor_unit, produto_id: dados.produto_id, nota_id: dados.nota_id, status: '0' }
             const vinculaSaida = await MovimentacoesEstoque.create(movimenta_estoque)
             dados.movimentacaoestoque_id = vinculaSaida.id;
 
@@ -49,9 +60,21 @@ class VinculoProdVeiculoService {
         }
     }
 
-    static async getVinculoPorProdutoId(produto_id) {
+    static async obterVinculoPorVeiculoId(veiculo_id) {
+        const veiculo = await VinculoProdVeiculo.findOne({
+            where: {
+                veiculo_id: veiculo_id,
+                nota_id 
+                
+            }
+        });
+        return veiculo;
+    }
+
+    static async getVinculoPorProdutoId(produto_id, nota_id) {
         try {
-            return await VinculoProdVeiculo.findAll({ where: { produto_id } });
+            console.log('Entrou na Exclusão:'+ JSON.stringify(nota_id))
+            return await VinculoProdVeiculo.findAll({ where: { produto_id : produto_id ,nota_id: nota_id } });
         } catch (err) {
             throw new Error(err.message);
         }
@@ -87,10 +110,9 @@ class VinculoProdVeiculoService {
 
                 // Buscar número da Nota Fiscal
                 const notaFiscal = await NotaFiscal.findByPk(vinculo.nota_id, {
-                    attributes: ['nNF','codFornecedor','dhEmi']
+                    attributes: ['nNF', 'codFornecedor', 'dhEmi']
                 });
 
-                console.log('Nota Fiscal: ' + JSON.stringify(notaFiscal));
                 // Buscar dados do Veículo
                 const veiculo = await Veiculos.findByPk(vinculo.veiculo_id, {
                     attributes: ['modelo', 'placa']
@@ -99,14 +121,14 @@ class VinculoProdVeiculoService {
                 // Buscar valor_unit do produto na MovimentacoesEstoque com base na nota e produto
                 const movimentacao = await MovimentacoesEstoque.findOne({
                     where: {
-                        id : vinculo.movimentacaoestoque_id,
+                        id: vinculo.movimentacaoestoque_id,
                         produto_id: vinculo.produto_id,
                         nota_id: vinculo.nota_id,
                         tipo_movimentacao: 'saida'
                     },
                     attributes: ['valor_unit']
                 });
-                
+
                 // Buscar nome do forncecedor na Fornecedores com base na nota
                 const fornecedor = await Fornecedores.findOne({
                     where: {
