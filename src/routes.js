@@ -16,13 +16,17 @@ const GrupoProdutoController = require('./controllers/GrupoProdutoController'); 
 const SubgrupoprodutoController = require('./controllers/SubgrupoprodutoController'); // Ajuste o caminho conforme necessário
 const VendasController = require('./controllers/VendasController'); // Ajuste o caminho conforme necessário
 const ClientesController = require('./controllers/ClientesController'); // Ajuste o caminho conforme necessário
+const FuncionariosController = require('./controllers/FuncionariosController'); // Ajuste o caminho conforme necessário
+const GrupoAcessoController = require('./controllers/GrupoAcessoController');
 
 
 
 // Aplica o middleware de autenticação globalmente a todas as rotas, exceto as rotas de login e registro
+router.post('/grupoacesso', GrupoAcessoController.createGrupoAcesso);
 
 router.post('/auth/register', LoginController.register);
 router.post('/auth/login', LoginController.login); // Exclui as rotas de autenticação do middleware
+
 
 
 // Aplica o middleware de autenticação para proteger todas as rotas abaixo
@@ -69,6 +73,11 @@ router.get('/clientes', ClientesController.obterTodosClientes);
 router.get('/clientes/:id', ClientesController.obterClientePorId);
 router.put('/clientes/:id', ClientesController.atualizarCliente);
 router.delete('/clientes/:id', ClientesController.deletarCliente);
+
+// Rotas para funcionarios
+router.post('/funcionarios', FuncionariosController.createFuncionarios);
+router.get('/funcionarios', FuncionariosController.getAllFuncionarios);
+router.get('/funcionarios/:id', FuncionariosController.getFuncionarioById);
 
 // Rotas para Grupo produtos
 router.post('/grupoprodutos', GrupoProdutoController.criarGrupoProduto);
