@@ -18,6 +18,7 @@ const VendasController = require('./controllers/VendasController'); // Ajuste o 
 const ClientesController = require('./controllers/ClientesController'); // Ajuste o caminho conforme necessário
 const FuncionariosController = require('./controllers/FuncionariosController'); // Ajuste o caminho conforme necessário
 const GrupoAcessoController = require('./controllers/GrupoAcessoController');
+const PermissionsController = require('./controllers/PermissionsController');
 
 
 
@@ -31,6 +32,14 @@ router.post('/auth/login', LoginController.login); // Exclui as rotas de autenti
 
 // Aplica o middleware de autenticação para proteger todas as rotas abaixo
 router.use(authenticateToken);
+
+// Rotas para gerenciar Permissões de acesso
+router.get('/grupoacesso', GrupoAcessoController.getAllGrupoAcesso);
+router.get('/grupoacesso/:id', GrupoAcessoController.getGrupoAcessoById);
+router.post('/permissoes/', PermissionsController.createPermission);
+router.get('/permissoes', PermissionsController.getAllPermissions);
+router.put('/permissoes/:id', PermissionsController.updatePermission);
+
 
 // Rotas para manipulação de Veiculos
 router.post('/veiculos', VeiculosController.criarVeiculos);
