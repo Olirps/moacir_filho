@@ -87,6 +87,7 @@ router.delete('/clientes/:id', ClientesController.deletarCliente);
 router.post('/funcionarios', FuncionariosController.createFuncionarios);
 router.get('/funcionarios', FuncionariosController.getAllFuncionarios);
 router.get('/funcionarios/:id', FuncionariosController.getFuncionarioById);
+router.put('/funcionarios/:id', FuncionariosController.updateFuncionario);
 
 // Rotas para Grupo produtos
 router.post('/grupoprodutos', GrupoProdutoController.criarGrupoProduto);

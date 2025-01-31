@@ -64,7 +64,7 @@ const Clientes = sequelize.define('Clientes', {
         allowNull: false
     },
     cep: {
-        type: DataTypes.STRING(8),
+        type: DataTypes.STRING(9),
         allowNull: false
     },
     observacoes: {

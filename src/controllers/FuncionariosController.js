@@ -36,10 +36,22 @@ class FuncionariosController {
     static async getFuncionarioById(req, res) {
         try {
             const funcionario = await FuncionariosService.getFuncionarioById(req.params.id);
-            if (!grupoAcesso) {
-                return res.status(404).json({ error: 'Grupo de acesso não encontrado' });
+            if (!funcionario) {
+                return res.status(404).json({ error: 'Funcionario não encontrado' });
             }
             return res.status(200).json(funcionario);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
+    static async updateFuncionario(req, res) {
+        try {
+            const updatedFuncionario = await FuncionariosService.updateFuncionario(req.params.id, req.body);
+            if (!updatedFuncionario) {
+                return res.status(404).json({ error: 'Funcionario não encontrado' });
+            }
+            return res.status(200).json(updatedFuncionario);
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }

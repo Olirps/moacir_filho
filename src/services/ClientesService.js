@@ -9,7 +9,8 @@ class ClientesService {
 
   static async criarClientes(dados) {
 
-    let sizeCpfCnpj = (dados.cpfCnpj ?? dados.CNPJ)?.length;
+    let sizeCpfCnpj = (dados.cpfCnpj.replace(/\D/g, '') ?? dados.CNPJ)?.length;
+
     let cpfCnpjLimpo = "";
 
     if (sizeCpfCnpj == 11) {
@@ -49,8 +50,16 @@ class ClientesService {
       });
 
       createdAt = createdAt.replace(",", "");
+      const clienteData = {
+        ...dados,
+        cpfCnpj: (dados.cpfCnpj ?? dados.CNPJ),
+        status: '1',
+        createdAt: createdAt
+      };
 
-      const createdClient = await Clientes.create({ ...dados, cpfCnpj: (dados.cpfCnpj ?? dados.CNPJ), status: '1', createdAt: createdAt });
+      console.log('Dados Para Criar Cliente: '+JSON.stringify(clienteData));
+      
+      const createdClient = await Clientes.create(clienteData);
       return createdClient
     } catch (err) {
       throw new Error(err.message);

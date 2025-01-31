@@ -129,6 +129,8 @@ function validarCnpj(cnpj) {
     return true;
 }
 
+
+
 module.exports = {
     limpaCpf,
     limpaDocumento,

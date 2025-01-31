@@ -23,7 +23,7 @@ Funcionarios.init({
         onDelete: 'CASCADE'
     },
     cargo: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         allowNull: false,
     },
     salario: {
