@@ -24,7 +24,7 @@ const Pagamentos = sequelize.define('Pagamentos', {
         allowNull: false, // Tipo de pagamento (01 - Dinheiro, 03 - Cartão de Crédito, etc.)
     },
     vPag: {
-        type: DataTypes.FLOAT(10, 4),
+        type: DataTypes.FLOAT(10, 2),
         allowNull: true, // Valor pago
     },
     indPag: {
@@ -32,6 +32,10 @@ const Pagamentos = sequelize.define('Pagamentos', {
         allowNull: true, // Indicador de pagamento (0 - À vista, 1 - A prazo, 2 - Outros)
     },
     CNPJ: {
+        type: DataTypes.STRING(25),
+        allowNull: true, // CNPJ do recebedor (se for pessoa jurídica)
+    },
+    CNPJPag: {
         type: DataTypes.STRING(25),
         allowNull: true, // CNPJ do recebedor (se for pessoa jurídica)
     },
@@ -52,7 +56,7 @@ const Pagamentos = sequelize.define('Pagamentos', {
         allowNull: true, // Nome do credor (responsável pelo pagamento, quando cartão)
     },
     vTroco: {
-        type: DataTypes.DECIMAL(10, 4),
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: true, // Valor do troco (caso haja)
     }
 }, {

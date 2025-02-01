@@ -6,6 +6,7 @@ const NotaFiscal = require('../models/NotaFiscal');
 const { dividirNotaFiscal } = require('../util/importaNotaFiscal');
 const Fornecedores = require('../models/Fornecedores');
 const Produtos = require('../models/Produtos');
+const PagamentosNF = require('../models/PagamentosNF');
 const ProdutosService = require('../services/ProdutosService');
 const FornecedoresService = require('../services/FornecedoresService');
 const getInformacoesProduto = require("../util/informacoesProduto");
@@ -71,6 +72,18 @@ class NotaFiscalService {
       const nfCreated = await NotaFiscal.create(jsonCreateNF);
       // Processa produtos associados
 
+      const pagamentosnf = {nota_id: nfCreated.id ,...dadosXml.pagamento}
+
+      // Transformando para um objeto único
+      const transformedData = {
+        nota_id: nfCreated.id,
+        ...pagamentosnf.detPag,
+        ...pagamentosnf.detPag.card,
+        ...pagamentosnf.vTroco
+      };
+
+      const cadastrapg = await PagamentosNF.create(transformedData)
+    
       let produtoInfo = getInformacoesProduto(xmlData);
 
       if (produtoInfo && typeof produtoInfo === 'object') {
