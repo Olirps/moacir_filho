@@ -8,12 +8,9 @@ const { validarCpf, limpaDocumento, validarCnpj } = require('../util/util');
 class FuncionariosService {
     static async createFuncionarios(data) {
         try {
-            console.log('Criando Funcionario Service: '+JSON.stringify(data));
             const cpfCnpjLimpo = data.cpfCnpj.replace(/\D/g, '');
-            console.log('CPF ou CNPJ LIMPO: '+JSON.stringify(cpfCnpjLimpo));
             // Verifica se já existe um cliente com o mesmo cpfCnpj
             const clienteExistente = await ClientesModel.findOne({ where: { cpfCnpj:  cpfCnpjLimpo} });
-            console.log('Cliente Encontrado: '+JSON.stringify(clienteExistente));
             if (clienteExistente) {
                 const clienteData = {
                     id: clienteExistente.id,

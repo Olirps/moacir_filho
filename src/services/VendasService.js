@@ -4,7 +4,6 @@ const VendasItens = require('../models/VendasItens');
 
 class VendasService {
     static async registraVenda(data) {
-        // console.log('Entrou no Service: '+JSON.stringify(data))
         const itensVenda = data.products;
         if(data.cliente_id === ''){
             data.cliente_id = 176
