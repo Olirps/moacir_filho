@@ -70,8 +70,6 @@ class PermissionsService {
 
     static updatePermission = async (id, updatedData) => {
         const permission = await Permissoes.findByPk(id);
-        console.log('Permissao Encontrada: '+ JSON.stringify(permission));
-        console.log('recebido no update: '+ JSON.stringify(updatedData.permissoes[0]));
         if (!permission) {
             throw new Error('Permission not found');
         }

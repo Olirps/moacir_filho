@@ -48,7 +48,6 @@ class VinculoProdVeiculoController {
 
     static async obterVinculoPorProdutoId(req, res) {
         try {
-            console.log('Log dos Parametro: '+JSON.stringify( req.params));
             const { produtoId, notaFiscalId } = req.params;
 
             const vinculo = await VinculoProdVeiculoService.getVinculoPorProdutoId(produtoId, notaFiscalId);

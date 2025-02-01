@@ -73,7 +73,6 @@ class VinculoProdVeiculoService {
 
     static async getVinculoPorProdutoId(produto_id, nota_id) {
         try {
-            console.log('Entrou na Exclusão:'+ JSON.stringify(nota_id))
             return await VinculoProdVeiculo.findAll({ where: { produto_id : produto_id ,nota_id: nota_id } });
         } catch (err) {
             throw new Error(err.message);

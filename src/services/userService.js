@@ -45,15 +45,12 @@ const authenticateUser = async (username, password) => {
         // Converter as instâncias do Sequelize para objetos simples
         const permissoesData = permissoes.map(permission => permission.toJSON());
 
-        console.log('Permissoes: ', JSON.stringify(permissoesData));
-
         // Garantindo que o user seja um objeto simples
         const userPlain = user.toJSON ? user.toJSON() : user; // Se user for uma instância Sequelize, converte para objeto simples
 
         // Atribuindo as permissões ao usuário
         userPlain.permissoes = permissoesData;
 
-        console.log('Usuário Com Permissoes: ', JSON.stringify(userPlain));
 
         // Criar o token JWT com as permissões e dados do usuário
         const token = jwt.sign(
@@ -64,7 +61,6 @@ const authenticateUser = async (username, password) => {
         // Retornar o usuário com as permissões e o token
         return { user: userPlain, token };
     } catch (error) {
-        console.log('Erro no Service')
         throw new Error(error.message);
     }
 };

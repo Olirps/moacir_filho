@@ -56,8 +56,6 @@ class ClientesService {
         status: '1',
         createdAt: createdAt
       };
-
-      console.log('Dados Para Criar Cliente: '+JSON.stringify(clienteData));
       
       const createdClient = await Clientes.create(clienteData);
       return createdClient

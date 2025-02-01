@@ -2,9 +2,29 @@ const Funcionarios = require('../models/Funcionarios');
 const ClientesModel = require('../models/Clientes');
 const Clientes = require('../services/ClientesService');
 
+const { validarCpf, limpaDocumento, validarCnpj } = require('../util/util');
+
+
 class FuncionariosService {
     static async createFuncionarios(data) {
         try {
+            console.log('Criando Funcionario Service: '+JSON.stringify(data));
+            const cpfCnpjLimpo = data.cpfCnpj.replace(/\D/g, '');
+            console.log('CPF ou CNPJ LIMPO: '+JSON.stringify(cpfCnpjLimpo));
+            // Verifica se já existe um cliente com o mesmo cpfCnpj
+            const clienteExistente = await ClientesModel.findOne({ where: { cpfCnpj:  cpfCnpjLimpo} });
+            console.log('Cliente Encontrado: '+JSON.stringify(clienteExistente));
+            if (clienteExistente) {
+                const clienteData = {
+                    id: clienteExistente.id,
+                    nome: clienteExistente.nome,
+                    cpfCnpj: clienteExistente.cpfCnpj,
+                    email: clienteExistente.email,
+                    // Adicione outros campos necessários aqui
+                };
+                throw new Error(`Já existe um Funcionário com esse CPF/CNPJ: ${data.cpfCnpj}`);
+            }
+
             // Tenta criar o cliente
             const pessoaCadastrada = await Clientes.criarClientes(data);
 
@@ -23,6 +43,7 @@ class FuncionariosService {
             throw new Error(`Erro ao criar funcionário: ${error.message}`);
         }
     }
+
 
     static async getAllFuncionarios(filtro) {
         try {

@@ -4,6 +4,7 @@ class FuncionariosController {
 
     static async createFuncionarios  (req, res) {
         try {
+            console.log('Criando Funcionario Controller: '+JSON.stringify(req.body));
             const funcionario = await FuncionariosService.createFuncionarios(req.body);
             return res.status(201).json(funcionario);
         } catch (error) {

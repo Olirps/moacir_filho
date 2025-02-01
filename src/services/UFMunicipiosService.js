@@ -25,7 +25,6 @@ class UFMunicipiosService {
         codUfId
       }// Ajuste conforme os campos da tabela
     });
-    console.log('Municipio: '+JSON.stringify(municipios));
     return municipios;
 
   }
