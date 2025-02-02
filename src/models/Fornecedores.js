@@ -30,11 +30,11 @@ const Fornecedores = sequelize.define('Fornecedores', {
     unique: true,
   },
   fone: {
-    type: DataTypes.STRING(11),
+    type: DataTypes.STRING(16),
     allowNull: true
   },
   celular: {
-    type: DataTypes.STRING(11),
+    type: DataTypes.STRING(16),
     allowNull: true
   },
   email: {

@@ -8,6 +8,7 @@ const MarcasController = require('./controllers/MarcasController');
 const FornecedoresController = require('./controllers/FornecedoresController');
 const LoginController = require('./controllers/LoginController');
 const {NotaFiscalController ,handleMulterErrors,upload}= require('./controllers/NotaFiscalController');
+const FinanceiroController = require('./controllers/FinanceiroController');
 const ProdutosController = require('./controllers/ProdutosController');
 const authenticateToken = require('./middlewares/authenticateToken'); // Importa o middleware de autenticação
 const ProdutosNFController = require('./controllers/ProdutosNFController'); // Ajuste o caminho conforme necessário
@@ -110,6 +111,11 @@ router.get('/export/produtos', ProdutosController.exportProdutos);
 router.get('/produtos/:id', ProdutosController.obterProdutoPorId);
 router.put('/produtos/:id', ProdutosController.atualizarProduto);
 router.delete('/produtos/:id', ProdutosController.excluirProduto);
+
+//Rotas para Lancamentos
+router.post('/movimentacaofinanceiradespesa', FinanceiroController.createLancamentos);
+router.get('/movimentacaofinanceiradespesa', FinanceiroController.getAllLancamentosFinanceiroDespesa);
+router.get('/movimentacaofinanceiradespesa/:id', FinanceiroController.getLancamentoDespesaById);
 
 // Rotas para nota fiscal eletronica
 router.post('/notafiscalimport',upload.array('xml'),handleMulterErrors,NotaFiscalController.importarNotaFiscal);

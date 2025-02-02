@@ -3,6 +3,5 @@ src/daemon/dionegoulartbackend.err.log
 src/daemon/dionegoulartbackend.out.log
 src/daemon/dionegoulartbackend.wrapper.log
 config/config.json
-migrations/20250201015635-create-pagamentos-table.js
-migrations/20250201020457-create-pagamentosnf-table.js
+migrations
 uploads

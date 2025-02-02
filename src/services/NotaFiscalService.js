@@ -12,6 +12,8 @@ const FornecedoresService = require('../services/FornecedoresService');
 const getInformacoesProduto = require("../util/informacoesProduto");
 const MovimentacoesEstoque = require("../models/MovimentacoesEstoque");
 const ItensNaoIdentificados = require("../models/ItensNaoIdentificados");
+const Financeiro = require('../models/Financeiro');
+
 const { Op } = require('sequelize');
 
 const fornecedoresCriados = [];
@@ -96,16 +98,26 @@ class NotaFiscalService {
 
       await verificarProdutos(produtoInfo);
 
-      //await transaction.commit();
+      // Cria contas a pagar
+      const contasPagarData = {
+        nota_id: nfCreated.id,
+        descricao: `Nota Fiscal ${nfCreated.nNF} - ${dadosXml.fornecedor.xFant}`,
+        tipo: 'débito',
+        fornecedor_id: nfCreated.codFornecedor,
+        valor: nfCreated.vNF,
+        data_lancamento: new Date(new Date().setHours(new Date().getHours() - 4)).toISOString().slice(0, 19).replace('T', ' '),
+        status: 'pendente'
+      };  
+
+      const movimentacao_financeira = await Financeiro.create(contasPagarData);
+
       return nfCreated;
     } catch (err) {
-      //await transaction.rollback();
       throw new Error(err.message);
     }
   }
 
   static async criarNotaFiscalManual(dados) {
-    //const transaction = await sequelize.transaction();
     try {
       const notaFiscalExistente = await existeNF(dados.nNF, dados.codFornecedor);
       if (notaFiscalExistente) {
@@ -116,6 +128,24 @@ class NotaFiscalService {
       dados.dhEmi = dados.dataEmissao;
       dados.dhSaiEnt = dados.dataSaida;
       const nfCreated = await NotaFiscal.create(dados);
+      
+      const fornecedor = await Fornecedores.findOne({ where: { id: nfCreated.codFornecedor} });
+
+
+      console.log('Dados do Lancamento Manual de NF: '+JSON.stringify(nfCreated));
+      // Cria contas a pagar
+      const contasPagarData = {
+        nota_id: nfCreated.id,
+        descricao: `Nota Fiscal ${nfCreated.nNF} - ${fornecedor.nomeFantasia}`,
+        tipo: 'débito',
+        fornecedor_id: nfCreated.codFornecedor,
+        valor: nfCreated.vNF,
+        data_lancamento: new Date(new Date().setHours(new Date().getHours() - 4)).toISOString().slice(0, 19).replace('T', ' '),
+        status: 'pendente'
+      };  
+
+      const movimentacao_financeira = await Financeiro.create(contasPagarData);
+
       //await transaction.commit();
       return nfCreated;
     } catch (err) {
