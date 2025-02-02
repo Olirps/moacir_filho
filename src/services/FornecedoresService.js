@@ -43,11 +43,34 @@ class FornecedoresService {
 
   static async obterTodasFornecedores(filtro) {
     try {
+      console.log('Filtros: '+JSON.stringify(filtro));
       return await Fornecedores.findAll({ where: filtro });
     } catch (err) {
       throw new Error(err.message);
     }
   }
+
+
+  static async obterFornecedoresPorFiltro(query) {
+    try {
+      const filtro = {};
+      if (query.razaoSocial) {
+        const razao = query.razaoSocial;
+        filtro.nome = { [Op.like]: `%${razao}%` };
+      }
+      if (query.nomeFantasia) {
+        filtro.nomeFantasia = { [Op.like]: `%${query.nomeFantasia}%` };
+      }
+      if (query.cnpj) {
+        filtro.cpfCnpj = { [Op.like]: `%${query.cnpj}%` };
+      }
+
+      return await Fornecedores.findAll({ where: filtro });
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
 
   static async obterFornecedoresPorId(id) {
     try {

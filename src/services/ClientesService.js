@@ -56,14 +56,14 @@ class ClientesService {
         status: '1',
         createdAt: createdAt
       };
-      
+
       const createdClient = await Clientes.create(clienteData);
       return createdClient
     } catch (err) {
       throw new Error(err.message);
     }
   }
-  
+
   static async obterTodosClientes(filtro) {
     try {
       return await Clientes.findAll({ where: filtro });
@@ -79,6 +79,29 @@ class ClientesService {
       throw new Error(err.message);
     }
   }
+
+  static async obterClientesPorFiltro(query) {
+    try {
+      const filtro = {};
+      if (query.razaoSocial) {
+        const razao = query.razaoSocial;
+        console.log('Razao: ' + JSON.stringify(razao));
+        filtro.nome = { [Op.like]: `%${razao}%` };
+      }
+      if (query.nomeFantasia) {
+        filtro.nomeFantasia = { [Op.like]: `%${query.nomeFantasia}%` };
+      }
+      if (query.cnpj) {
+        filtro.cpfCnpj = { [Op.like]: `%${query.cnpj}%` };
+      }
+
+      return await Clientes.findAll({ where: filtro });
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+
 
   static async atualizarCliente(id, dados) {
     // Processar os dados da pessoa antes de atualizar

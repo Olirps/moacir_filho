@@ -45,6 +45,7 @@ class FornecedoresController {
       res.status(400).json({ error: err.message });
     }
   }
+  
   static async obterFornecedoresPorId(req, res) {
     try {
       const fornecedores = await FornecedoresService.obterFornecedoresPorId(req.params.id);
@@ -53,6 +54,16 @@ class FornecedoresController {
       } else {
         res.status(404).json({ error: 'Fornecedor não encontrada' });
       }
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  static async obterFornecedoresPorFiltro(req, res) {
+    try {
+      const filtros = req.query; // Obtém os filtros do corpo da requisição
+      const fornecedores = await FornecedoresService.obterFornecedoresPorFiltro(filtros);
+      res.status(200).json(fornecedores);
     } catch (err) {
       res.status(400).json({ error: err.message });
     }

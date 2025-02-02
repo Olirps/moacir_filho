@@ -74,6 +74,7 @@ router.delete('/marcas/:id', MarcasController.deletarMarca);
 router.post('/fornecedores', FornecedoresController.criarFornecedores);
 router.get('/fornecedores', FornecedoresController.obterTodasFornecedores);
 router.get('/fornecedores/:id', FornecedoresController.obterFornecedoresPorId);
+router.get('/fornecedores/filtro/credor', FornecedoresController.obterFornecedoresPorFiltro);
 router.put('/fornecedores/:id', FornecedoresController.atualizarFornecedores);
 router.delete('/fornecedores/:id', FornecedoresController.deletarFornecedores);
 
@@ -81,12 +82,14 @@ router.delete('/fornecedores/:id', FornecedoresController.deletarFornecedores);
 router.post('/clientes', ClientesController.criarClientes);
 router.get('/clientes', ClientesController.obterTodosClientes);
 router.get('/clientes/:id', ClientesController.obterClientePorId);
+router.get('/clientes/filtro/credor', ClientesController.obterClientesPorFiltro);
 router.put('/clientes/:id', ClientesController.atualizarCliente);
 router.delete('/clientes/:id', ClientesController.deletarCliente);
 
 // Rotas para funcionarios
 router.post('/funcionarios', FuncionariosController.createFuncionarios);
 router.get('/funcionarios', FuncionariosController.getAllFuncionarios);
+router.get('/funcionarios/filtro/credor', FuncionariosController.obterFuncionariosPorFiltro);
 router.get('/funcionarios/:id', FuncionariosController.getFuncionarioById);
 router.put('/funcionarios/:id', FuncionariosController.updateFuncionario);
 

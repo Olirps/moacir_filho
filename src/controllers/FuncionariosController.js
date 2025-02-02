@@ -1,8 +1,9 @@
 const FuncionariosService = require('../services/FuncionariosService');
+const { Op } = require('sequelize');
 
 class FuncionariosController {
 
-    static async createFuncionarios  (req, res) {
+    static async createFuncionarios(req, res) {
         try {
             const funcionario = await FuncionariosService.createFuncionarios(req.body);
             return res.status(201).json(funcionario);
@@ -16,15 +17,15 @@ class FuncionariosController {
         try {
             const { cpfCnpj, nome } = req.query; // Obtém os parâmetros da requisição
             const where = {};
-        
+
             // Aplica filtro de CPF/CNPJ se fornecido
             if (cpfCnpj) {
-              where.cpfCnpj = { [Op.like]: `%${cpfCnpj}%` };
+                where.cpfCnpj = { [Op.like]: `%${cpfCnpj}%` };
             }
-        
+
             // Aplica filtro de nome se fornecido
             if (nome) {
-              where.nome = { [Op.like]: `%${nome}%` };
+                where.nome = { [Op.like]: `%${nome}%` };
             }
             const funcionarios = await FuncionariosService.getAllFuncionarios(where);
             return res.status(200).json(funcionarios);
@@ -45,6 +46,17 @@ class FuncionariosController {
         }
     }
 
+    static async obterFuncionariosPorFiltro(req, res) {
+        try {
+            const filtros = req.query; // Obtém os filtros do corpo da requisição
+            const funcionarios = await FuncionariosService.obterFuncionariosPorFiltro(filtros);
+            res.status(200).json(funcionarios);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
+
+
     static async updateFuncionario(req, res) {
         try {
             const updatedFuncionario = await FuncionariosService.updateFuncionario(req.params.id, req.body);
@@ -58,4 +70,4 @@ class FuncionariosController {
     }
 }
 
-module.exports =  FuncionariosController;
+module.exports = FuncionariosController;

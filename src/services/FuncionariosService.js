@@ -1,6 +1,7 @@
 const Funcionarios = require('../models/Funcionarios');
 const ClientesModel = require('../models/Clientes');
 const Clientes = require('../services/ClientesService');
+const { Op } = require('sequelize');
 
 const { validarCpf, limpaDocumento, validarCnpj } = require('../util/util');
 
@@ -10,7 +11,7 @@ class FuncionariosService {
         try {
             const cpfCnpjLimpo = data.cpfCnpj.replace(/\D/g, '');
             // Verifica se já existe um cliente com o mesmo cpfCnpj
-            const clienteExistente = await ClientesModel.findOne({ where: { cpfCnpj:  cpfCnpjLimpo} });
+            const clienteExistente = await ClientesModel.findOne({ where: { cpfCnpj: cpfCnpjLimpo } });
             if (clienteExistente) {
                 const clienteData = {
                     id: clienteExistente.id,
@@ -76,6 +77,39 @@ class FuncionariosService {
             return funcionario;
         } catch (error) {
             throw new Error(`Error fetching Funcionario by ID: ${error.message}`);
+        }
+    }
+
+    static async obterFuncionariosPorFiltro(query) {
+        try {
+            const filtro = {};
+            if (query.nome) {
+                filtro.nome = { [Op.like]: `%${query.nome}%` };
+            }
+            if (query.cpf) {
+                filtro.cpfCnpj = { [Op.like]: `%${query.cpf}%` };
+            }
+
+            const clienteEncontrados =await  ClientesModel.findAll({ where: filtro });
+
+            console.log('Cliente Encontrado: '+JSON.stringify(clienteEncontrados));
+            
+            const clienteIds = clienteEncontrados.map(cliente => cliente.id);
+
+            const funcionarios = await Funcionarios.findAll({ where: { cliente_id: clienteIds } });
+
+            funcionarios.forEach(funcionario => {
+                const cliente = clienteEncontrados.find(cliente => cliente.id === funcionario.cliente_id);
+                if (cliente) {
+                    funcionario.dataValues.cliente = cliente;
+                }
+            });
+
+            return funcionarios;
+
+            return 
+        } catch (err) {
+            throw new Error(err.message);
         }
     }
 
