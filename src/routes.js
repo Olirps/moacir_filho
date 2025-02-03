@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const VeiculosController = require('./controllers/VeiculosController');
+const BancoController = require('./controllers/BancoController');
+const ContasBancariasController = require('./controllers/ContasBancariasController');
 const TipoVeiculoController = require('./controllers/TipoVeiculoController');
 const VinculoProdVeiculoController = require('./controllers/VinculoProdVeiculoController');
 const MarcasController = require('./controllers/MarcasController');
@@ -48,6 +50,12 @@ router.get('/veiculos', VeiculosController.obterTodosVeiculos);
 router.get('/veiculos/:id', VeiculosController.obterVeiculosPorId);
 router.put('/veiculos/:id', VeiculosController.atualizarVeiculos);
 router.delete('/veiculos/:id', VeiculosController.deletarVeiculos);
+//Rota Bancos
+router.get('/bancos', BancoController.getAllBancos);
+router.post('/contasbancarias', ContasBancariasController.createContaBancaria);
+router.get('/contasbancarias', ContasBancariasController.getAllContas);
+
+
 
 // Rotas para manipulação de Tipo Veiculos
 router.post('/tipoveiculo', TipoVeiculoController.criarTipoVeiculo);
