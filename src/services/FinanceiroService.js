@@ -3,6 +3,8 @@ const Financeiro = require('../models/Financeiro');
 const Clientes = require('../models/Clientes');
 const Fornecedores = require('../models/Fornecedores');
 const Funcionarios = require('../models/Funcionarios');
+const MovimentacaoFinanceira = require('../models/MovimentacaoFinanceira');
+
 
 
 class FinanceiroService {
@@ -19,7 +21,7 @@ class FinanceiroService {
         valor: dadosFinanceiro.valor,
         data_lancamento: dadosFinanceiro.data_lancamento,
         dtVencimento: dadosFinanceiro.dtVencimento,
-        status: dadosFinanceiro.status || 'PENDENTE'
+        status: dadosFinanceiro.status || 'aberta'
       });
 
       return despesa;
@@ -34,7 +36,8 @@ class FinanceiroService {
     try {
       const financeiro = await Financeiro.findAll({
         where: { tipo: 'debito' },
-        raw: true // Transforma os dados em objetos JS puros para evitar problemas com Sequelize
+        raw: true, // Transforma os dados em objetos JS puros para evitar problemas com Sequelize
+        order: [['id', 'DESC']]
       });
 
       const financeiroComDetalhes = await Promise.all(financeiro.map(async (lancamento) => {
@@ -97,6 +100,23 @@ class FinanceiroService {
     } catch (error) {
       console.error('Erro ao buscar lançamento:', error);
       throw new Error('Erro ao buscar lançamento financeiro');
+    }
+  }
+
+  static async createMovimentacaoFinanceira(dadosMovimentacao) {
+    try {
+      const movimentacao = await MovimentacaoFinanceira.create({
+        financeiro_id: dadosMovimentacao.financeiro_id,
+        tipo: dadosMovimentacao.tipo,
+        valor: dadosMovimentacao.valor,
+        data_movimentacao: dadosMovimentacao.data_movimentacao,
+        descricao: dadosMovimentacao.descricao
+      });
+
+      return movimentacao;
+    } catch (error) {
+      console.error('Erro ao registrar movimentação financeira:', error);
+      throw new Error('Erro ao registrar movimentação financeira');
     }
   }
 

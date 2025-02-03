@@ -31,8 +31,8 @@ const MovimentacaoFinanceira = sequelize.define('MovimentacaoFinanceira', {
         },
         allowNull: false,
     },
-    metodo_pagamento: {
-        type: DataTypes.ENUM('transferencia', 'boleto', 'cartao'),
+    formaPagamento: {
+        type: DataTypes.ENUM('transferencia', 'boleto', 'credito','debito','dinheiro','PIX'),
         allowNull: false,
     },
     status: {

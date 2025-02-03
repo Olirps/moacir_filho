@@ -37,6 +37,15 @@ class FinanceiroController {
         }
     }
 
+    static async createMovimentacaoFinanceira(req, res) {
+        try {
+            const movimentacao = await FinanceiroService.createMovimentacaoFinanceira(req.body);
+            return res.status(201).json(movimentacao);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
     /*static async updateFuncionario(req, res) {
         try {
             const updatedFuncionario = await FuncionariosService.updateFuncionario(req.params.id, req.body);

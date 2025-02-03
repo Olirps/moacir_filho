@@ -7,25 +7,17 @@ const Banco = sequelize.define('Banco', {
         autoIncrement: true,
         primaryKey: true,
     },
+    codBancario: {
+        type: DataTypes.STRING(5),
+        allowNull: false,
+        unique: true, // Garante que o código bancário seja único
+        comment: 'Código bancário único para identificação do banco',
+
+
+    },
     nome: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    agencia: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    conta: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    tipo_conta: {
-        type: DataTypes.ENUM('corrente', 'poupanca'),
-        allowNull: false,
-    },
-    documento: {
-        type: DataTypes.STRING,
-        allowNull: true,
     }
 }, {
     sequelize,

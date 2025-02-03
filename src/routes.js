@@ -117,6 +117,7 @@ router.delete('/produtos/:id', ProdutosController.excluirProduto);
 
 //Rotas para Lancamentos
 router.post('/movimentacaofinanceiradespesa', FinanceiroController.createLancamentos);
+router.post('/lancamentoparcelas', FinanceiroController.createMovimentacaoFinanceira);
 router.get('/movimentacaofinanceiradespesa', FinanceiroController.getAllLancamentosFinanceiroDespesa);
 router.get('/movimentacaofinanceiradespesa/:id', FinanceiroController.getLancamentoDespesaById);
 

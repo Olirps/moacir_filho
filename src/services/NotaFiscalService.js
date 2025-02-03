@@ -140,7 +140,7 @@ class NotaFiscalService {
         fornecedor_id: nfCreated.codFornecedor,
         valor: nfCreated.vNF,
         data_lancamento: new Date(new Date().setHours(new Date().getHours() - 4)).toISOString().slice(0, 19).replace('T', ' '),
-        status: 'pendente'
+        status: 'aberta'
       };  
 
       const movimentacao_financeira = await Financeiro.create(contasPagarData);
