@@ -132,7 +132,6 @@ class NotaFiscalService {
       const fornecedor = await Fornecedores.findOne({ where: { id: nfCreated.codFornecedor} });
 
 
-      console.log('Dados do Lancamento Manual de NF: '+JSON.stringify(nfCreated));
       // Cria contas a pagar
       const contasPagarData = {
         nota_id: nfCreated.id,

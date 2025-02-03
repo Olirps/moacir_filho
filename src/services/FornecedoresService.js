@@ -43,7 +43,6 @@ class FornecedoresService {
 
   static async obterTodasFornecedores(filtro) {
     try {
-      console.log('Filtros: '+JSON.stringify(filtro));
       return await Fornecedores.findAll({ where: filtro });
     } catch (err) {
       throw new Error(err.message);
@@ -54,15 +53,14 @@ class FornecedoresService {
   static async obterFornecedoresPorFiltro(query) {
     try {
       const filtro = {};
-      if (query.razaoSocial) {
-        const razao = query.razaoSocial;
-        filtro.nome = { [Op.like]: `%${razao}%` };
+      if (query.razaoSocial.trim()) {
+        filtro.nome = { [Op.like]: `%${query.razaoSocial.trim()}%` };
       }
       if (query.nomeFantasia) {
-        filtro.nomeFantasia = { [Op.like]: `%${query.nomeFantasia}%` };
+        filtro.nomeFantasia = { [Op.like]: `%${query.nomeFantasia.trim()}%` };
       }
       if (query.cnpj) {
-        filtro.cpfCnpj = { [Op.like]: `%${query.cnpj}%` };
+        filtro.cpfCnpj = { [Op.like]: `%${query.cnpj.trim()}%` };
       }
 
       return await Fornecedores.findAll({ where: filtro });

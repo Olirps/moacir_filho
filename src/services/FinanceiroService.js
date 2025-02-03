@@ -9,7 +9,6 @@ class FinanceiroService {
   static async createLancamentos(dadosFinanceiro) {
     try {
 
-      console.log('Dados Recebidos para criar Despesa: '+JSON.stringify(dadosFinanceiro));
       const despesa = await Financeiro.create({
         nota_id: dadosFinanceiro.notaId || null,
         descricao: dadosFinanceiro.descricao,
@@ -23,7 +22,6 @@ class FinanceiroService {
         status: dadosFinanceiro.status || 'PENDENTE'
       });
 
-      console.log('Despesa registrada:', despesa.id);
       return despesa;
 
     } catch (error) {

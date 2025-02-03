@@ -83,16 +83,14 @@ class ClientesService {
   static async obterClientesPorFiltro(query) {
     try {
       const filtro = {};
-      if (query.razaoSocial) {
-        const razao = query.razaoSocial;
-        console.log('Razao: ' + JSON.stringify(razao));
-        filtro.nome = { [Op.like]: `%${razao}%` };
+      if (query.razaoSocial.trim()) {
+        filtro.nome = { [Op.like]: `%${query.razaoSocial.trim()}%` };
       }
-      if (query.nomeFantasia) {
-        filtro.nomeFantasia = { [Op.like]: `%${query.nomeFantasia}%` };
+      if (query.nomeFantasia.trim()) {
+        filtro.nomeFantasia = { [Op.like]: `%${query.nomeFantasia.trim()}%` };
       }
-      if (query.cnpj) {
-        filtro.cpfCnpj = { [Op.like]: `%${query.cnpj}%` };
+      if (query.cpfCnpj.trim()) {
+        filtro.cpfCnpj = { [Op.like]: `%${query.cpfCnpj.trim()}%` };
       }
 
       return await Clientes.findAll({ where: filtro });

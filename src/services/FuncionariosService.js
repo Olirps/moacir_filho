@@ -83,16 +83,15 @@ class FuncionariosService {
     static async obterFuncionariosPorFiltro(query) {
         try {
             const filtro = {};
-            if (query.nome) {
-                filtro.nome = { [Op.like]: `%${query.nome}%` };
+            if (query.nome.trim()) {
+                filtro.nome = { [Op.like]: `%${query.nome.trim()}%` };
             }
-            if (query.cpf) {
-                filtro.cpfCnpj = { [Op.like]: `%${query.cpf}%` };
+            if (query.cpf.trim()) {
+                filtro.cpfCnpj = { [Op.like]: `%${query.cpf.trim()}%` };
             }
 
-            const clienteEncontrados =await  ClientesModel.findAll({ where: filtro });
+            const clienteEncontrados = await  ClientesModel.findAll({ where: filtro });
 
-            console.log('Cliente Encontrado: '+JSON.stringify(clienteEncontrados));
             
             const clienteIds = clienteEncontrados.map(cliente => cliente.id);
 
