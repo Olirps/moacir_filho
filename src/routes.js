@@ -54,6 +54,8 @@ router.delete('/veiculos/:id', VeiculosController.deletarVeiculos);
 router.get('/bancos', BancoController.getAllBancos);
 router.post('/contasbancarias', ContasBancariasController.createContaBancaria);
 router.get('/contasbancarias', ContasBancariasController.getAllContas);
+router.get('/contasbancarias/:id', ContasBancariasController.getContaBancariaById);
+router.put('/contasbancarias/:id', ContasBancariasController.updateContaBancaria);
 
 
 

@@ -18,6 +18,10 @@ const Permissoes = sequelize.define('Permissoes', {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
+    viewcadastro: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     edit: {
         type: DataTypes.BOOLEAN,
         defaultValue: false

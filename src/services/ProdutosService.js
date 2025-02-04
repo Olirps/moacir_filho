@@ -91,6 +91,7 @@ class ProdutosService {
             } else {
                 
                 dadosProduto.tipo_produto = dadosProduto.tipoProduto;
+                dadosProduto.qCom = 1;
                 produto = await Produtos.create(dadosProduto);
                 
                 if (dadosProduto.nota_id) {
@@ -138,7 +139,7 @@ class ProdutosService {
             if (!produto) {
                 throw new Error('Produto não encontrado');
             }
-            if (dadosAtualizados.tipoProduto == 'servico') {
+            if (dadosAtualizados.tipoProduto !== 'servico') {
                 if (dadosAtualizados.cEAN !== 'SEM GTIN') {
                     const produtoExistente = await Produtos.findOne({ where: { cEAN: dadosAtualizados.cEAN } });
                     if (produtoExistente) {

@@ -19,6 +19,30 @@ class ContasBancariasController {
             return res.status(500).json({ message: error.message });
         }
     }
+
+    static async getContaBancariaById(req, res) {
+        try {
+            const conta = await ContasBancariasService.getContaBancariaById(req.params.id);
+            if (!conta) {
+                return res.status(404).json({ message: 'Conta Bancaria not found' });
+            }
+            return res.status(200).json(conta);
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
+
+    static async updateContaBancaria(req, res) {
+        try {
+            const conta = await ContasBancariasService.updateContaBancaria(req.params.id, req.body);
+            if (!conta) {
+                return res.status(404).json({ message: 'Conta Bancaria not found' });
+            }
+            return res.status(200).json(conta);
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
 }
 
 
