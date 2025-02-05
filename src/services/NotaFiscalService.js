@@ -193,9 +193,13 @@ class NotaFiscalService {
       if (!notaFiscal) {
         return null;
       }
-      return await notaFiscal.update(notaFiscalData);
+
+      await notaFiscal.update(notaFiscalData);
+      
+      return notaFiscal
     } catch (err) {
-      throw new Error('Erro ao atualizar a nota fiscal');
+
+      throw new Error(`Erro ao atualizar a nota fiscal: ${err.message}`);
     }
   }
 
