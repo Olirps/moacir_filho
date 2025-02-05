@@ -43,6 +43,11 @@ const Financeiro = sequelize.define('Financeiro', {
             key: 'id',
         },
     },
+    data_vencimento: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        allowNull: true
+    },
     data_lancamento: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,

@@ -130,6 +130,7 @@ router.post('/movimentacaofinanceiradespesa', FinanceiroController.createLancame
 router.post('/lancamentoparcelas', FinanceiroController.createMovimentacaoFinanceira);
 router.get('/movimentacaofinanceiradespesa', FinanceiroController.getAllLancamentosFinanceiroDespesa);
 router.get('/movimentacaofinanceiradespesa/:id', FinanceiroController.getLancamentoDespesaById);
+router.get('/parcelasmovimentacao/:id', FinanceiroController.getMovimentacaoFinanceiraByFinanceiroID);
 
 // Rotas para nota fiscal eletronica
 router.post('/notafiscalimport',upload.array('xml'),handleMulterErrors,NotaFiscalController.importarNotaFiscal);

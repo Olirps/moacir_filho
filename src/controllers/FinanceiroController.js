@@ -46,6 +46,20 @@ class FinanceiroController {
         }
     }
 
+    static async getMovimentacaoFinanceiraByFinanceiroID(req, res) {
+        try {
+            const { financeiroId } = req.params.id;
+            const movimentacao = await FinanceiroService.getMovimentacaoFinanceiraByFinanceiroID(req.params.id);
+
+            if (!movimentacao) {
+                return res.status(404).json({ message: 'Movimentação não encontrada' });
+            }
+
+            return res.status(200).json(movimentacao);
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
     /*static async updateFuncionario(req, res) {
         try {
             const updatedFuncionario = await FuncionariosService.updateFuncionario(req.params.id, req.body);

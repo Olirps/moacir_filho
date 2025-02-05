@@ -10,7 +10,6 @@ const MovimentacaoFinanceira = require('../models/MovimentacaoFinanceira');
 class FinanceiroService {
   static async createLancamentos(dadosFinanceiro) {
     try {
-
       const despesa = await Financeiro.create({
         nota_id: dadosFinanceiro.notaId || null,
         descricao: dadosFinanceiro.descricao,
@@ -20,17 +19,49 @@ class FinanceiroService {
         funcionario_id: dadosFinanceiro.funcionario_id || null,
         valor: dadosFinanceiro.valor,
         data_lancamento: dadosFinanceiro.data_lancamento,
-        dtVencimento: dadosFinanceiro.dtVencimento,
-        status: dadosFinanceiro.status || 'aberta'
+        data_vencimento: dadosFinanceiro.dtVencimento,
+        status: dadosFinanceiro.status || 'andamento'
       });
 
-      return despesa;
+      if (dadosFinanceiro.despesaRecorrente) {
+        const dtVencimento = new Date(dadosFinanceiro.data_vencimento); // Garante que dtVencimento é um objeto Date
+        const qtdParcelas = dadosFinanceiro.lancarParcelas; // Número correto de parcelas
 
+        for (let i = 1; i <= qtdParcelas; i++) {
+          const vencimento = new Date(dtVencimento); // Cria uma cópia para evitar mutação
+          vencimento.setMonth(vencimento.getMonth() + i - 1); // Ajusta corretamente os meses
+          // Garante que o dia do mês seja o mesmo do original
+          if (vencimento.getDate() !== dtVencimento.getDate()) {
+            vencimento.setDate(0); // Define para o último dia do mês anterior
+          }
+          const movimentacao = {
+            financeiro_id: despesa.id,
+            valor_parcela: dadosFinanceiro.valor,
+            vencimento,
+            descricao: `${dadosFinanceiro.descricao} - Parcela ${i}/${qtdParcelas}`,
+            status: 'pendente'
+          };
+          await MovimentacaoFinanceira.create(movimentacao);
+        }
+      } else {
+        const movimentacao = {
+          financeiro_id: despesa.id,
+          valor_parcela: dadosFinanceiro.valor,
+          vencimento: dadosFinanceiro.data_vencimento,
+          descricao: `${dadosFinanceiro.descricao} - Parcela 1 / 1`,
+          status: 'pendente'
+        };
+        await MovimentacaoFinanceira.create(movimentacao);
+      }
+
+      return despesa;
     } catch (error) {
       console.error('Erro ao registrar despesa:', error);
       throw new Error('Erro ao registrar despesa');
     }
   }
+
+
 
   static async getAllLancamentosFinanceiroDespesa() {
     try {
@@ -85,13 +116,20 @@ class FinanceiroService {
       if (lancamento.fornecedor_id) {
         entidade = await Fornecedores.findOne({ where: { id: lancamento.fornecedor_id }, raw: true });
         entidadeNome = 'fornecedor';
-      } else if (lancamento.funcionario_id) {
-        entidade = await Funcionarios.findOne({ where: { id: lancamento.funcionario_id }, raw: true });
-        entidadeNome = 'funcionario';
-      } else if (lancamento.cliente_id) {
-        entidade = await Clientes.findOne({ where: { id: lancamento.cliente_id }, raw: true });
-        entidadeNome = 'cliente';
-      }
+      } else
+        if (lancamento.funcionario_id) {
+          entidade = await Funcionarios.findOne({ where: { id: lancamento.funcionario_id }, raw: true });
+
+          // Verifica se o funcionário tem um cliente associado
+          if (entidade.cliente_id) {
+            const cliente = await Clientes.findOne({ where: { id: entidade.cliente_id }, raw: true });
+            entidade.cliente = cliente; // Adiciona o cliente ao objeto do funcionário
+          }
+          entidadeNome = 'funcionario';
+        } else if (lancamento.cliente_id) {
+          entidade = await Clientes.findOne({ where: { id: lancamento.cliente_id }, raw: true });
+          entidadeNome = 'cliente';
+        }
 
       return {
         ...lancamento,
@@ -117,6 +155,21 @@ class FinanceiroService {
     } catch (error) {
       console.error('Erro ao registrar movimentação financeira:', error);
       throw new Error('Erro ao registrar movimentação financeira');
+    }
+  }
+
+
+  static async getMovimentacaoFinanceiraByFinanceiroID(financeiro_id) {
+    try {
+      const movimentacoes = await MovimentacaoFinanceira.findAll({
+        where: { financeiro_id },
+        raw: true
+      });
+
+      return movimentacoes;
+    } catch (error) {
+      console.error('Erro ao buscar movimentações financeiras:', error);
+      throw new Error('Erro ao buscar movimentações financeiras');
     }
   }
 
