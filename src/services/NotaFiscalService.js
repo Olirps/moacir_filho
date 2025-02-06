@@ -74,18 +74,35 @@ class NotaFiscalService {
       const nfCreated = await NotaFiscal.create(jsonCreateNF);
       // Processa produtos associados
 
-      const pagamentosnf = {nota_id: nfCreated.id ,...dadosXml.pagamento}
+      const pagamentosnf = { nota_id: nfCreated.id, ...dadosXml.pagamento }
 
       // Transformando para um objeto único
       const transformedData = {
         nota_id: nfCreated.id,
         ...pagamentosnf.detPag,
         ...pagamentosnf.detPag.card,
-        ...pagamentosnf.vTroco
+        ...pagamentosnf.vTroco,
+        ...pagamentosnf.tPag
       };
 
-      const cadastrapg = await PagamentosNF.create(transformedData)
-    
+      const pagamentos = Object.keys(pagamentosnf.detPag)
+        .filter(key => !isNaN(key)) // Filtra apenas as chaves numéricas
+        .map(key => ({
+          ...pagamentosnf.detPag[key], // Pega os dados do pagamento
+          nota_id: nfCreated.id, // Adiciona o ID da nota
+        }));
+
+      if (pagamentos.length > 0) {
+        for (const data of pagamentos) {
+          await PagamentosNF.create(data);
+        }
+      } else {
+        await PagamentosNF.create( transformedData ); // Caso não haja pagamentos, ainda cria um registro
+      }
+
+
+      //const cadastrapg = await PagamentosNF.create(transformedData)
+
       let produtoInfo = getInformacoesProduto(xmlData);
 
       if (produtoInfo && typeof produtoInfo === 'object') {
@@ -107,7 +124,7 @@ class NotaFiscalService {
         valor: nfCreated.vNF,
         data_lancamento: new Date(new Date().setHours(new Date().getHours() - 4)).toISOString().slice(0, 19).replace('T', ' '),
         status: 'aberta'
-      };  
+      };
 
       const movimentacao_financeira = await Financeiro.create(contasPagarData);
 
@@ -128,8 +145,8 @@ class NotaFiscalService {
       dados.dhEmi = dados.dataEmissao;
       dados.dhSaiEnt = dados.dataSaida;
       const nfCreated = await NotaFiscal.create(dados);
-      
-      const fornecedor = await Fornecedores.findOne({ where: { id: nfCreated.codFornecedor} });
+
+      const fornecedor = await Fornecedores.findOne({ where: { id: nfCreated.codFornecedor } });
 
 
       // Cria contas a pagar
@@ -141,7 +158,7 @@ class NotaFiscalService {
         valor: nfCreated.vNF,
         data_lancamento: new Date(new Date().setHours(new Date().getHours() - 4)).toISOString().slice(0, 19).replace('T', ' '),
         status: 'aberta'
-      };  
+      };
 
       const movimentacao_financeira = await Financeiro.create(contasPagarData);
 
@@ -195,7 +212,7 @@ class NotaFiscalService {
       }
 
       await notaFiscal.update(notaFiscalData);
-      
+
       return notaFiscal
     } catch (err) {
 
