@@ -19,39 +19,71 @@ class FinanceiroService {
         funcionario_id: dadosFinanceiro.funcionario_id || null,
         valor: dadosFinanceiro.valor,
         data_lancamento: dadosFinanceiro.data_lancamento,
+        tipo_lancamento: 'manual',
+        pagamento: dadosFinanceiro.pagamento,
         data_vencimento: dadosFinanceiro.dtVencimento,
         status: dadosFinanceiro.status || 'andamento'
       });
-
-      if (dadosFinanceiro.despesaRecorrente) {
-        const dtVencimento = new Date(dadosFinanceiro.data_vencimento); // Garante que dtVencimento é um objeto Date
-        const qtdParcelas = dadosFinanceiro.lancarParcelas; // Número correto de parcelas
-
-        for (let i = 1; i <= qtdParcelas; i++) {
-          const vencimento = new Date(dtVencimento); // Cria uma cópia para evitar mutação
-          vencimento.setMonth(vencimento.getMonth() + i - 1); // Ajusta corretamente os meses
-          // Garante que o dia do mês seja o mesmo do original
-          if (vencimento.getDate() !== dtVencimento.getDate()) {
-            vencimento.setDate(0); // Define para o último dia do mês anterior
-          }
-          const movimentacao = {
-            financeiro_id: despesa.id,
-            valor_parcela: dadosFinanceiro.valor,
-            vencimento,
-            descricao: `${dadosFinanceiro.descricao} - Parcela ${i}/${qtdParcelas}`,
-            status: 'pendente'
-          };
-          await MovimentacaoFinanceira.create(movimentacao);
-        }
-      } else {
+      console.log('Dados Financeiro tipo de despesa: ' + dadosFinanceiro.pagamento);
+      if (dadosFinanceiro.pagamento === 'recorrente') {
         const movimentacao = {
           financeiro_id: despesa.id,
           valor_parcela: dadosFinanceiro.valor,
           vencimento: dadosFinanceiro.data_vencimento,
           descricao: `${dadosFinanceiro.descricao} - Parcela 1 / 1`,
-          status: 'pendente'
+          status: 'pendente',
+          parcela: 1 // Parcela única
         };
         await MovimentacaoFinanceira.create(movimentacao);
+      } else if (dadosFinanceiro.pagamento === 'cotaunica') {
+        const movimentacao = {
+          financeiro_id: despesa.id,
+          valor_parcela: dadosFinanceiro.valor,
+          vencimento: dadosFinanceiro.data_vencimento,
+          descricao: `${dadosFinanceiro.descricao} - Parcela 1 / 1`,
+          status: 'pendente',
+          parcela: 1 // Parcela única
+        };
+        await MovimentacaoFinanceira.create(movimentacao);
+      } else if (dadosFinanceiro.pagamento === 'parcelada') {
+        const valorEntrada = parseFloat((dadosFinanceiro.valorEntradaDespesa || '0').replace(',', '.')); // Default to 0 if undefined
+        const valorTotal = parseFloat(dadosFinanceiro.valor.replace(',', '.')); // Valor total da despesa
+        const valorRestante = valorTotal - valorEntrada; // Calcula o valor restante após a entrada
+        const qtdParcelas = parseInt(dadosFinanceiro.lancarParcelas); // Número de parcelas
+        const valorParcela = valorRestante / qtdParcelas; // Valor de cada parcela
+        const valorParcelaArredondado = parseFloat(valorParcela.toFixed(2)); // Arredondamos para 2 casas decimais
+
+        const dataVencimentoInicial = new Date(dadosFinanceiro.data_vencimento); // Data de vencimento da primeira parcela
+
+        // Se houver valor de entrada, cria a parcela de entrada (parcela 0)
+        if (valorEntrada > 0) {
+          const movimentacaoEntrada = {
+            financeiro_id: despesa.id,
+            valor_parcela: valorEntrada,
+            vencimento: dadosFinanceiro.data_vencimento, // A entrada vence na mesma data da primeira parcela
+            descricao: `${dadosFinanceiro.descricao} - Entrada`,
+            status: 'pendente',
+            parcela: 0 // Parcela de entrada
+          };
+          await MovimentacaoFinanceira.create(movimentacaoEntrada);
+        }
+
+        // Cria as parcelas normais (1, 2, 3, ...)
+        for (let i = 0; i < qtdParcelas; i++) {
+          const dataVencimentoParcela = new Date(dataVencimentoInicial);
+          dataVencimentoParcela.setMonth(dataVencimentoInicial.getMonth() + i); // Adiciona i meses à data inicial
+
+          const movimentacao = {
+            financeiro_id: despesa.id,
+            valor_parcela: i === qtdParcelas - 1 ? valorRestante - valorParcelaArredondado * (qtdParcelas - 1) : valorParcelaArredondado, // Ajusta o valor da última parcela
+            vencimento: dataVencimentoParcela.toISOString().split('T')[0], // Formata a data para YYYY-MM-DD
+            descricao: `${dadosFinanceiro.descricao} - Parcela ${i + 1} / ${qtdParcelas}`,
+            status: 'pendente',
+            parcela: i + 1 // Número da parcela
+          };
+
+          await MovimentacaoFinanceira.create(movimentacao);
+        }
       }
 
       return despesa;
@@ -143,15 +175,71 @@ class FinanceiroService {
 
   static async createMovimentacaoFinanceira(dadosMovimentacao) {
     try {
-      const movimentacao = await MovimentacaoFinanceira.create({
-        financeiro_id: dadosMovimentacao.financeiro_id,
-        tipo: dadosMovimentacao.tipo,
-        valor: dadosMovimentacao.valor,
-        data_movimentacao: dadosMovimentacao.data_movimentacao,
-        descricao: dadosMovimentacao.descricao
-      });
 
-      return movimentacao;
+      let parcelas = {};
+      if (dadosMovimentacao.quantidadeParcelas > 1) {
+        console.log('Chegou aqui dentro do if de parcelas: ' + JSON.stringify(dadosMovimentacao));
+
+        const valorEntrada = parseFloat((dadosMovimentacao.valorEntrada || '0').replace(',', '.')); // Default to 0 if undefined
+        const valorTotal = parseFloat(dadosMovimentacao.valor); // Valor total da despesa
+        const valorRestante = valorTotal - valorEntrada; // Calcula o valor restante após a entrada
+        const qtdParcelas = parseInt(dadosMovimentacao.quantidadeParcelas); // Número de parcelas
+        const valorParcela = valorRestante / qtdParcelas; // Valor de cada parcela
+        const valorParcelaArredondado = parseFloat(valorParcela.toFixed(2)); // Arredondamos para 2 casas decimais
+
+        const dataVencimentoInicial = new Date(dadosMovimentacao.vencimento); // Data de vencimento da primeira parcela
+
+        // Se houver valor de entrada, cria a parcela de entrada (parcela 0)
+        if (valorEntrada > 0) {
+          const movimentacaoEntrada = {
+            financeiro_id: dadosMovimentacao.financeiro_id,
+            valor_parcela: valorEntrada,
+            vencimento: dadosMovimentacao.vencimento, // A entrada vence na mesma data da primeira parcela
+            descricao: `${dadosMovimentacao.descricao} - Entrada`,
+            status: 'pendente',
+            parcela: 0 // Parcela de entrada
+          };
+          await MovimentacaoFinanceira.create(movimentacaoEntrada);
+        }
+
+        // Cria as parcelas normais (1, 2, 3, ...)
+        for (let i = 0; i < qtdParcelas; i++) {
+          const dataVencimentoParcela = new Date(dataVencimentoInicial);
+          dataVencimentoParcela.setMonth(dataVencimentoInicial.getMonth() + i); // Adiciona i meses à data inicial
+
+          const movimentacao = {
+            financeiro_id: dadosMovimentacao.financeiro_id,
+            valor_parcela: i === qtdParcelas - 1 ? valorRestante - valorParcelaArredondado * (qtdParcelas - 1) : valorParcelaArredondado, // Ajusta o valor da última parcela
+            vencimento: dataVencimentoParcela.toISOString().split('T')[0], // Formata a data para YYYY-MM-DD
+            descricao: `${dadosMovimentacao.descricao} - Parcela ${i + 1} / ${qtdParcelas}`,
+            status: 'pendente',
+            parcela: i + 1 // Número da parcela
+          };
+          parcelas = await MovimentacaoFinanceira.create(movimentacao);
+          if (parcelas) {
+            const financeiro = await Financeiro.findByPk(dadosMovimentacao.financeiro_id);
+            const status = { status: 'andamento' }
+            await financeiro.update(status)
+          }
+        }
+      } else {
+        parcelas = await MovimentacaoFinanceira.create({
+          descricao: dadosMovimentacao.descricao + 'Parcela 1 / 1',
+          parcela: 1,
+          financeiro_id: dadosMovimentacao.financeiro_id,
+          tipo: dadosMovimentacao.tipo,
+          valor_parcela: dadosMovimentacao.valor,
+          vencimento: dadosMovimentacao.vencimento,
+          descricao: dadosMovimentacao.descricao
+        });
+        if (parcelas) {
+          const financeiro = await Financeiro.findByPk(dadosMovimentacao.financeiro_id);
+          const status = { status: 'andamento' }
+          await financeiro.update(status)
+        }
+      }
+
+      return parcelas;
     } catch (error) {
       console.error('Erro ao registrar movimentação financeira:', error);
       throw new Error('Erro ao registrar movimentação financeira');

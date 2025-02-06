@@ -120,6 +120,7 @@ class NotaFiscalService {
         nota_id: nfCreated.id,
         descricao: `Nota Fiscal ${nfCreated.nNF} - ${dadosXml.fornecedor.xFant}`,
         tipo: 'débito',
+        tipo_lancamento: 'automatico',
         fornecedor_id: nfCreated.codFornecedor,
         valor: nfCreated.vNF,
         data_lancamento: new Date(new Date().setHours(new Date().getHours() - 4)).toISOString().slice(0, 19).replace('T', ' '),
@@ -148,12 +149,12 @@ class NotaFiscalService {
 
       const fornecedor = await Fornecedores.findOne({ where: { id: nfCreated.codFornecedor } });
 
-
       // Cria contas a pagar
       const contasPagarData = {
         nota_id: nfCreated.id,
         descricao: `Nota Fiscal ${nfCreated.nNF} - ${fornecedor.nomeFantasia}`,
         tipo: 'débito',
+        tipo_lancamento: 'automatico',
         fornecedor_id: nfCreated.codFornecedor,
         valor: nfCreated.vNF,
         data_lancamento: new Date(new Date().setHours(new Date().getHours() - 4)).toISOString().slice(0, 19).replace('T', ' '),

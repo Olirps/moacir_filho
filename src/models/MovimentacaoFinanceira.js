@@ -7,9 +7,13 @@ const MovimentacaoFinanceira = sequelize.define('MovimentacaoFinanceira', {
         autoIncrement: true,
         primaryKey: true,
     },
+    parcela: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
     descricao: {
         type: DataTypes.STRING(150),
-        allowNull: false,
+        allowNull: true,
     },
     financeiro_id: {
         type: DataTypes.INTEGER,
@@ -44,7 +48,7 @@ const MovimentacaoFinanceira = sequelize.define('MovimentacaoFinanceira', {
         allowNull: true,
     },
     metodo_pagamento: {
-        type: DataTypes.ENUM('transferencia', 'boleto', 'credito','debito','dinheiro','PIX'),
+        type: DataTypes.ENUM('transferencia', 'boleto', 'credito', 'debito', 'dinheiro', 'PIX'),
         allowNull: true,
     },
     status: {
@@ -52,7 +56,7 @@ const MovimentacaoFinanceira = sequelize.define('MovimentacaoFinanceira', {
         defaultValue: 'pendente',
         allowNull: false,
     },
-},{
+}, {
     sequelize,
     modelName: 'MovimentacaoFinanceira',
     tableName: 'movimentacaofinanceira',

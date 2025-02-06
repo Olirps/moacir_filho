@@ -52,6 +52,14 @@ const Financeiro = sequelize.define('Financeiro', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
+    tipo_lancamento: {
+        type: DataTypes.ENUM('automatico', 'manual'),
+        allowNull: false,
+    },
+    pagamento: {
+        type: DataTypes.ENUM('cotaunica', 'recorrente','parcelada'),
+        allowNull: true,
+    },
     tipo: {
         type: DataTypes.ENUM('credito', 'debito'),
         allowNull: false,
