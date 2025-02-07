@@ -4,6 +4,8 @@ const Clientes = require('../models/Clientes');
 const Fornecedores = require('../models/Fornecedores');
 const Funcionarios = require('../models/Funcionarios');
 const MovimentacaoFinanceira = require('../models/MovimentacaoFinanceira');
+const { Op } = require('sequelize');
+
 
 
 
@@ -98,7 +100,12 @@ class FinanceiroService {
   static async getAllLancamentosFinanceiroDespesa() {
     try {
       const financeiro = await Financeiro.findAll({
-        where: { tipo: 'debito' },
+        where: {
+          tipo: 'debito',
+          status: {
+            [Op.ne]: 'liquidado' // Op.ne significa "not equal" (diferente de)
+          }
+        },
         raw: true, // Transforma os dados em objetos JS puros para evitar problemas com Sequelize
         order: [['id', 'DESC']]
       });
@@ -250,7 +257,10 @@ class FinanceiroService {
   static async getMovimentacaoFinanceiraByFinanceiroID(financeiro_id) {
     try {
       const movimentacoes = await MovimentacaoFinanceira.findAll({
-        where: { financeiro_id },
+        where: {
+          financeiro_id,
+          status: 'pendente'
+        },
         raw: true
       });
 
@@ -261,6 +271,106 @@ class FinanceiroService {
     }
   }
 
+  static async getParcelaByID(id) {
+    try {
+      const movimentacoes = await MovimentacaoFinanceira.findByPk(id);
+
+      return movimentacoes;
+    } catch (error) {
+      console.error('Erro ao buscar parcela:', error);
+      throw new Error('Erro ao buscar parcela');
+    }
+  }
+
+  static async updateMovimentacaoFinanceira(id, dadosAtualizados) {
+    try {
+      const movimentacao = await MovimentacaoFinanceira.findByPk(id);
+
+      if (!movimentacao) {
+        throw new Error('Movimentação financeira não encontrada');
+      }
+
+      const parcelaLiquidada = await movimentacao.update(dadosAtualizados);
+
+      if (parcelaLiquidada) {
+        const movimentacoes = await MovimentacaoFinanceira.findAll({
+          where: {
+            financeiro_id: movimentacao.financeiro_id,
+            status: 'pendente'
+          },
+          raw: true
+        });
+        console.log('Movimentacoes Encontradas' + JSON.stringify(movimentacoes.length))
+        if (movimentacoes.length === 0) {
+          const financeiro = await Financeiro.findByPk(movimentacao.financeiro_id)
+          financeiro.update({ status: 'liquidado' })
+        }
+      }
+
+      return movimentacao;
+    } catch (error) {
+      console.error('Erro ao atualizar movimentação financeira:', error);
+      throw new Error('Erro ao atualizar movimentação financeira');
+    }
+  }
+
+  static async getLancamentoCompletoById(id) {
+    try {
+      // Busca o lançamento principal
+      const lancamento = await Financeiro.findOne({
+        where: { id, tipo: 'debito' },
+        raw: true // Retorna um objeto JavaScript comum
+      });
+
+      if (!lancamento) {
+        throw new Error('Lançamento financeiro não encontrado');
+      }
+
+      // Busca as parcelas relacionadas na tabela MovimentacaoFinanceira
+      const parcelas = await MovimentacaoFinanceira.findAll({
+        where: { financeiro_id: id },
+        raw: true
+      });
+
+      // Verifica se há vínculo com uma NotaFiscal
+      const notaFiscal = await NotaFiscal.findOne({
+        where: { id: lancamento.nota_id },
+        raw: true
+      });
+
+      // Busca a entidade relacionada (fornecedor, funcionário ou cliente)
+      let entidade = null;
+      let entidadeNome = null;
+
+      if (lancamento.fornecedor_id) {
+        entidade = await Fornecedores.findOne({ where: { id: lancamento.fornecedor_id }, raw: true });
+        entidadeNome = 'fornecedor';
+      } else if (lancamento.funcionario_id) {
+        entidade = await Funcionarios.findOne({ where: { id: lancamento.funcionario_id }, raw: true });
+
+        // Verifica se o funcionário tem um cliente associado
+        if (entidade.cliente_id) {
+          const cliente = await Clientes.findOne({ where: { id: entidade.cliente_id }, raw: true });
+          entidade.cliente = cliente; // Adiciona o cliente ao objeto do funcionário
+        }
+        entidadeNome = 'funcionario';
+      } else if (lancamento.cliente_id) {
+        entidade = await Clientes.findOne({ where: { id: lancamento.cliente_id }, raw: true });
+        entidadeNome = 'cliente';
+      }
+
+      // Retorna todos os dados consolidados
+      return {
+        ...lancamento,
+        [entidadeNome]: entidade,
+        parcelas: parcelas || [], // Retorna as parcelas ou um array vazio se não houver
+        notaFiscal: notaFiscal || null // Retorna a nota fiscal ou null se não houver
+      };
+    } catch (error) {
+      console.error('Erro ao buscar lançamento:', error);
+      throw new Error('Erro ao buscar lançamento financeiro');
+    }
+  }
 }
 
 module.exports = FinanceiroService;

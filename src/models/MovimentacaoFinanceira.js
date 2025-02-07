@@ -39,23 +39,27 @@ const MovimentacaoFinanceira = sequelize.define('MovimentacaoFinanceira', {
         type: DataTypes.FLOAT,
         allowNull: true,
     },
-    banco_id: {
+    conta_id: {
         type: DataTypes.INTEGER,
         references: {
-            model: 'banco',
+            model: 'contasbancarias',
             key: 'id',
         },
         allowNull: true,
     },
     metodo_pagamento: {
-        type: DataTypes.ENUM('transferencia', 'boleto', 'credito', 'debito', 'dinheiro', 'PIX'),
+        type: DataTypes.ENUM('transferencia', 'boleto', 'credito', 'debito','cheque', 'dinheiro', 'PIX'),
         allowNull: true,
     },
     status: {
-        type: DataTypes.ENUM('pendente', 'realizado', 'cancelado'),
+        type: DataTypes.ENUM('pendente', 'liquidado', 'cancelado'),
         defaultValue: 'pendente',
         allowNull: false,
     },
+    data_efetiva_pg: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    }
 }, {
     sequelize,
     modelName: 'MovimentacaoFinanceira',

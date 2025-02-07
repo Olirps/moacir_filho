@@ -65,7 +65,7 @@ const Financeiro = sequelize.define('Financeiro', {
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('aberta', 'andamento','quitada','cancelada'),
+        type: DataTypes.ENUM('aberta', 'andamento','liquidado','cancelada'),
         allowNull: true 
     }
 }, {

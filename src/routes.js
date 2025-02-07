@@ -129,8 +129,11 @@ router.delete('/produtos/:id', ProdutosController.excluirProduto);
 router.post('/movimentacaofinanceiradespesa', FinanceiroController.createLancamentos);
 router.post('/lancamentoparcelas', FinanceiroController.createMovimentacaoFinanceira);
 router.get('/movimentacaofinanceiradespesa', FinanceiroController.getAllLancamentosFinanceiroDespesa);
+router.get('/despesa/:id', FinanceiroController.getLancamentoCompletoById);
 router.get('/movimentacaofinanceiradespesa/:id', FinanceiroController.getLancamentoDespesaById);
 router.get('/parcelasmovimentacao/:id', FinanceiroController.getMovimentacaoFinanceiraByFinanceiroID);
+router.get('/parcelas/:id', FinanceiroController.getParcelaByID);
+router.put('/parcelas/:id', FinanceiroController.updateMovimentacaoFinanceira);
 
 // Rotas para nota fiscal eletronica
 router.post('/notafiscalimport',upload.array('xml'),handleMulterErrors,NotaFiscalController.importarNotaFiscal);
