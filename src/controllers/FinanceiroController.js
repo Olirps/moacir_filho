@@ -91,6 +91,21 @@ class FinanceiroController {
         }
     }
 
+    static async updateLancamentoFinanceiro(req, res) {
+        try {
+            const { id } = req.params;
+            const updatedLancamento = await FinanceiroService.updateLancamentoFinanceiro(id, req.body);
+
+            if (!updatedLancamento) {
+                return res.status(404).json({ message: 'Lançamento não encontrado' });
+            }
+
+            return res.status(200).json(updatedLancamento);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
     static async getLancamentoCompletoById(req, res) {
         try {
             const { id } = req.params;

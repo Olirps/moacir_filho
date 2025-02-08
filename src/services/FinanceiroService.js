@@ -103,7 +103,7 @@ class FinanceiroService {
         where: {
           tipo: 'debito',
           status: {
-            [Op.ne]: 'liquidado' // Op.ne significa "not equal" (diferente de)
+            [Op.notIn]: ['cancelada','liquidado'] // Exclui registros com status "cancelada" ou "liquidado"
           }
         },
         raw: true, // Transforma os dados em objetos JS puros para evitar problemas com Sequelize
@@ -115,13 +115,32 @@ class FinanceiroService {
         let entidadeNome = null;
 
         if (lancamento.fornecedor_id) {
-          entidade = await Fornecedores.findOne({ where: { id: lancamento.fornecedor_id }, raw: true });
+          entidade = await Fornecedores.findOne({
+            where: { id: lancamento.fornecedor_id },
+            raw: true
+          });
           entidadeNome = 'fornecedor';
         } else if (lancamento.funcionario_id) {
-          entidade = await Funcionarios.findOne({ where: { id: lancamento.funcionario_id }, raw: true });
+
+          entidade = await Funcionarios.findOne({
+            where: { id: lancamento.funcionario_id },
+            raw: true
+          });
+
+          // Busca o nome do funcionário na tabela Clientes, caso haja correspondência
+          const cliente = await Clientes.findOne({
+            where: { id: entidade.cliente_id },
+            attributes: ['nome'],
+            raw: true
+          });
+
+          entidade = { ...entidade, nome: cliente?.nome || null };
           entidadeNome = 'funcionario';
         } else if (lancamento.cliente_id) {
-          entidade = await Clientes.findOne({ where: { id: lancamento.cliente_id }, raw: true });
+          entidade = await Clientes.findOne({
+            where: { id: lancamento.cliente_id },
+            raw: true
+          });
           entidadeNome = 'cliente';
         }
 
@@ -137,6 +156,7 @@ class FinanceiroService {
       throw new Error('Erro ao buscar lançamentos');
     }
   }
+
 
   static async getLancamentoDespesaById(id) {
     try {
@@ -371,6 +391,52 @@ class FinanceiroService {
       throw new Error('Erro ao buscar lançamento financeiro');
     }
   }
+
+  static async updateLancamentoFinanceiro(id, dadosAtualizados) {
+    try {
+      const lancamento = await Financeiro.findByPk(id);
+
+      if (!lancamento) {
+        throw new Error('Lançamento financeiro não encontrado');
+      }
+
+      const parcelasPagas = await MovimentacaoFinanceira.findAll({
+        where: {
+          financeiro_id: id,
+          status: 'liquidado'
+        },
+        raw: true
+      });
+
+
+      if (parcelasPagas.length > 0) {
+        throw new Error('Lançamento financeiro com parcelas pagas');
+      }
+
+      // Verifica se há vínculo com uma NotaFiscal
+      const notaFiscal = await NotaFiscal.findOne({
+        where: { id: lancamento.nota_id },
+        raw: true
+      });
+      console.log('Nota Fiscal Vinculada: ' + JSON.stringify(notaFiscal));
+
+      if (notaFiscal) {
+        throw new Error(`Lançamento financeiro Vinculado a Nota Fiscal: ${notaFiscal.nNF}`);
+      }
+
+      if (dadosAtualizados.status === 'cancelada') {
+        dadosAtualizados.data_cancelamento = new Date().toISOString().split('T')[0];
+      }
+
+      const lancamentoAtualizado = await lancamento.update(dadosAtualizados);
+
+      return lancamentoAtualizado;
+    } catch (error) {
+      console.error('Erro ao atualizar lançamento financeiro:', error);
+      throw new Error(`Erro ao atualizar lançamento financeiro: ${error.message}`);
+    }
+  }
+
 }
 
 module.exports = FinanceiroService;

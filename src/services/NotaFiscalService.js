@@ -97,7 +97,7 @@ class NotaFiscalService {
           await PagamentosNF.create(data);
         }
       } else {
-        await PagamentosNF.create( transformedData ); // Caso não haja pagamentos, ainda cria um registro
+        await PagamentosNF.create(transformedData); // Caso não haja pagamentos, ainda cria um registro
       }
 
 
@@ -175,6 +175,11 @@ class NotaFiscalService {
   static async getAllNotasFiscais() {
     try {
       const notas = await NotaFiscal.findAll({
+        where: {
+          status: {
+            [Op.notIn]: ['cancelada'] // Exclui registros com status "cancelada" ou "liquidado"
+          }
+        },
         order: [['id', 'DESC']]
       });
 

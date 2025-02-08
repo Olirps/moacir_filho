@@ -57,7 +57,7 @@ const Financeiro = sequelize.define('Financeiro', {
         allowNull: false,
     },
     pagamento: {
-        type: DataTypes.ENUM('cotaunica', 'recorrente','parcelada'),
+        type: DataTypes.ENUM('cotaunica', 'recorrente', 'parcelada'),
         allowNull: true,
     },
     tipo: {
@@ -65,8 +65,12 @@ const Financeiro = sequelize.define('Financeiro', {
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('aberta', 'andamento','liquidado','cancelada'),
-        allowNull: true 
+        type: DataTypes.ENUM('aberta', 'andamento', 'liquidado', 'cancelada'),
+        allowNull: true
+    },
+    data_cancelamento: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
     }
 }, {
     sequelize,

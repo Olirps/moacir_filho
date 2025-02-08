@@ -131,6 +131,7 @@ router.post('/lancamentoparcelas', FinanceiroController.createMovimentacaoFinanc
 router.get('/movimentacaofinanceiradespesa', FinanceiroController.getAllLancamentosFinanceiroDespesa);
 router.get('/despesa/:id', FinanceiroController.getLancamentoCompletoById);
 router.get('/movimentacaofinanceiradespesa/:id', FinanceiroController.getLancamentoDespesaById);
+router.put('/lancamentos/:id', FinanceiroController.updateLancamentoFinanceiro);
 router.get('/parcelasmovimentacao/:id', FinanceiroController.getMovimentacaoFinanceiraByFinanceiroID);
 router.get('/parcelas/:id', FinanceiroController.getParcelaByID);
 router.put('/parcelas/:id', FinanceiroController.updateMovimentacaoFinanceira);
