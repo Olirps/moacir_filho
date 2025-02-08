@@ -102,7 +102,7 @@ class FinanceiroService {
         where: {
           tipo: 'debito',
           status: {
-            [Op.notIn]: ['cancelada','liquidado'] // Exclui registros com status "cancelada" ou "liquidado"
+            [Op.notIn]: ['cancelada', 'liquidado'] // Exclui registros com status "cancelada" ou "liquidado"
           }
         },
         raw: true, // Transforma os dados em objetos JS puros para evitar problemas com Sequelize
@@ -248,12 +248,31 @@ class FinanceiroService {
           }
         }
       } else {
+        console.log('Valor de Entrada: ' + dadosMovimentacao.valorEntrada);
+        const valorTotal = parseFloat(dadosMovimentacao.valor); // Valor total da despesa
+        const valorEntrada = parseFloat((dadosMovimentacao.valorEntrada || '0')); // Default to 0 if undefined
+        const valorRestante = valorTotal - valorEntrada; // Calcula o valor restante após a entrada
+
+        // Se houver valor de entrada, cria a parcela de entrada (parcela 0)
+        if (valorEntrada > 0) {
+
+          const movimentacaoEntrada = {
+            financeiro_id: dadosMovimentacao.financeiro_id,
+            valor_parcela: valorEntrada,
+            vencimento: dadosMovimentacao.vencimento, // A entrada vence na mesma data da primeira parcela
+            descricao: `${dadosMovimentacao.descricao} - Entrada`,
+            status: 'pendente',
+            parcela: 0 // Parcela de entrada
+          };
+          await MovimentacaoFinanceira.create(movimentacaoEntrada);
+        }
+
         parcelas = await MovimentacaoFinanceira.create({
           descricao: dadosMovimentacao.descricao + 'Parcela 1 / 1',
           parcela: 1,
           financeiro_id: dadosMovimentacao.financeiro_id,
           tipo: dadosMovimentacao.tipo,
-          valor_parcela: dadosMovimentacao.valor,
+          valor_parcela: valorRestante,
           vencimento: dadosMovimentacao.vencimento,
           descricao: dadosMovimentacao.descricao
         });
