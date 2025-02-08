@@ -26,7 +26,6 @@ class FinanceiroService {
         data_vencimento: dadosFinanceiro.dtVencimento,
         status: dadosFinanceiro.status || 'andamento'
       });
-      console.log('Dados Financeiro tipo de despesa: ' + dadosFinanceiro.pagamento);
       if (dadosFinanceiro.pagamento === 'recorrente') {
         const movimentacao = {
           financeiro_id: despesa.id,
@@ -205,7 +204,6 @@ class FinanceiroService {
 
       let parcelas = {};
       if (dadosMovimentacao.quantidadeParcelas > 1) {
-        console.log('Chegou aqui dentro do if de parcelas: ' + JSON.stringify(dadosMovimentacao));
 
         const valorEntrada = parseFloat((dadosMovimentacao.valorEntrada || '0').replace(',', '.')); // Default to 0 if undefined
         const valorTotal = parseFloat(dadosMovimentacao.valor); // Valor total da despesa
@@ -320,7 +318,6 @@ class FinanceiroService {
           },
           raw: true
         });
-        console.log('Movimentacoes Encontradas' + JSON.stringify(movimentacoes.length))
         if (movimentacoes.length === 0) {
           const financeiro = await Financeiro.findByPk(movimentacao.financeiro_id)
           financeiro.update({ status: 'liquidado' })
@@ -418,7 +415,6 @@ class FinanceiroService {
         where: { id: lancamento.nota_id },
         raw: true
       });
-      console.log('Nota Fiscal Vinculada: ' + JSON.stringify(notaFiscal));
 
       if (notaFiscal) {
         throw new Error(`Lançamento financeiro Vinculado a Nota Fiscal: ${notaFiscal.nNF}`);
