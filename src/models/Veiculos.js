@@ -1,8 +1,6 @@
 // src/models/Veiculos.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db');
-const Marcas = require('../models/Marcas');
-const TipoVeiculo = require('../models/TipoVeiculo');
 
 const Veiculos = sequelize.define('Veiculos', {
   id: {
@@ -33,7 +31,7 @@ const Veiculos = sequelize.define('Veiculos', {
   marcaId: {
     type: DataTypes.INTEGER,
     references: {
-      model: Marcas,
+      model: 'marcas',
       key: 'id',
     },
     onUpdate: 'CASCADE',
@@ -42,7 +40,7 @@ const Veiculos = sequelize.define('Veiculos', {
   tipoveiculoId: {
     type: DataTypes.INTEGER,
     references: {
-      model: TipoVeiculo,
+      model: 'tipoveiculo',
       key: 'id',
     },
     onUpdate: 'CASCADE',
@@ -52,8 +50,5 @@ const Veiculos = sequelize.define('Veiculos', {
   tableName: 'veiculos',
   timestamps: true,
 });
-
-Veiculos.belongsTo(Marcas, { foreignKey: 'marcaId', as: 'marcas' });
-Veiculos.belongsTo(TipoVeiculo, { foreignKey: 'tipoveiculoId', as: 'tipoveiculo' });
 
 module.exports = Veiculos;

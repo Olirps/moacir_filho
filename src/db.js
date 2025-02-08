@@ -26,21 +26,6 @@ const loadModels = async () => {
     await sequelize.authenticate();
     console.log('Conexão bem-sucedida ao banco de dados.');
 
-    // Importação dos modelos
-    const GrupoAcesso = require('./models/GrupoAcesso');
-    const UserLogin = require('./models/UserLogin');
-    const Produtos = require('./models/Produtos');
-    const Marcas = require('./models/Marcas');
-    const UF = require('./models/Uf');
-    const Municipio = require('./models/Municipio');
-    const ImpostoProduto = require('./models/ImpostoProduto');
-    const MovimentacoesEstoque = require('./models/MovimentacoesEstoque');
-    const ItensNaoIdentificados = require('./models/ItensNaoIdentificados');
-    const GrupoProduto = require('./models/GrupoProduto');
-    const Subgrupoproduto = require('./models/Subgrupoproduto');
-    const Vendas = require('./models/Vendas');
-    const VendasItens = require('./models/VendasItens');
-
     // Sincronizar os modelos com o banco de dados
     await sequelize.sync({ force: false });
     console.log('Modelos sincronizados com sucesso.');

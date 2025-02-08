@@ -42,6 +42,8 @@ Funcionarios.init({
 }, {
     sequelize,
     modelName: 'Funcionarios',
+    tableName: 'funcionarios',
+
 });
 
 // Relacionamento com Cliente
