@@ -36,7 +36,7 @@ class FornecedoresController {
   
       // Aplica filtro de nome se fornecido
       if (nome) {
-        where.nome = { [Op.like]: `%${nome}%` };
+        where.nomeFantasia = { [Op.like]: `%${nome}%` };
       }
   
       const fornecedores = await FornecedoresService.obterTodasFornecedores(where);
