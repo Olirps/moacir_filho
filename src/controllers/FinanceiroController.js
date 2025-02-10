@@ -121,17 +121,14 @@ class FinanceiroController {
         }
     }
 
-    /*static async updateFuncionario(req, res) {
+    static async getContaPagarSemana(req, res) {
         try {
-            const updatedFuncionario = await FuncionariosService.updateFuncionario(req.params.id, req.body);
-            if (!updatedFuncionario) {
-                return res.status(404).json({ error: 'Funcionario não encontrado' });
-            }
-            return res.status(200).json(updatedFuncionario);
+            const contas = await FinanceiroService.getContaPagarSemana();
+            return res.status(200).json(contas);
         } catch (error) {
-            return res.status(400).json({ error: error.message });
+            return res.status(500).json({ message: error.message });
         }
-    }*/
+    }
 }
 
 module.exports = FinanceiroController;

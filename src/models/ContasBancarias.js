@@ -9,6 +9,7 @@ const ContasBancarias = sequelize.define('ContasBancarias', {
     },
     banco_id: {
         type: DataTypes.INTEGER,
+        allowNull: true,
         references: {
             model: 'banco',
             key: 'id',
