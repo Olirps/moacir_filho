@@ -5,6 +5,8 @@ const Fornecedores = require('../models/Fornecedores');
 const Funcionarios = require('../models/Funcionarios');
 const MovimentacaoFinanceira = require('../models/MovimentacaoFinanceira');
 const { Op } = require('sequelize');
+const { Sequelize, QueryTypes } = require('sequelize');
+const sequelize = require('../db');
 
 
 
@@ -205,7 +207,7 @@ class FinanceiroService {
       let parcelas = {};
       if (dadosMovimentacao.quantidadeParcelas > 1) {
 
-        const valorEntrada = parseFloat((dadosMovimentacao.valorEntrada || '0').replace(',', '.')); // Default to 0 if undefined
+        const valorEntrada = parseFloat((dadosMovimentacao.valorEntrada || '0')); // Default to 0 if undefined
         const valorTotal = parseFloat(dadosMovimentacao.valor); // Valor total da despesa
         const valorRestante = valorTotal - valorEntrada; // Calcula o valor restante após a entrada
         const qtdParcelas = parseInt(dadosMovimentacao.quantidadeParcelas); // Número de parcelas
@@ -451,6 +453,47 @@ class FinanceiroService {
       throw new Error(`Erro ao atualizar lançamento financeiro: ${error.message}`);
     }
   }
+
+
+static async getContaPagarSemana() {
+  try {
+    const hoje = new Date();
+    const diaSemana = hoje.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+
+    // Se não for segunda-feira, ajustar para a última segunda
+    if (diaSemana !== 1) {
+      const diferenca = diaSemana === 0 ? 6 : diaSemana - 1; // Se for domingo, volta 6 dias
+      hoje.setDate(hoje.getDate() - diferenca);
+    }
+
+    const segundaFeira = hoje.toISOString().split('T')[0];
+
+    const umaSemanaDepois = new Date(hoje);
+    umaSemanaDepois.setDate(hoje.getDate() + 6); // Pegamos até domingo
+    const domingo = umaSemanaDepois.toISOString().split('T')[0];
+
+    const query = `
+      SELECT mf.*
+      FROM dbgerencialspeedcar.financeiro fi
+      INNER JOIN dbgerencialspeedcar.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
+      WHERE mf.vencimento BETWEEN :segundaFeira AND :domingo
+      AND fi.tipo = 'debito'
+      AND mf.status = 'pendente'
+    `;
+
+    const contas = await sequelize.query(query, {
+      replacements: { segundaFeira, domingo },
+      type: QueryTypes.SELECT
+    });
+
+    return contas;
+  } catch (error) {
+    console.error('Erro ao buscar contas a pagar da semana:', error);
+    throw new Error('Erro ao buscar contas a pagar da semana');
+  }
+}
+
+
 
 }
 

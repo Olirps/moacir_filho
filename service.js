@@ -2,9 +2,9 @@ var Service = require('node-windows').Service;
 
 // Create a new service object
 var svc = new Service({
-  name:'Dione Goulart - Backend',
-  description: 'Back end das aplicacoes Dione Goulart',
-  script: 'C:\\Projetos\\apigerencial-dionegoulart\\src\\server.js'
+  name:'Moacir Filho - Backend',
+  description: 'Back end das aplicacoes Moacir Filho',
+  script: 'C:\\Projetos\\moacir_filho\\src\\server.js'
 });
 
 // Listen for the "install" event, which indicates the

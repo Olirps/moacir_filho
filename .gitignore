@@ -5,3 +5,4 @@ src/daemon/dionegoulartbackend.wrapper.log
 config/config.json
 migrations
 uploads
+daemon
