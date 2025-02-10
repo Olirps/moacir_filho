@@ -474,8 +474,8 @@ static async getContaPagarSemana() {
 
     const query = `
       SELECT mf.*
-      FROM dbgerencialspeedcar.financeiro fi
-      INNER JOIN dbgerencialspeedcar.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
+      FROM dbgerencialmoacir.financeiro fi
+      INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
       WHERE mf.vencimento BETWEEN :segundaFeira AND :domingo
       AND fi.tipo = 'debito'
       AND mf.status = 'pendente'
