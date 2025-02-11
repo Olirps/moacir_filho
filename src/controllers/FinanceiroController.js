@@ -1,4 +1,5 @@
 const FinanceiroService = require('../services/FinanceiroService');
+const ContasPagasService = require('../services/ContasPagasService');
 
 class FinanceiroController {
 
@@ -125,6 +126,15 @@ class FinanceiroController {
         try {
             const contas = await FinanceiroService.getContaPagarSemana();
             return res.status(200).json(contas);
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
+
+    static async getContasPagas(req, res) {
+        try {
+            const contasPagas = await ContasPagasService.getContasPagas();
+            return res.status(200).json(contasPagas);
         } catch (error) {
             return res.status(500).json({ message: error.message });
         }

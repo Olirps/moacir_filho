@@ -136,6 +136,7 @@ router.get('/parcelasmovimentacao/:id', FinanceiroController.getMovimentacaoFina
 router.get('/parcelas/:id', FinanceiroController.getParcelaByID);
 router.put('/parcelas/:id', FinanceiroController.updateMovimentacaoFinanceira);
 router.get('/contaspagar/semana', FinanceiroController.getContaPagarSemana);
+router.get('/contaspagas', FinanceiroController.getContasPagas);
 
 // Rotas para nota fiscal eletronica
 router.post('/notafiscalimport',upload.array('xml'),handleMulterErrors,NotaFiscalController.importarNotaFiscal);
