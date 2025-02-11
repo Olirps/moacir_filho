@@ -49,8 +49,8 @@ class FinanceiroService {
         };
         await MovimentacaoFinanceira.create(movimentacao);
       } else if (dadosFinanceiro.pagamento === 'parcelada') {
-        const valorEntrada = parseFloat((dadosFinanceiro.valorEntradaDespesa || '0').replace(',', '.')); // Default to 0 if undefined
-        const valorTotal = parseFloat(dadosFinanceiro.valor.replace(',', '.')); // Valor total da despesa
+        const valorEntrada = parseFloat((dadosFinanceiro.valorEntradaDespesa || '0')); // Default to 0 if undefined
+        const valorTotal = parseFloat(dadosFinanceiro.valor); // Valor total da despesa
         const valorRestante = valorTotal - valorEntrada; // Calcula o valor restante após a entrada
         const qtdParcelas = parseInt(dadosFinanceiro.lancarParcelas); // Número de parcelas
         const valorParcela = valorRestante / qtdParcelas; // Valor de cada parcela
