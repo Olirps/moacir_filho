@@ -31,11 +31,12 @@ class ContasPagasService {
             const domingo = umaSemanaDepois.toISOString().split('T')[0];
 
             const query = `
-              SELECT mf.*
-              FROM dbgerencialmoacir.financeiro fi
-              INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
-              WHERE fi.tipo = 'debito'
-              AND mf.status = 'liquidado'
+                SELECT mf.*,cb.nome
+                FROM dbgerencialmoacir.financeiro fi
+                INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
+                inner join dbgerencialmoacir.contasbancarias cb on cb.id = mf.conta_id
+                WHERE fi.tipo = 'debito'AND mf.status = 'liquidado'
+                order by mf.data_pagamento desc
             `;
 
             const contas = await sequelize.query(query, {
