@@ -31,12 +31,25 @@ class ContasPagasService {
             const domingo = umaSemanaDepois.toISOString().split('T')[0];
 
             const query = `
-                SELECT mf.*,cb.nome
-                FROM dbgerencialmoacir.financeiro fi
-                INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
-                inner join dbgerencialmoacir.contasbancarias cb on cb.id = mf.conta_id
-                WHERE fi.tipo = 'debito'AND mf.status = 'liquidado'
-                order by mf.data_pagamento desc
+                 SELECT 
+                    mf.*,
+                    CASE 
+                        WHEN fi.fornecedor_id IS NOT NULL THEN fo.nome
+                        WHEN fi.cliente_id IS NOT NULL THEN cl.nome
+                        WHEN fi.funcionario_id IS NOT NULL THEN (SELECT nome FROM dbgerencialmoacir.clientes WHERE id = fu.cliente_id)
+                        WHEN fi.credor_nome is not null then fi.credor_nome
+                    END AS credor_nome,
+                    cb.nome AS conta_bancaria_nome
+                FROM 
+                    dbgerencialmoacir.financeiro fi
+                    LEFT JOIN dbgerencialmoacir.fornecedores fo ON fo.id = fi.fornecedor_id
+                    LEFT JOIN dbgerencialmoacir.clientes cl ON cl.id = fi.cliente_id
+                    LEFT JOIN dbgerencialmoacir.funcionarios fu ON fu.id = fi.funcionario_id
+                    INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
+                    INNER JOIN dbgerencialmoacir.contasbancarias cb ON cb.id = mf.conta_id
+                WHERE fi.tipo = 'debito' 
+                AND mf.status = 'liquidado'
+                ORDER BY mf.data_pagamento DESC;
             `;
 
             const contas = await sequelize.query(query, {

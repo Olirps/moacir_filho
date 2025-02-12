@@ -12,24 +12,26 @@ class FornecedoresService {
     let sizeCpfCnpj = (dados.cpfCnpj ?? dados.CNPJ)?.length;
     let cpfCnpjLimpo = "";
 
-    if (sizeCpfCnpj == 11) {
-      cpfCnpjLimpo = (dados.cpfCnpj ?? dados.CNPJ)?.replace(/\D/g, ''); // Remove caracteres não numéricos
-      if (!validarCpf(cpfCnpjLimpo) & sizeCpfCnpj == 11) {
-        throw new Error(`CPF: ${(dados.cpfCnpj ?? dados.CNPJ)} é inválido`);
-      }
-      const fornecedoresExistente = await Fornecedores.findOne({ where: { cpfCnpj: cpfCnpjLimpo } });
-      if (fornecedoresExistente) {
-        throw new Error(`CPF: ${(dados.cpfCnpj ?? dados.CNPJ)} já cadastrado`);
-      }
-    } else {
-      cpfCnpjLimpo = (dados.cpfCnpj ?? dados.CNPJ)?.replace(/\D/g, ''); // Remove caracteres não numéricos
+    if (sizeCpfCnpj > 0) {
+      if (sizeCpfCnpj == 11) {
+        cpfCnpjLimpo = (dados.cpfCnpj ?? dados.CNPJ)?.replace(/\D/g, ''); // Remove caracteres não numéricos
+        if (!validarCpf(cpfCnpjLimpo) & sizeCpfCnpj == 11) {
+          throw new Error(`CPF: ${(dados.cpfCnpj ?? dados.CNPJ)} é inválido`);
+        }
+        const fornecedoresExistente = await Fornecedores.findOne({ where: { cpfCnpj: cpfCnpjLimpo } });
+        if (fornecedoresExistente) {
+          throw new Error(`CPF: ${(dados.cpfCnpj ?? dados.CNPJ)} já cadastrado`);
+        }
+      } else {
+        cpfCnpjLimpo = (dados.cpfCnpj ?? dados.CNPJ)?.replace(/\D/g, ''); // Remove caracteres não numéricos
 
-      if (!validarCnpj(cpfCnpjLimpo)) {
-        throw new Error(`CNPJ: ${(dados.cpfCnpj ?? dados.CNPJ)} é inválido`);
-      }
-      const fornecedoresExistente = await Fornecedores.findOne({ where: { cpfCnpj: cpfCnpjLimpo } });
-      if (fornecedoresExistente) {
-        throw new Error(`CNPJ: ${(dados.cpfCnpj ?? dados.CNPJ)} já cadastrado`);
+        if (!validarCnpj(cpfCnpjLimpo)) {
+          throw new Error(`CNPJ: ${(dados.cpfCnpj ?? dados.CNPJ)} é inválido`);
+        }
+        const fornecedoresExistente = await Fornecedores.findOne({ where: { cpfCnpj: cpfCnpjLimpo } });
+        if (fornecedoresExistente) {
+          throw new Error(`CNPJ: ${(dados.cpfCnpj ?? dados.CNPJ)} já cadastrado`);
+        }
       }
     }
     try {

@@ -18,13 +18,14 @@ class FinanceiroService {
         nota_id: dadosFinanceiro.notaId || null,
         descricao: dadosFinanceiro.descricao,
         tipo: dadosFinanceiro.tipo,
+        credor_nome: dadosFinanceiro.credor_nome || null,
         cliente_id: dadosFinanceiro.cliente_id || null,
         fornecedor_id: dadosFinanceiro.fornecedor_id || null,
         funcionario_id: dadosFinanceiro.funcionario_id || null,
         valor: dadosFinanceiro.valor,
         data_lancamento: dadosFinanceiro.data_lancamento,
         tipo_lancamento: 'manual',
-        tipo_parcelamento:dadosFinanceiro.tipo_parcelamento,
+        tipo_parcelamento: dadosFinanceiro.tipo_parcelamento,
         pagamento: dadosFinanceiro.pagamento,
         data_vencimento: dadosFinanceiro.dtVencimento,
         status: dadosFinanceiro.status || 'andamento'
@@ -350,7 +351,20 @@ class FinanceiroService {
         });
         if (movimentacoes.length === 0) {
           const financeiro = await Financeiro.findByPk(movimentacao.financeiro_id)
-          financeiro.update({ status: 'liquidado' })
+          if (financeiro.pagamento === 'recorrente') {
+            const novaDataVencimento = new Date(movimentacao.vencimento);
+            novaDataVencimento.setMonth(novaDataVencimento.getMonth() + 1);
+           const parcelas = await MovimentacaoFinanceira.create({
+              descricao: movimentacao.descricao ,
+              parcela: Number(movimentacao.parcela)+1,
+              financeiro_id: movimentacao.financeiro_id,
+              valor_parcela: movimentacao.valor_parcela,
+              vencimento: novaDataVencimento ,
+              status: 'pendente'
+            });
+          } else {
+            financeiro.update({ status: 'liquidado' })
+          }
         }
       }
 
