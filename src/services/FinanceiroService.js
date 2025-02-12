@@ -24,6 +24,7 @@ class FinanceiroService {
         valor: dadosFinanceiro.valor,
         data_lancamento: dadosFinanceiro.data_lancamento,
         tipo_lancamento: 'manual',
+        tipo_parcelamento:dadosFinanceiro.tipo_parcelamento,
         pagamento: dadosFinanceiro.pagamento,
         data_vencimento: dadosFinanceiro.dtVencimento,
         status: dadosFinanceiro.status || 'andamento'
@@ -71,10 +72,17 @@ class FinanceiroService {
           await MovimentacaoFinanceira.create(movimentacaoEntrada);
         }
 
-        // Cria as parcelas normais (1, 2, 3, ...)
+        // Cria as parcelas
         for (let i = 0; i < qtdParcelas; i++) {
           const dataVencimentoParcela = new Date(dataVencimentoInicial);
-          dataVencimentoParcela.setMonth(dataVencimentoInicial.getMonth() + i); // Adiciona i meses à data inicial
+
+          if (dadosFinanceiro.tipo_parcelamento === 'mensal') {
+            // Para o parcelamento mensal, adiciona i meses à data inicial
+            dataVencimentoParcela.setMonth(dataVencimentoInicial.getMonth() + i);
+          } else if (dadosFinanceiro.tipo_parcelamento === 'anual') {
+            // Para o parcelamento anual, adiciona i anos à data inicial
+            dataVencimentoParcela.setFullYear(dataVencimentoInicial.getFullYear() + i);
+          }
 
           const movimentacao = {
             financeiro_id: despesa.id,
@@ -87,6 +95,7 @@ class FinanceiroService {
 
           await MovimentacaoFinanceira.create(movimentacao);
         }
+
       }
 
       return despesa;
@@ -455,24 +464,24 @@ class FinanceiroService {
   }
 
 
-static async getContaPagarSemana() {
-  try {
-    const hoje = new Date();
-    const diaSemana = hoje.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+  static async getContaPagarSemana() {
+    try {
+      const hoje = new Date();
+      const diaSemana = hoje.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
 
-    // Se não for segunda-feira, ajustar para a última segunda
-    if (diaSemana !== 1) {
-      const diferenca = diaSemana === 0 ? 6 : diaSemana - 1; // Se for domingo, volta 6 dias
-      hoje.setDate(hoje.getDate() - diferenca);
-    }
+      // Se não for segunda-feira, ajustar para a última segunda
+      if (diaSemana !== 1) {
+        const diferenca = diaSemana === 0 ? 6 : diaSemana - 1; // Se for domingo, volta 6 dias
+        hoje.setDate(hoje.getDate() - diferenca);
+      }
 
-    const segundaFeira = hoje.toISOString().split('T')[0];
+      const segundaFeira = hoje.toISOString().split('T')[0];
 
-    const umaSemanaDepois = new Date(hoje);
-    umaSemanaDepois.setDate(hoje.getDate() + 6); // Pegamos até domingo
-    const domingo = umaSemanaDepois.toISOString().split('T')[0];
+      const umaSemanaDepois = new Date(hoje);
+      umaSemanaDepois.setDate(hoje.getDate() + 6); // Pegamos até domingo
+      const domingo = umaSemanaDepois.toISOString().split('T')[0];
 
-    const query = `
+      const query = `
       SELECT mf.*
       FROM dbgerencialmoacir.financeiro fi
       INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
@@ -481,17 +490,17 @@ static async getContaPagarSemana() {
       AND mf.status = 'pendente'
     `;
 
-    const contas = await sequelize.query(query, {
-      replacements: { segundaFeira, domingo },
-      type: QueryTypes.SELECT
-    });
+      const contas = await sequelize.query(query, {
+        replacements: { segundaFeira, domingo },
+        type: QueryTypes.SELECT
+      });
 
-    return contas;
-  } catch (error) {
-    console.error('Erro ao buscar contas a pagar da semana:', error);
-    throw new Error('Erro ao buscar contas a pagar da semana');
+      return contas;
+    } catch (error) {
+      console.error('Erro ao buscar contas a pagar da semana:', error);
+      throw new Error('Erro ao buscar contas a pagar da semana');
+    }
   }
-}
 
 
 

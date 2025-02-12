@@ -56,6 +56,10 @@ const Financeiro = sequelize.define('Financeiro', {
         type: DataTypes.ENUM('automatico', 'manual'),
         allowNull: false,
     },
+    tipo_parcelamento: {
+        type: DataTypes.ENUM('mensal', 'anual'),
+        allowNull: false,
+    },
     pagamento: {
         type: DataTypes.ENUM('cotaunica', 'recorrente', 'parcelada'),
         allowNull: true,
