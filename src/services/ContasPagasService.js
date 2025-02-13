@@ -45,7 +45,7 @@ class ContasPagasService {
                     LEFT JOIN dbgerencialmoacir.fornecedores fo ON fo.id = fi.fornecedor_id
                     LEFT JOIN dbgerencialmoacir.clientes cl ON cl.id = fi.cliente_id
                     LEFT JOIN dbgerencialmoacir.funcionarios fu ON fu.id = fi.funcionario_id
-                    INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
+                    INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON (mf.financeiro_id = fi.id and fi.status <> 'cancelada')
                     INNER JOIN dbgerencialmoacir.contasbancarias cb ON cb.id = mf.conta_id
                 WHERE fi.tipo = 'debito' 
                 AND mf.status = 'liquidado'
