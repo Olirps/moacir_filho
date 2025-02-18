@@ -54,9 +54,9 @@ class FinanceiroService {
         const valorEntrada = parseFloat((dadosFinanceiro.valorEntradaDespesa || '0')); // Default to 0 if undefined
         const valorTotal = parseFloat(dadosFinanceiro.valor); // Valor total da despesa
         const valorRestante = valorTotal - valorEntrada; // Calcula o valor restante após a entrada
-        const qtdParcelas = parseInt(dadosFinanceiro.lancarParcelas); // Número de parcelas
-        const valorParcela = valorRestante / qtdParcelas; // Valor de cada parcela
-        const valorParcelaArredondado = parseFloat(valorParcela.toFixed(2)); // Arredondamos para 2 casas decimais
+        const qtdParcelas = dadosFinanceiro.lancarParcelas.length; // Número de parcelas
+        //const valorParcela = valorRestante / qtdParcelas; // Valor de cada parcela
+        //const valorParcelaArredondado = parseFloat(valorParcela.toFixed(2)); // Arredondamos para 2 casas decimais
 
         const dataVencimentoInicial = new Date(dadosFinanceiro.data_vencimento); // Data de vencimento da primeira parcela
 
@@ -87,8 +87,10 @@ class FinanceiroService {
 
           const movimentacao = {
             financeiro_id: despesa.id,
-            valor_parcela: i === qtdParcelas - 1 ? valorRestante - valorParcelaArredondado * (qtdParcelas - 1) : valorParcelaArredondado, // Ajusta o valor da última parcela
-            vencimento: dataVencimentoParcela.toISOString().split('T')[0], // Formata a data para YYYY-MM-DD
+            //valor_parcela: i === qtdParcelas - 1 ? valorRestante - valorParcelaArredondado * (qtdParcelas - 1) : valorParcelaArredondado, // Ajusta o valor da última parcela
+            valor_parcela: parseFloat(dadosFinanceiro.lancarParcelas[i].valor.replace(/[^0-9,-]/g, '').replace(',', '.')),
+            //vencimento: dataVencimentoParcela.toISOString().split('T')[0], // Formata a data para YYYY-MM-DD
+            vencimento: dadosFinanceiro.lancarParcelas[i].dataVencimento, // Formata a data para YYYY-MM-DD
             descricao: `${dadosFinanceiro.descricao} - Parcela ${i + 1} / ${qtdParcelas}`,
             status: 'pendente',
             parcela: i + 1 // Número da parcela
@@ -220,7 +222,7 @@ class FinanceiroService {
         const valorEntrada = parseFloat((dadosMovimentacao.valorEntrada || '0')); // Default to 0 if undefined
         const valorTotal = parseFloat(dadosMovimentacao.valor); // Valor total da despesa
         const valorRestante = valorTotal - valorEntrada; // Calcula o valor restante após a entrada
-        const qtdParcelas = parseInt(dadosMovimentacao.quantidadeParcelas); // Número de parcelas
+        const qtdParcelas = dadosMovimentacao.parcelas.length; // Número de parcelas
         const valorParcela = valorRestante / qtdParcelas; // Valor de cada parcela
         const valorParcelaArredondado = parseFloat(valorParcela.toFixed(2)); // Arredondamos para 2 casas decimais
 
@@ -242,6 +244,35 @@ class FinanceiroService {
         // Cria as parcelas normais (1, 2, 3, ...)
         for (let i = 0; i < qtdParcelas; i++) {
           const dataVencimentoParcela = new Date(dataVencimentoInicial);
+
+          if (dadosMovimentacao.tipo_parcelamento === 'mensal') {
+            // Para o parcelamento mensal, adiciona i meses à data inicial
+            dataVencimentoParcela.setMonth(dataVencimentoInicial.getMonth() + i);
+          } else if (dadosMovimentacao.tipo_parcelamento === 'anual') {
+            // Para o parcelamento anual, adiciona i anos à data inicial
+            dataVencimentoParcela.setFullYear(dataVencimentoInicial.getFullYear() + i);
+          }
+
+          const movimentacao = {
+            financeiro_id: dadosMovimentacao.financeiro_id,
+            //valor_parcela: i === qtdParcelas - 1 ? valorRestante - valorParcelaArredondado * (qtdParcelas - 1) : valorParcelaArredondado, // Ajusta o valor da última parcela
+            valor_parcela: parseFloat(dadosMovimentacao.parcelas[i].valor.replace(/[^0-9,-]/g, '').replace(',', '.')),
+            //vencimento: dataVencimentoParcela.toISOString().split('T')[0], // Formata a data para YYYY-MM-DD
+            vencimento: dadosMovimentacao.parcelas[i].dataVencimento, // Formata a data para YYYY-MM-DD
+            descricao: `${dadosMovimentacao.descricao} - Parcela ${i + 1} / ${qtdParcelas}`,
+            status: 'pendente',
+            parcela: i + 1 // Número da parcela
+          };
+
+          parcelas = await MovimentacaoFinanceira.create(movimentacao);
+          if (parcelas) {
+            const financeiro = await Financeiro.findByPk(dadosMovimentacao.financeiro_id);
+            const status = { status: 'andamento' }
+            await financeiro.update(status)
+          }
+        }
+        /*for (let i = 0; i < qtdParcelas; i++) {
+          const dataVencimentoParcela = new Date(dataVencimentoInicial);
           dataVencimentoParcela.setMonth(dataVencimentoInicial.getMonth() + i); // Adiciona i meses à data inicial
 
           const movimentacao = {
@@ -258,9 +289,8 @@ class FinanceiroService {
             const status = { status: 'andamento' }
             await financeiro.update(status)
           }
-        }
+        }*/
       } else {
-        console.log('Valor de Entrada: ' + dadosMovimentacao.valorEntrada);
         const valorTotal = parseFloat(dadosMovimentacao.valor); // Valor total da despesa
         const valorEntrada = parseFloat((dadosMovimentacao.valorEntrada || '0')); // Default to 0 if undefined
         const valorRestante = valorTotal - valorEntrada; // Calcula o valor restante após a entrada
@@ -284,8 +314,8 @@ class FinanceiroService {
           parcela: 1,
           financeiro_id: dadosMovimentacao.financeiro_id,
           tipo: dadosMovimentacao.tipo,
-          valor_parcela: valorRestante,
-          vencimento: dadosMovimentacao.vencimento,
+          valor_parcela: parseFloat(dadosMovimentacao.parcelas[0].valor.replace(/[^0-9,-]/g, '').replace(',', '.')),
+          vencimento: dadosMovimentacao.parcelas[0].dataVencimento,
           descricao: dadosMovimentacao.descricao
         });
         if (parcelas) {
@@ -354,12 +384,12 @@ class FinanceiroService {
           if (financeiro.pagamento === 'recorrente') {
             const novaDataVencimento = new Date(movimentacao.vencimento);
             novaDataVencimento.setMonth(novaDataVencimento.getMonth() + 1);
-           const parcelas = await MovimentacaoFinanceira.create({
-              descricao: movimentacao.descricao ,
-              parcela: Number(movimentacao.parcela)+1,
+            const parcelas = await MovimentacaoFinanceira.create({
+              descricao: movimentacao.descricao,
+              parcela: Number(movimentacao.parcela) + 1,
               financeiro_id: movimentacao.financeiro_id,
               valor_parcela: movimentacao.valor_parcela,
-              vencimento: novaDataVencimento ,
+              vencimento: novaDataVencimento,
               status: 'pendente'
             });
           } else {
