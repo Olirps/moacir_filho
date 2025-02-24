@@ -70,7 +70,7 @@ const Fornecedores = sequelize.define('Fornecedores', {
     allowNull: true
   },
   tipo_fornecedor: {
-    type: DataTypes.ENUM('peça', 'maquinario', 'suplemento', 'transporte', 'servico'),
+    type: DataTypes.ENUM('peça', 'maquinario', 'suplemento', 'transporte', 'servico','combustivel','bancario'),
     allowNull: true,
   },
   status: {

@@ -528,7 +528,7 @@ class FinanceiroService {
       const query = `
       SELECT mf.*
       FROM dbgerencialmoacir.financeiro fi
-      INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON mf.financeiro_id = fi.id
+      INNER JOIN dbgerencialmoacir.movimentacaofinanceira mf ON (mf.financeiro_id = fi.id and fi.status <> 'cancelada')
       WHERE mf.vencimento BETWEEN :segundaFeira AND :domingo
       AND fi.tipo = 'debito'
       AND mf.status = 'pendente'
