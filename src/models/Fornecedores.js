@@ -46,7 +46,7 @@ const Fornecedores = sequelize.define('Fornecedores', {
     allowNull: true
   },
   numero: {
-    type: DataTypes.STRING(8),
+    type: DataTypes.STRING(20),
     allowNull: true
   },
   bairro: {
