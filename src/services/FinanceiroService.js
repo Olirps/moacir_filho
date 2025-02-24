@@ -532,6 +532,7 @@ class FinanceiroService {
       WHERE mf.vencimento BETWEEN :segundaFeira AND :domingo
       AND fi.tipo = 'debito'
       AND mf.status = 'pendente'
+      order by mf.vencimento asc
     `;
 
       const contas = await sequelize.query(query, {
