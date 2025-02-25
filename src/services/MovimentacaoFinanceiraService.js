@@ -12,11 +12,15 @@ class MovimentacaoFinanceiraService {
      * @param {Object} filters - Objeto contendo os filtros a serem aplicados.
      * @returns {Promise<Array>} - Lista de movimentações financeiras com dados complementares.
      */
+
     static async getAll(filters = {}) {
         try {
-            const { dataInicio, dataFim, tipoMovimentacao, cliente_id, fornecedor_id, funcionario_id ,status} = filters;
+            const { dataInicio, dataFim, tipoMovimentacao, cliente_id, fornecedor, fornecedor_id, funcionario_id, status, cnpj } = filters;
 
-            // Filtros para a tabela MovimentacaoFinanceira (data de vencimento)
+            // Limpa o CNPJ do filtro
+            const cnpjFiltro = cnpj ? limparCNPJ(cnpj) : null;
+
+            // Filtros para a tabela MovimentacaoFinanceira (data de vencimento e status)
             const whereMovimentacao = {};
 
             if (dataInicio && dataFim) {
@@ -24,14 +28,14 @@ class MovimentacaoFinanceiraService {
                     [Op.between]: [new Date(dataInicio), new Date(dataFim)]
                 };
             }
-            if (status){
-                whereMovimentacao.status = status ;
+            if (status) {
+                whereMovimentacao.status = status;
             }
+
             // Busca as movimentações financeiras na tabela MovimentacaoFinanceira
             const movimentacoes = await MovimentacaoFinanceira.findAll({
                 where: whereMovimentacao,
                 order: [['vencimento', 'ASC']] // Ordenação por dataVencimento em ordem decrescente
-
             });
 
             // Para cada movimentação, busca os dados complementares na tabela Financeiro e os nomes relacionados
@@ -62,6 +66,7 @@ class MovimentacaoFinanceiraService {
                         cliente_nome: cliente ? cliente.nome : null,
                         fornecedor_id: financeiro ? financeiro.fornecedor_id : null,
                         fornecedor_nome: fornecedor ? fornecedor.nome : null,
+                        fornecedor_cnpj: fornecedor ? limparCNPJ(fornecedor.cpfCnpj) : null, // Limpa o CNPJ do fornecedor
                         funcionario_id: financeiro ? financeiro.funcionario_id : null,
                         funcionario_nome: funcionario ? funcionario.nome : null,
                         credor_nome: financeiro ? financeiro.credor_nome : null
@@ -69,7 +74,7 @@ class MovimentacaoFinanceiraService {
                 })
             );
 
-            // Aplica filtros adicionais (tipoMovimentacao, clienteId, fornecedorId, funcionarioId)
+            // Aplica filtros adicionais (tipoMovimentacao, clienteId, fornecedorId, funcionarioId, fornecedorNome, CNPJ)
             const filteredMovimentacoes = movimentacoesCompletas.filter((movimentacao) => {
                 let match = true;
 
@@ -85,6 +90,14 @@ class MovimentacaoFinanceiraService {
                 if (funcionario_id && movimentacao.funcionario_id !== funcionario_id) {
                     match = false;
                 }
+                // Filtro por nome do fornecedor
+                if (fornecedor && !movimentacao?.fornecedor_nome?.toLowerCase().includes(fornecedor.toLowerCase())) {
+                    match = false;
+                }
+                // Filtro por CNPJ do fornecedor
+                if (cnpjFiltro && movimentacao.fornecedor_cnpj !== cnpjFiltro) {
+                    match = false;
+                }
 
                 return match;
             });
@@ -94,7 +107,6 @@ class MovimentacaoFinanceiraService {
             throw new Error(`Erro ao buscar movimentações financeiras: ${error.message}`);
         }
     }
-
     /**
      * Cria uma nova movimentação financeira.
      * @param {Object} movimentacaoData - Dados da movimentação financeira.
@@ -199,5 +211,10 @@ class MovimentacaoFinanceiraService {
         }
     }
 }
+
+function limparCNPJ(cnpj) {
+    return cnpj.replace(/\D/g, ''); // Remove tudo que não for dígito
+}
+
 
 module.exports = MovimentacaoFinanceiraService;
