@@ -7,6 +7,8 @@ const MovimentacaoFinanceira = require('../models/MovimentacaoFinanceira');
 const { Op } = require('sequelize');
 const { Sequelize, QueryTypes } = require('sequelize');
 const sequelize = require('../db');
+const moment = require('moment'); // ou dayjs
+
 
 
 
@@ -110,50 +112,68 @@ class FinanceiroService {
 
 
 
-  static async getAllLancamentosFinanceiroDespesa() {
+  static async getAllLancamentosFinanceiroDespesa(filtros) {
     try {
-      const financeiro = await Financeiro.findAll({
-        where: {
-          tipo: 'debito',
-          status: {
-            [Op.notIn]: ['cancelada', 'liquidado'] // Exclui registros com status "cancelada" ou "liquidado"
-          }
-        },
-        raw: true, // Transforma os dados em objetos JS puros para evitar problemas com Sequelize
+      const whereCondition = {
+        tipo: 'debito',
+        status: {
+          [Op.notIn]: ['cancelada', 'liquidado']
+        }
+      };
+
+      if (filtros) {
+        const { descricao, fornecedor, funcionario, cliente, dataInicio, dataFim, pagamento } = filtros;
+
+        if (descricao) whereCondition.descricao = { [Op.like]: `%${descricao}%` };
+        if (pagamento) whereCondition.pagamento = pagamento;
+
+        if (fornecedor) whereCondition.fornecedor_id = fornecedor;
+        if (funcionario) whereCondition.funcionario_id = funcionario;
+        if (cliente) whereCondition.cliente_id = cliente;
+      }
+
+      let financeiro = await Financeiro.findAll({
+        where: whereCondition,
+        raw: true,
         order: [['id', 'DESC']]
       });
+
+      if (filtros?.dataInicio || filtros?.dataFim) {
+        // Ajustar para garantir que não há hora
+        const dataInicio = filtros.dataInicio ? moment(filtros.dataInicio).startOf('day').format('YYYY-MM-DD') : null;
+        const dataFim = filtros.dataFim ? moment(filtros.dataFim).endOf('day').format('YYYY-MM-DD') : null;
+
+        const movimentacoes = await MovimentacaoFinanceira.findAll({
+          where: {
+            vencimento: {
+              [Op.between]: [
+                dataInicio ? new Date(dataInicio) : null,
+                dataFim ? new Date(dataFim) : null
+              ]
+            }
+          },
+          attributes: ['financeiro_id'],
+          raw: true
+        });
+
+        const idsValidos = movimentacoes.map(mov => mov.financeiro_id);
+        financeiro = financeiro.filter(lancamento => idsValidos.includes(lancamento.id));
+      }
 
       const financeiroComDetalhes = await Promise.all(financeiro.map(async (lancamento) => {
         let entidade = null;
         let entidadeNome = null;
 
         if (lancamento.fornecedor_id) {
-          entidade = await Fornecedores.findOne({
-            where: { id: lancamento.fornecedor_id },
-            raw: true
-          });
+          entidade = await Fornecedores.findOne({ where: { id: lancamento.fornecedor_id }, raw: true });
           entidadeNome = 'fornecedor';
         } else if (lancamento.funcionario_id) {
-
-          entidade = await Funcionarios.findOne({
-            where: { id: lancamento.funcionario_id },
-            raw: true
-          });
-
-          // Busca o nome do funcionário na tabela Clientes, caso haja correspondência
-          const cliente = await Clientes.findOne({
-            where: { id: entidade.cliente_id },
-            attributes: ['nome'],
-            raw: true
-          });
-
+          entidade = await Funcionarios.findOne({ where: { id: lancamento.funcionario_id }, raw: true });
+          const cliente = await Clientes.findOne({ where: { id: entidade?.cliente_id }, attributes: ['nome'], raw: true });
           entidade = { ...entidade, nome: cliente?.nome || null };
           entidadeNome = 'funcionario';
         } else if (lancamento.cliente_id) {
-          entidade = await Clientes.findOne({
-            where: { id: lancamento.cliente_id },
-            raw: true
-          });
+          entidade = await Clientes.findOne({ where: { id: lancamento.cliente_id }, raw: true });
           entidadeNome = 'cliente';
         }
 
@@ -333,16 +353,36 @@ class FinanceiroService {
   }
 
 
-  static async getMovimentacaoFinanceiraByFinanceiroID(financeiro_id) {
+  static async getMovimentacaoFinanceiraByFinanceiroID(financeiro_id, filtros) {
     try {
-      const movimentacoes = await MovimentacaoFinanceira.findAll({
-        where: {
-          financeiro_id,
-          status: 'pendente'
-        },
-        raw: true
-      });
+      const { dataInicio, dataFim } = filtros;
+      let movimentacoes;
+      if (filtros?.dataInicio || filtros?.dataFim) {
+        // Ajustar para garantir que não há hora
+        const dataInicio = filtros.dataInicio ? moment(filtros.dataInicio).startOf('day').format('YYYY-MM-DD') : null;
+        const dataFim = filtros.dataFim ? moment(filtros.dataFim).endOf('day').format('YYYY-MM-DD') : null;
 
+        movimentacoes = await MovimentacaoFinanceira.findAll({
+          where: {
+            financeiro_id,
+            vencimento: {
+              [Op.between]: [
+                dataInicio ? new Date(dataInicio) : null,
+                dataFim ? new Date(dataFim) : null
+              ]
+            }
+          },
+          raw: true
+        });
+      } else {
+        movimentacoes = await MovimentacaoFinanceira.findAll({
+          where: {
+            financeiro_id,
+            status: 'pendente'
+          },
+          raw: true
+        });
+      }
       return movimentacoes;
     } catch (error) {
       console.error('Erro ao buscar movimentações financeiras:', error);
