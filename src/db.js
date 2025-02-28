@@ -27,7 +27,7 @@ const loadModels = async () => {
     console.log('Conexão bem-sucedida ao banco de dados.');
 
     // Sincronizar os modelos com o banco de dados
-    await sequelize.sync({ force: false });
+    await sequelize.sync({ force: false, alter: false });
     console.log('Modelos sincronizados com sucesso.');
   } catch (error) {
     console.error('Erro ao conectar ou sincronizar o banco de dados:', error);

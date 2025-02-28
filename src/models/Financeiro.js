@@ -12,7 +12,7 @@ const Financeiro = sequelize.define('Financeiro', {
         allowNull: true,
     },
     descricao: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
     valor: {
@@ -37,13 +37,6 @@ const Financeiro = sequelize.define('Financeiro', {
         type: DataTypes.INTEGER,
         references: {
             model: 'funcionarios',
-            key: 'id',
-        },
-    },
-    nota_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'nota_fiscal',
             key: 'id',
         },
     },
@@ -77,6 +70,10 @@ const Financeiro = sequelize.define('Financeiro', {
     },
     data_cancelamento: {
         type: DataTypes.DATE,
+    },
+    motivo_cancelamento: {
+        type: DataTypes.STRING(255),
+        allowNull: true
     }
 }, {
     sequelize,

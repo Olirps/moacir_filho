@@ -10,13 +10,13 @@ const Banco = sequelize.define('Banco', {
     codBancario: {
         type: DataTypes.STRING(5),
         allowNull: false,
-        unique: true, // Garante que o código bancário seja único
+        unique: {
+            name: 'codBancario' // Define um nome fixo para evitar múltiplas entradas
+        },
         comment: 'Código bancário único para identificação do banco',
-
-
     },
     nome: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: false,
     }
 }, {

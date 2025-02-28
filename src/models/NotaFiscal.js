@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db');
 const Fornecedores = require('../models/Fornecedores');
+const Financeiro = require('../models/Financeiro');
 
 
 const NotaFiscal = sequelize.define('NotaFiscal', {
@@ -22,12 +23,20 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         },
         allowNull: false,
     },
+    financeiro_id: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: Financeiro,
+            key: 'id',
+        },
+        allowNull: false,
+    },
     cNF: {
         type: DataTypes.STRING(15),
         allowNull: true
     },
     natOp: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: true
     },
     mod: {
@@ -39,7 +48,7 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         allowNull: true
     },
     nNF: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: true
     },
     dhEmi: {
@@ -99,7 +108,7 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         allowNull: true
     },
     verProc: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: true
     },
     dhCont: {
@@ -107,7 +116,7 @@ const NotaFiscal = sequelize.define('NotaFiscal', {
         allowNull: true
     },
     NFref: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: true // Assuming NFref is optional
     },
     vNF: {

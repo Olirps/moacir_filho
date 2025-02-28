@@ -3,11 +3,15 @@ const Financeiro = require('../models/Financeiro');
 const Clientes = require('../models/Clientes');
 const Fornecedores = require('../models/Fornecedores');
 const Funcionarios = require('../models/Funcionarios');
+const UnificaLancamento = require('../models/UnificaLancamento');
+const VwFinanceiroDebito = require('../models/VwFinanceiroDebito');
 const MovimentacaoFinanceira = require('../models/MovimentacaoFinanceira');
-const { Op } = require('sequelize');
+const { dataAtual } = require('../util/util');
+const { Op, where } = require('sequelize');
 const { Sequelize, QueryTypes } = require('sequelize');
 const sequelize = require('../db');
 const moment = require('moment'); // ou dayjs
+const UnificarLancamento = require('../models/UnificaLancamento');
 
 
 
@@ -16,6 +20,47 @@ const moment = require('moment'); // ou dayjs
 class FinanceiroService {
   static async createLancamentos(dadosFinanceiro) {
     try {
+
+      // Verifica se há boletos na movimentação ou nas parcelas
+      if (
+        dadosFinanceiro.boleto ||
+        (Array.isArray(dadosFinanceiro.parcelas) && dadosFinanceiro.lancarParcelas.some(parcela => parcela.boleto))
+      ) {
+        const boletos = [];
+
+        // Adiciona o boleto da movimentação, se existir
+        if (dadosFinanceiro.boleto) {
+          boletos.push(dadosFinanceiro.boleto);
+        }
+
+        // Adiciona os boletos das parcelas, se existirem
+        if (Array.isArray(dadosFinanceiro.lancarParcelas)) {
+          for (const parcela of dadosFinanceiro.lancarParcelas) {
+            if (parcela.boleto) {
+              boletos.push(parcela.boleto);
+            }
+          }
+        }
+
+        // Verifica se há boletos repetidos na solicitação
+        const boletosUnicos = [...new Set(boletos)];
+        if (boletosUnicos.length !== boletos.length) {
+          throw new Error('Existem boletos repetidos na solicitação.');
+        }
+
+        // Verifica se os boletos já estão vinculados a outras movimentações financeiras
+        for (const boleto of boletos) {
+          const movimentacaoExistente = await MovimentacaoFinanceira.findOne({
+            where: { boleto }
+          });
+
+          if (movimentacaoExistente) {
+            throw new Error(`Boleto ${boleto} já vinculado a outra movimentação financeira.`);
+          }
+        }
+      }
+
+
       const despesa = await Financeiro.create({
         nota_id: dadosFinanceiro.notaId || null,
         descricao: dadosFinanceiro.descricao,
@@ -32,6 +77,48 @@ class FinanceiroService {
         data_vencimento: dadosFinanceiro.dtVencimento,
         status: dadosFinanceiro.status || 'andamento'
       });
+
+      if (dadosFinanceiro.lanctoSelecionados) {
+        const lanctoSelecionados = dadosFinanceiro.lanctoSelecionados;
+
+        for (const id of lanctoSelecionados) {
+          const lancto = await Financeiro.findByPk(id)
+          try {
+            const dataCancelamento = dataAtual();
+            lancto.update({
+              status: 'cancelada',
+              data_cancelamento: dataCancelamento,
+              motivo_cancelamento: 'Despesa Cancelada e Unificada na Despesa ID: ' + despesa.id
+            })
+          } catch (error) {
+            throw new Error('Erro ao Unificar Lançamentos');
+          }
+        }
+
+        if (despesa) {
+          const notaLancto = await NotaFiscal.findAll(
+            {
+              where: {
+                financeiro_id: {
+                  [Op.in]: lanctoSelecionados
+                }
+              }
+            }
+          );
+          for (const nota_id of notaLancto) {
+            const nota = await NotaFiscal.findByPk(nota_id.id);
+            let unificar = { nota_id: nota.id, financeiro_id_old: nota.financeiro_id, financeiro_id_new: despesa.id, status: 1 };
+            try {
+              const unificaLancto = await UnificaLancamento.create(unificar)
+              nota.update({ financeiro_id: despesa.id });
+            } catch (error) {
+              throw new Error('Erro ao Unificar Lançamentos ' + error);
+            }
+          }
+        }
+      }
+
+
       if (dadosFinanceiro.pagamento === 'recorrente') {
         const movimentacao = {
           financeiro_id: despesa.id,
@@ -39,7 +126,8 @@ class FinanceiroService {
           vencimento: dadosFinanceiro.data_vencimento,
           descricao: `${dadosFinanceiro.descricao} - Parcela 1 / 1`,
           status: 'pendente',
-          parcela: 1 // Parcela única
+          parcela: 1, // Parcela única
+          boleto: dadosFinanceiro.boleto
         };
         await MovimentacaoFinanceira.create(movimentacao);
       } else if (dadosFinanceiro.pagamento === 'cotaunica') {
@@ -49,7 +137,8 @@ class FinanceiroService {
           vencimento: dadosFinanceiro.data_vencimento,
           descricao: `${dadosFinanceiro.descricao} - Parcela 1 / 1`,
           status: 'pendente',
-          parcela: 1 // Parcela única
+          parcela: 1, // Parcela única
+          boleto: dadosFinanceiro.boleto
         };
         await MovimentacaoFinanceira.create(movimentacao);
       } else if (dadosFinanceiro.pagamento === 'parcelada') {
@@ -70,7 +159,9 @@ class FinanceiroService {
             vencimento: dadosFinanceiro.data_vencimento, // A entrada vence na mesma data da primeira parcela
             descricao: `${dadosFinanceiro.descricao} - Entrada`,
             status: 'pendente',
-            parcela: 0 // Parcela de entrada
+            parcela: 0, // Parcela de entrada
+            boleto: dadosFinanceiro.boleto
+
           };
           await MovimentacaoFinanceira.create(movimentacaoEntrada);
         }
@@ -95,7 +186,9 @@ class FinanceiroService {
             vencimento: dadosFinanceiro.lancarParcelas[i].dataVencimento, // Formata a data para YYYY-MM-DD
             descricao: `${dadosFinanceiro.descricao} - Parcela ${i + 1} / ${qtdParcelas}`,
             status: 'pendente',
-            parcela: i + 1 // Número da parcela
+            parcela: i + 1, // Número da parcela
+            boleto: dadosFinanceiro.lancarParcelas[i].boleto, // Formata a data para YYYY-MM-DD
+
           };
 
           await MovimentacaoFinanceira.create(movimentacao);
@@ -106,7 +199,7 @@ class FinanceiroService {
       return despesa;
     } catch (error) {
       console.error('Erro ao registrar despesa:', error);
-      throw new Error('Erro ao registrar despesa');
+      throw new Error('Erro ao registrar despesa: ' + error);
     }
   }
 
@@ -122,7 +215,7 @@ class FinanceiroService {
       };
 
       if (filtros) {
-        const { descricao, fornecedor, funcionario, cliente, dataInicio, dataFim, pagamento } = filtros;
+        const { descricao, fornecedor, funcionario, cliente, dataInicio, dataFim, pagamento, boleto } = filtros;
 
         if (descricao) whereCondition.descricao = { [Op.like]: `%${descricao}%` };
         if (pagamento) whereCondition.pagamento = pagamento;
@@ -138,20 +231,30 @@ class FinanceiroService {
         order: [['id', 'DESC']]
       });
 
-      if (filtros?.dataInicio || filtros?.dataFim) {
+      if (filtros?.dataInicio || filtros?.dataFim || filtros?.boleto) {
         // Ajustar para garantir que não há hora
         const dataInicio = filtros.dataInicio ? moment(filtros.dataInicio).startOf('day').format('YYYY-MM-DD') : null;
         const dataFim = filtros.dataFim ? moment(filtros.dataFim).endOf('day').format('YYYY-MM-DD') : null;
 
+        const whereClause = {};
+
+        // Filtro por data de vencimento
+        if (filtros.dataInicio || filtros.dataFim) {
+          whereClause.vencimento = {
+            [Op.between]: [
+              dataInicio ? new Date(dataInicio) : null,
+              dataFim ? new Date(dataFim) : null
+            ]
+          };
+        }
+
+        // Filtro por boleto
+        if (filtros.boleto) {
+          whereClause.boleto = filtros.boleto;
+        }
+
         const movimentacoes = await MovimentacaoFinanceira.findAll({
-          where: {
-            vencimento: {
-              [Op.between]: [
-                dataInicio ? new Date(dataInicio) : null,
-                dataFim ? new Date(dataFim) : null
-              ]
-            }
-          },
+          where: whereClause,
           attributes: ['financeiro_id'],
           raw: true
         });
@@ -190,6 +293,31 @@ class FinanceiroService {
     }
   }
 
+  static async getLancamentosParaUnificar(filters = {}) {
+    try {
+      const { credor_nome, credor_id, cpfCnpj } = filters;
+      const whereMovimentacao = {};
+
+      if (credor_nome) {
+        whereMovimentacao.credor_nome = credor_nome
+      }
+      if (credor_id) {
+        whereMovimentacao.status = credor_id;
+      }
+      if (cpfCnpj) {
+        whereMovimentacao.cpfCnpj = cpfCnpj;
+      }
+
+      // Chama a função que retorna os lançamentos para unificação
+      const lancamentos = await VwFinanceiroDebito.findAll({
+        where: whereMovimentacao
+      });
+      return lancamentos; // Retorna os lançamentos encontrados
+    } catch (error) {
+      console.error('Erro ao buscar lançamentos para unificação:', error);
+      throw new Error('Não foi possível buscar os lançamentos para unificação.'); // Lança o erro para ser tratado no chamador
+    }
+  }
 
   static async getLancamentoDespesaById(id) {
     try {
@@ -238,6 +366,46 @@ class FinanceiroService {
 
       let parcelas = {};
       if (dadosMovimentacao.quantidadeParcelas > 1) {
+        const qtdParcelaMovimentacao = dadosMovimentacao.parcelas.length;
+
+        // Verifica se há boletos na movimentação ou nas parcelas
+        if (
+          dadosMovimentacao?.boleto ||
+          (Array.isArray(dadosMovimentacao.parcelas) && dadosMovimentacao.parcelas.some(parcela => parcela.boleto))
+        ) {
+          const boletos = [];
+
+          // Adiciona o boleto da movimentação, se existir
+          if (dadosMovimentacao.boleto) {
+            boletos.push(dadosMovimentacao.boleto);
+          }
+
+          // Adiciona os boletos das parcelas, se existirem
+          if (Array.isArray(dadosMovimentacao.parcelas)) {
+            for (const parcela of dadosMovimentacao.parcelas) {
+              if (parcela.boleto) {
+                boletos.push(parcela.boleto);
+              }
+            }
+          }
+
+          // Verifica se há boletos repetidos na solicitação
+          const boletosUnicos = [...new Set(boletos)];
+          if (boletosUnicos.length !== boletos.length) {
+            throw new Error('Existem boletos repetidos na solicitação.');
+          }
+
+          // Verifica se os boletos já estão vinculados a outras movimentações financeiras
+          for (const boleto of boletos) {
+            const movimentacaoExistente = await MovimentacaoFinanceira.findOne({
+              where: { boleto }
+            });
+
+            if (movimentacaoExistente) {
+              throw new Error(`Boleto ${boleto} já vinculado a outra movimentação financeira.`);
+            }
+          }
+        }
 
         const valorEntrada = parseFloat((dadosMovimentacao.valorEntrada || '0')); // Default to 0 if undefined
         const valorTotal = parseFloat(dadosMovimentacao.valor); // Valor total da despesa
@@ -250,13 +418,15 @@ class FinanceiroService {
 
         // Se houver valor de entrada, cria a parcela de entrada (parcela 0)
         if (valorEntrada > 0) {
+          console.log('Dados Movimentacao: ' + JSON.stringify(dadosMovimentacao));
           const movimentacaoEntrada = {
             financeiro_id: dadosMovimentacao.financeiro_id,
             valor_parcela: valorEntrada,
             vencimento: dadosMovimentacao.vencimento, // A entrada vence na mesma data da primeira parcela
             descricao: `${dadosMovimentacao.descricao} - Entrada`,
             status: 'pendente',
-            parcela: 0 // Parcela de entrada
+            parcela: 0, // Parcela de entrada
+            boleto: dadosMovimentacao.boleto
           };
           await MovimentacaoFinanceira.create(movimentacaoEntrada);
         }
@@ -272,18 +442,15 @@ class FinanceiroService {
             // Para o parcelamento anual, adiciona i anos à data inicial
             dataVencimentoParcela.setFullYear(dataVencimentoInicial.getFullYear() + i);
           }
-
           const movimentacao = {
             financeiro_id: dadosMovimentacao.financeiro_id,
-            //valor_parcela: i === qtdParcelas - 1 ? valorRestante - valorParcelaArredondado * (qtdParcelas - 1) : valorParcelaArredondado, // Ajusta o valor da última parcela
             valor_parcela: parseFloat(dadosMovimentacao.parcelas[i].valor.replace(/[^0-9,-]/g, '').replace(',', '.')),
-            //vencimento: dataVencimentoParcela.toISOString().split('T')[0], // Formata a data para YYYY-MM-DD
             vencimento: dadosMovimentacao.parcelas[i].dataVencimento, // Formata a data para YYYY-MM-DD
             descricao: `${dadosMovimentacao.descricao} - Parcela ${i + 1} / ${qtdParcelas}`,
             status: 'pendente',
-            parcela: i + 1 // Número da parcela
+            parcela: i + 1, // Número da parcela
+            boleto: dadosMovimentacao.parcelas[i].boleto
           };
-
           parcelas = await MovimentacaoFinanceira.create(movimentacao);
           if (parcelas) {
             const financeiro = await Financeiro.findByPk(dadosMovimentacao.financeiro_id);
@@ -291,26 +458,48 @@ class FinanceiroService {
             await financeiro.update(status)
           }
         }
-        /*for (let i = 0; i < qtdParcelas; i++) {
-          const dataVencimentoParcela = new Date(dataVencimentoInicial);
-          dataVencimentoParcela.setMonth(dataVencimentoInicial.getMonth() + i); // Adiciona i meses à data inicial
-
-          const movimentacao = {
-            financeiro_id: dadosMovimentacao.financeiro_id,
-            valor_parcela: i === qtdParcelas - 1 ? valorRestante - valorParcelaArredondado * (qtdParcelas - 1) : valorParcelaArredondado, // Ajusta o valor da última parcela
-            vencimento: dataVencimentoParcela.toISOString().split('T')[0], // Formata a data para YYYY-MM-DD
-            descricao: `${dadosMovimentacao.descricao} - Parcela ${i + 1} / ${qtdParcelas}`,
-            status: 'pendente',
-            parcela: i + 1 // Número da parcela
-          };
-          parcelas = await MovimentacaoFinanceira.create(movimentacao);
-          if (parcelas) {
-            const financeiro = await Financeiro.findByPk(dadosMovimentacao.financeiro_id);
-            const status = { status: 'andamento' }
-            await financeiro.update(status)
-          }
-        }*/
       } else {
+
+
+        // Verifica se há boletos na movimentação ou nas parcelas
+        if (
+          dadosMovimentacao.boleto ||
+          (Array.isArray(dadosMovimentacao.parcelas) && dadosMovimentacao.parcelas.some(parcela => parcela.boleto))
+        ) {
+          const boletos = [];
+
+          // Adiciona o boleto da movimentação, se existir
+          if (dadosMovimentacao.boleto) {
+            boletos.push(dadosMovimentacao.boleto);
+          }
+
+          // Adiciona os boletos das parcelas, se existirem
+          if (Array.isArray(dadosMovimentacao.parcelas)) {
+            for (const parcela of dadosMovimentacao.parcelas) {
+              if (parcela.boleto) {
+                boletos.push(parcela.boleto);
+              }
+            }
+          }
+
+          // Verifica se há boletos repetidos na solicitação
+          const boletosUnicos = [...new Set(boletos)];
+          if (boletosUnicos.length !== boletos.length) {
+            throw new Error('Existem boletos repetidos na solicitação.');
+          }
+
+          // Verifica se os boletos já estão vinculados a outras movimentações financeiras
+          for (const boleto of boletos) {
+            const movimentacaoExistente = await MovimentacaoFinanceira.findOne({
+              where: { boleto }
+            });
+
+            if (movimentacaoExistente) {
+              throw new Error(`Boleto ${boleto} já vinculado a outra movimentação financeira.`);
+            }
+          }
+        }
+
         const valorTotal = parseFloat(dadosMovimentacao.valor); // Valor total da despesa
         const valorEntrada = parseFloat((dadosMovimentacao.valorEntrada || '0')); // Default to 0 if undefined
         const valorRestante = valorTotal - valorEntrada; // Calcula o valor restante após a entrada
@@ -324,7 +513,8 @@ class FinanceiroService {
             vencimento: dadosMovimentacao.vencimento, // A entrada vence na mesma data da primeira parcela
             descricao: `${dadosMovimentacao.descricao} - Entrada`,
             status: 'pendente',
-            parcela: 0 // Parcela de entrada
+            parcela: 0, // Parcela de entrada
+            boleto: dadosMovimentacao.boleto
           };
           await MovimentacaoFinanceira.create(movimentacaoEntrada);
         }
@@ -336,7 +526,8 @@ class FinanceiroService {
           tipo: dadosMovimentacao.tipo,
           valor_parcela: parseFloat(dadosMovimentacao.parcelas[0].valor.replace(/[^0-9,-]/g, '').replace(',', '.')),
           vencimento: dadosMovimentacao.parcelas[0].dataVencimento,
-          descricao: dadosMovimentacao.descricao
+          descricao: dadosMovimentacao.descricao,
+          boleto: dadosMovimentacao.parcelas[0].boleto
         });
         if (parcelas) {
           const financeiro = await Financeiro.findByPk(dadosMovimentacao.financeiro_id);
@@ -348,7 +539,7 @@ class FinanceiroService {
       return parcelas;
     } catch (error) {
       console.error('Erro ao registrar movimentação financeira:', error);
-      throw new Error('Erro ao registrar movimentação financeira');
+      throw new Error('Erro ao registrar movimentação financeira' + error);
     }
   }
 
@@ -464,8 +655,8 @@ class FinanceiroService {
       });
 
       // Verifica se há vínculo com uma NotaFiscal
-      const notaFiscal = await NotaFiscal.findOne({
-        where: { id: lancamento.nota_id },
+      const notaFiscal = await NotaFiscal.findAll({
+        where: { financeiro_id: lancamento.id },
         raw: true
       });
 
@@ -505,42 +696,143 @@ class FinanceiroService {
 
   static async updateLancamentoFinanceiro(id, dadosAtualizados) {
     try {
-      const lancamento = await Financeiro.findByPk(id);
-
-      if (!lancamento) {
-        throw new Error('Lançamento financeiro não encontrado');
-      }
-
-      const parcelasPagas = await MovimentacaoFinanceira.findAll({
-        where: {
-          financeiro_id: id,
-          status: 'liquidado'
-        },
-        raw: true
-      });
-
-
-      if (parcelasPagas.length > 0) {
-        throw new Error('Lançamento financeiro com parcelas pagas');
-      }
-
-      // Verifica se há vínculo com uma NotaFiscal
-      const notaFiscal = await NotaFiscal.findOne({
-        where: { id: lancamento.nota_id },
-        raw: true
-      });
-
-      if (notaFiscal) {
-        throw new Error(`Lançamento financeiro Vinculado a Nota Fiscal: ${notaFiscal.nNF}`);
-      }
 
       if (dadosAtualizados.status === 'cancelada') {
-        dadosAtualizados.data_cancelamento = new Date().toISOString().split('T')[0];
+        const lancamento = await Financeiro.findByPk(id);
+
+        if (!lancamento) {
+          throw new Error('Lançamento financeiro não encontrado');
+        }
+
+        const parcelasPagas = await MovimentacaoFinanceira.findAll({
+          where: {
+            financeiro_id: id,
+            status: 'liquidado'
+          },
+          raw: true
+        });
+
+        if (parcelasPagas.length > 0) {
+          throw new Error('Lançamento financeiro com parcelas pagas');
+        }
+
+        // Verifica se há vínculo com uma NotaFiscal
+        const notaFiscal = await NotaFiscal.findAll({
+          where: { financeiro_id: lancamento.id },
+          raw: true
+        });
+
+        if (notaFiscal.length > 0) {
+          let lancamentoAtualizado;
+
+          for (const nf of notaFiscal) {
+            const notaRollBack = await UnificarLancamento.findOne(
+              {
+                where: {
+                  nota_id: nf.id,
+                  status: 1
+                }
+              }
+            );
+            if (notaRollBack) {
+              const status = { status: 0 }
+              const cancelaUnificacao = await notaRollBack.update(status);
+              const notaFiscalRollBack = await NotaFiscal.findOne(
+                {
+                  where: {
+                    id: notaRollBack.nota_id
+                  }
+                }
+              );
+              const financeiroRollBack = await Financeiro.findOne(
+                {
+                  where: {
+                    id: notaRollBack.financeiro_id_old
+                  }
+                }
+              );
+              const voltarFinanceiro = { status: 'aberta', data_cancelamento: null, motivo_cancelamento: null };
+              const voltarNota = { financeiro_id: notaRollBack.financeiro_id_old };
+
+              const movimentacoes = await MovimentacaoFinanceira.findAll({
+                where: {
+                  financeiro_id: notaRollBack.financeiro_id_new,
+                  status: { [Op.notIn]: ['cancelado'] } // Correção aqui
+                }
+              });
+
+
+              for (const mov of movimentacoes) {
+                const cancelamento = { status: 'cancelado', motivo_cancelamento: 'Cancelado pelo Usuário', data_cancelamento: dataAtual() };
+                const movimentacoesFind = await MovimentacaoFinanceira.findByPk(mov.id)
+
+                const cancela = await movimentacoesFind.update(cancelamento);
+              }
+
+              financeiroRollBack.update(voltarFinanceiro);
+              notaFiscalRollBack.update(voltarNota);
+
+              dadosAtualizados.data_cancelamento = dataAtual();
+              dadosAtualizados.motivo_cancelamento = 'Lançamento Cancelado pelo Usuário';
+
+              lancamentoAtualizado = await lancamento.update(dadosAtualizados);
+
+            }
+            else {
+              dadosAtualizados.status = 'aberta';
+
+              const movimentacoes = await MovimentacaoFinanceira.findAll({
+                where: {
+                  financeiro_id: lancamento.id,
+                  status: { [Op.notIn]: ['cancelado'] } // Correção aqui
+                }
+              });
+
+
+              for (const mov of movimentacoes) {
+                const cancelamento = { status: 'cancelado', motivo_cancelamento: 'Cancelado pelo Usuário', data_cancelamento: dataAtual() };
+                const movimentacoesFind = await MovimentacaoFinanceira.findByPk(mov.id)
+
+                const cancela = await movimentacoesFind.update(cancelamento);
+              }
+
+              lancamentoAtualizado = await lancamento.update(dadosAtualizados);
+
+
+            }
+          }
+          return lancamentoAtualizado;
+
+        } else {
+          dadosAtualizados.data_cancelamento = dataAtual();
+          dadosAtualizados.motivo_cancelamento = 'Lançamento Cancelado pelo Usuário';
+
+          const movimentacoes = await MovimentacaoFinanceira.findAll(
+            {
+              where:
+                { financeiro_id: lancamento.id }
+            }
+          )
+
+          for (const mov of movimentacoes) {
+            const dataAtualNew = dataAtual();
+            const cancelamento = { status: 'cancelado', motivo_cancelamento: 'Cancelado pelo Usuário', data_cancelamento: dataAtualNew };
+            const movimentacoesFind = await MovimentacaoFinanceira.findByPk(mov.id)
+
+            const cancela = await movimentacoesFind.update(cancelamento);
+          }
+
+          const lancamentoAtualizado = await lancamento.update(dadosAtualizados);
+
+          return lancamentoAtualizado;
+
+        }
+      } else {
+        const lancamento = await Financeiro.findByPk(id);
+        const lancamentoAtualizado = await lancamento.update(dadosAtualizados);
+        return lancamentoAtualizado
       }
 
-      const lancamentoAtualizado = await lancamento.update(dadosAtualizados);
-
-      return lancamentoAtualizado;
     } catch (error) {
       console.error('Erro ao atualizar lançamento financeiro:', error);
       throw new Error(`Erro ao atualizar lançamento financeiro: ${error.message}`);

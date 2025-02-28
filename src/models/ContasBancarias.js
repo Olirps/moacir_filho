@@ -16,15 +16,15 @@ const ContasBancarias = sequelize.define('ContasBancarias', {
         },
     },
     nome: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
     agencia: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
     conta: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
     tipo_conta: {
@@ -32,7 +32,7 @@ const ContasBancarias = sequelize.define('ContasBancarias', {
         allowNull: false,
     },
     documento: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: true,
     }
 }, {

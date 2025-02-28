@@ -22,6 +22,17 @@ class FinanceiroController {
         }
     }
 
+    static async getLancamentosParaUnificar(req, res) {
+        try {
+            const filters = req.query; // Filtros passados na query string
+
+            const lancamentos = await FinanceiroService.getLancamentosParaUnificar(filters);
+            return res.status(200).json(lancamentos);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
     // Buscar um lançamento financeiro de despesa pelo ID
     static async getLancamentoDespesaById(req, res) {
         try {

@@ -138,6 +138,7 @@ router.get('/parcelas/:id', FinanceiroController.getParcelaByID);
 router.put('/parcelas/:id', FinanceiroController.updateMovimentacaoFinanceira);
 router.get('/contaspagar/semana', FinanceiroController.getContaPagarSemana);
 router.get('/contaspagas', FinanceiroController.getContasPagas);
+router.get('/lancamentos-unificar', FinanceiroController.getLancamentosParaUnificar);
 
 //Rota para Movimentacao Financeira
 router.get('/movimentacao-despesa', MovimentacaoFinanceiraController.getAll);
