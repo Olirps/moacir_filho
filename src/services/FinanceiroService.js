@@ -221,13 +221,24 @@ class FinanceiroService {
         if (pagamento) whereCondition.pagamento = pagamento;
 
         // Filtro para Fornecedor
+        const { Op } = require('sequelize'); // Importe o operador `Op` do Sequelize
+
         if (fornecedor) {
-          // Busca os fornecedores com base no nomeFantasia (busca parcial)
+          // Busca os fornecedores com base no nomeFantasia OU nome (busca parcial)
           const fornecedor_filtred = await Fornecedores.findAll({
             where: {
-              nomeFantasia: {
-                [Op.like]: `%${fornecedor}%` // Busca parcial no campo `nomeFantasia`
-              }
+              [Op.or]: [ // Usa o operador [Op.or] para buscar em nomeFantasia OU nome
+                {
+                  nomeFantasia: {
+                    [Op.like]: `%${fornecedor}%` // Busca parcial no campo `nomeFantasia`
+                  }
+                },
+                {
+                  nome: {
+                    [Op.like]: `%${fornecedor}%` // Busca parcial no campo `nome`
+                  }
+                }
+              ]
             },
             attributes: ['id'],
             raw: true
@@ -665,7 +676,7 @@ class FinanceiroService {
         movimentacoes = await MovimentacaoFinanceira.findAll({
           where: {
             financeiro_id,
-            status: { [Op.notIn]: ['liquidado','cancelado'] }, // Correção aqui
+            status: { [Op.notIn]: ['liquidado', 'cancelado'] }, // Correção aqui
             vencimento: {
               [Op.between]: [
                 dataInicio ? new Date(dataInicio) : null,
