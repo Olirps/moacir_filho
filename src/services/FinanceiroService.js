@@ -221,8 +221,6 @@ class FinanceiroService {
         if (pagamento) whereCondition.pagamento = pagamento;
 
         // Filtro para Fornecedor
-        const { Op } = require('sequelize'); // Importe o operador `Op` do Sequelize
-
         if (fornecedor) {
           // Busca os fornecedores com base no nomeFantasia OU nome (busca parcial)
           const fornecedor_filtred = await Fornecedores.findAll({
