@@ -220,9 +220,118 @@ class FinanceiroService {
         if (descricao) whereCondition.descricao = { [Op.like]: `%${descricao}%` };
         if (pagamento) whereCondition.pagamento = pagamento;
 
-        if (fornecedor) whereCondition.fornecedor_id = fornecedor;
-        if (funcionario) whereCondition.funcionario_id = funcionario;
-        if (cliente) whereCondition.cliente_id = cliente;
+        // Filtro para Fornecedor
+        if (fornecedor) {
+          // Busca os fornecedores com base no nomeFantasia (busca parcial)
+          const fornecedor_filtred = await Fornecedores.findAll({
+            where: {
+              nomeFantasia: {
+                [Op.like]: `%${fornecedor}%` // Busca parcial no campo `nomeFantasia`
+              }
+            },
+            attributes: ['id'],
+            raw: true
+          });
+
+          // Extrai os IDs dos fornecedores filtrados
+          const idsFornecedores = fornecedor_filtred.map(fornecedor => fornecedor.id);
+
+          // Cria um array para armazenar as condições OR
+          const conditions = [];
+
+          // Adiciona a condição de fornecedor_id, se houver IDs de fornecedores
+          if (idsFornecedores.length > 0) {
+            conditions.push({
+              fornecedor_id: {
+                [Op.in]: idsFornecedores // Filtra por IDs dos fornecedores encontrados
+              }
+            });
+          }
+
+          // Adiciona a condição de credor_nome
+          conditions.push({
+            credor_nome: {
+              [Op.like]: `%${fornecedor}%` // Busca parcial no campo `credor_nome`
+            }
+          });
+
+          // Adiciona as condições ao `whereCondition` usando o operador [Op.or]
+          whereCondition[Op.or] = conditions;
+        }
+        // Filtro para funcionário
+        if (funcionario) {
+          // Busca os clientes com base no nome (busca parcial)
+          const clientesFiltrados = await Clientes.findAll({
+            where: {
+              nome: {
+                [Op.like]: `%${funcionario}%` // Busca parcial no campo `nome`
+              }
+            },
+            attributes: ['id'],
+            raw: true
+          });
+
+          // Extrai os IDs dos clientes filtrados
+          const idsClientes = clientesFiltrados.map(cliente => cliente.id);
+
+          if (idsClientes.length > 0) {
+            // Busca os funcionários associados aos clientes filtrados
+            const funcionariosFiltrados = await Funcionarios.findAll({
+              where: {
+                cliente_id: {
+                  [Op.in]: idsClientes // Filtra por IDs dos clientes encontrados
+                }
+              },
+              attributes: ['id'],
+              raw: true
+            });
+
+            // Extrai os IDs dos funcionários filtrados
+            const idsFuncionarios = funcionariosFiltrados.map(funcionario => funcionario.id);
+
+            if (idsFuncionarios.length > 0) {
+              // Adiciona a condição ao `whereCondition`
+              whereCondition.funcionario_id = {
+                [Op.in]: idsFuncionarios // Filtra por IDs dos funcionários encontrados
+              };
+            } else {
+              // Caso nenhum funcionário seja encontrado, você pode optar por não retornar nada
+              whereCondition.funcionario_id = null; // Ou outra lógica de sua escolha
+            }
+          } else {
+            // Caso nenhum cliente seja encontrado, você pode optar por não retornar nada
+            whereCondition.funcionario_id = null; // Ou outra lógica de sua escolha
+          }
+        }
+
+        // Filtro para cliente
+        if (cliente) {
+          // Busca os clientes com base no nome (busca parcial)
+          const clientesFiltrados = await Clientes.findAll({
+            where: {
+              nome: {
+                [Op.like]: `%${cliente}%` // Busca parcial no campo `nome`
+              }
+            },
+            attributes: ['id'],
+            raw: true
+          });
+
+          // Extrai os IDs dos clientes filtrados
+          const idsClientes = clientesFiltrados.map(cliente => cliente.id);
+
+          if (idsClientes.length > 0) {
+            // Adiciona a condição ao `whereCondition`
+            whereCondition.cliente_id = {
+              [Op.in]: idsClientes // Filtra por IDs dos clientes encontrados
+            };
+          } else {
+            // Caso nenhum cliente seja encontrado, você pode optar por não retornar nada
+            whereCondition.cliente_id = null; // Ou outra lógica de sua escolha
+          }
+        }
+
+
       }
 
       let financeiro = await Financeiro.findAll({
@@ -556,10 +665,11 @@ class FinanceiroService {
         movimentacoes = await MovimentacaoFinanceira.findAll({
           where: {
             financeiro_id,
+            status: { [Op.notIn]: ['liquidado','cancelado'] }, // Correção aqui
             vencimento: {
               [Op.between]: [
                 dataInicio ? new Date(dataInicio) : null,
-                dataFim ? new Date(dataFim) : null
+                dataFim ? new Date(dataFim) : null,
               ]
             }
           },

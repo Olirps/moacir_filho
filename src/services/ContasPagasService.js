@@ -39,6 +39,12 @@ class ContasPagasService {
                         WHEN fi.funcionario_id IS NOT NULL THEN (SELECT nome FROM dbgerencialmoacir.clientes WHERE id = fu.cliente_id)
                         WHEN fi.credor_nome is not null then fi.credor_nome
                     END AS credor_nome,
+                    CASE 
+                        WHEN fi.fornecedor_id IS NOT NULL THEN fo.cpfCnpj
+                        WHEN fi.cliente_id IS NOT NULL THEN cl.cpfCnpj
+                        WHEN fi.funcionario_id IS NOT NULL THEN (SELECT cpfCnpj FROM dbgerencialmoacir.clientes WHERE id = fu.cliente_id)
+                        WHEN fi.credor_nome is not null then 'CPF/CNPJ Não Informado'
+                    END AS credor_cpfcnpj,
                     cb.nome AS conta_bancaria_nome
                 FROM 
                     dbgerencialmoacir.financeiro fi
