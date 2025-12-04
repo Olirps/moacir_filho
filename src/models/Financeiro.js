@@ -16,7 +16,7 @@ const Financeiro = sequelize.define('Financeiro', {
         allowNull: false,
     },
     valor: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.DECIMAL(15,2),
         allowNull: false,
     },
     fornecedor_id: {

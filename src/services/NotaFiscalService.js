@@ -14,6 +14,13 @@ const MovimentacoesEstoque = require("../models/MovimentacoesEstoque");
 const ItensNaoIdentificados = require("../models/ItensNaoIdentificados");
 const Financeiro = require('../models/Financeiro');
 
+
+/**/
+const MovimentacaoFinanceira = require('../models/MovimentacaoFinanceira'); // <--- adicionado
+const { dataAtual } = require('../util/util'); // <--- adicionado
+
+/**/
+
 const { Op } = require('sequelize');
 
 const fornecedoresCriados = [];
@@ -235,17 +242,87 @@ class NotaFiscalService {
   }
 
   static async deleteNotaFiscal(id) {
+    const t = await sequelize.transaction();
+
     try {
-      const notaFiscal = await NotaFiscal.findByPk(id);
+      const notaFiscal = await NotaFiscal.findByPk(id, { transaction: t });
       if (!notaFiscal) {
+        await t.rollback();
         return null;
       }
-      await notaFiscal.destroy();
+
+      const dataCancel = dataAtual();
+
+      // Se houver financeiro vinculado, checamos as movimentações primeiro
+      if (notaFiscal.financeiro_id) {
+        const financeiro = await Financeiro.findByPk(notaFiscal.financeiro_id, { transaction: t });
+
+        if (financeiro) {
+          // Verifica se existe alguma movimentação com status 'liquidado'
+          const movLiquidada = await MovimentacaoFinanceira.findOne({
+            where: {
+              financeiro_id: financeiro.id,
+              status: 'liquidado'
+            },
+            transaction: t
+          });
+
+          if (movLiquidada) {
+            // Não podemos concluir a exclusão/cancelamento porque já existe pagamento liquidado
+            await t.rollback();
+            // Retornamos false pra indicar que não foi possível concluir por regra de negócio
+            return false;
+          }
+
+          // Se não houver movimentação liquidada, seguimos com o cancelamento do financeiro
+          await financeiro.update(
+            {
+              status: 'cancelada',
+              data_cancelamento: dataCancel,
+              motivo_cancelamento: `Cancelado por cancelamento da NotaFiscal ID: ${id}`
+            },
+            { transaction: t }
+          );
+
+          await MovimentacaoFinanceira.update(
+            {
+              status: 'cancelado',
+              motivo_cancelamento: `Cancelado por cancelamento da NotaFiscal ID: ${id}`,
+              data_cancelamento: dataCancel
+            },
+            {
+              where: { financeiro_id: financeiro.id },
+              transaction: t
+            }
+          );
+        }
+      }
+
+      // Marca a nota fiscal como cancelada
+      await notaFiscal.update(
+        { status: 'cancelada', data_cancelamento: dataCancel },
+        { transaction: t }
+      );
+
+      // Movimentações de estoque
+      await MovimentacoesEstoque.update(
+        { status: 1 },
+        { where: { nota_id: id }, transaction: t }
+      );
+
+      // Pagamentos da NF (remover ou adaptar)
+      await PagamentosNF.destroy({ where: { nota_id: id }, transaction: t });
+
+      await t.commit();
       return true;
+
     } catch (err) {
-      throw new Error('Erro ao deletar a nota fiscal');
+      await t.rollback();
+      throw new Error('Erro ao deletar a nota fiscal: ' + err.message);
     }
   }
+
+
 }
 
 async function existeNF(nroNf, codFornecedor) {

@@ -158,16 +158,38 @@ class NotaFiscalController {
     static async excluirNotaFiscal(req, res) {
         try {
             const { id } = req.params;
+
+            // validação rápida (opcional, já faz get no service abaixo)
+            if (!id) return res.status(400).json({ error: 'ID da nota é obrigatório' });
+
             const notaFiscal = await NotaFiscalService.getNotaFiscalById(id);
 
             if (!notaFiscal) {
                 return res.status(404).json({ error: 'Nota Fiscal não encontrada' });
             }
 
-            await NotaFiscalService.deleteNotaFiscal(id);
-            res.status(204).send();
+            // deleteNotaFiscal agora pode retornar:
+            //  - null  -> não encontrado (redundante aqui, mas tratado)
+            //  - false -> existe movimentação liquidada (não pode excluir)
+            //  - true  -> sucesso
+            const result = await NotaFiscalService.deleteNotaFiscal(id);
+
+            if (result === null) {
+                return res.status(404).json({ error: 'Nota Fiscal não encontrada' });
+            }
+
+            if (result === false) {
+                // 409 Conflict — regra de negócio impedindo a operação
+                return res.status(409).json({
+                    error: 'Não é possível cancelar/excluir: existem movimentações financeiras liquidada(s) vinculadas.'
+                });
+            }
+
+            // sucesso
+            return res.status(204).send();
         } catch (err) {
-            res.status(500).json({ error: err.message });
+            // se você preferir esconder detalhes do erro em produção, retorne uma mensagem genérica aqui
+            return res.status(500).json({ error: err.message || 'Erro interno' });
         }
     }
 
@@ -258,7 +280,7 @@ async function existeNF(nroNf, ident) {
     if (!fornecedoresExistente) {
         return false;
     } else {
-        const exist = await NotaFiscal.findOne({ where: { nNF: nroNf, codFornecedor: fornecedoresExistente.id ,status: { [Op.ne]: 'cancelada' }} });
+        const exist = await NotaFiscal.findOne({ where: { nNF: nroNf, codFornecedor: fornecedoresExistente.id, status: { [Op.ne]: 'cancelada' } } });
         return !!exist;
     }
 

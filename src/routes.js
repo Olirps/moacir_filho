@@ -152,7 +152,7 @@ router.post('/notafiscal',NotaFiscalController.criarNotaFiscal);
 router.get('/notafiscal', NotaFiscalController.listarNotaFiscal);
 router.get('/notafiscal/:id', NotaFiscalController.obterNotaFiscalPorId);
 router.put('/notafiscal/:id', NotaFiscalController.atualizarNotaFiscal);
-router.delete('/notafiscal/:id', NotaFiscalController.excluirNotaFiscal);
+router.put('/excluir-notafiscal/:id', NotaFiscalController.excluirNotaFiscal);
 
 // Rotas para produtos nota fiscal
 router.get('/produtosnf/:notaFiscalId', ProdutosNFController.getProdutosPorNotaFiscal);

@@ -36,11 +36,11 @@ const MovimentacaoFinanceira = sequelize.define('MovimentacaoFinanceira', {
         allowNull: false,
     },
     valor_parcela: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.DECIMAL(15,2),
         allowNull: true,
     },
     valor_pago: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.DECIMAL(15,2),
         allowNull: true,
     },
     conta_id: {
