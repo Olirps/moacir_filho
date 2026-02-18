@@ -185,6 +185,21 @@ class MovimentacaoFinanceiraService {
         }
     }
 
+    static async updateDataPagamento(id, data_pagamento) {
+        try {
+            const movimentacao = await MovimentacaoFinanceira.findByPk(id);
+            if (!movimentacao) {
+                throw new Error('Movimentação financeira não encontrada');
+            }
+            await movimentacao.update({
+                data_pagamento,
+            });
+            return movimentacao;
+        } catch (error) {
+            throw new Error(`Erro ao atualizar data de pagamento: ${error.message}`);
+        }
+    }
+
     /**
      * Deleta uma movimentação financeira.
      * @param {number} id - ID da movimentação financeira.

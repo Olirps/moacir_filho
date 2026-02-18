@@ -142,6 +142,7 @@ router.get('/lancamentos-unificar', FinanceiroController.getLancamentosParaUnifi
 
 //Rota para Movimentacao Financeira
 router.get('/movimentacao-despesa', MovimentacaoFinanceiraController.getAll);
+router.put('/movimentacao-despesa/:id/data-pagamento', MovimentacaoFinanceiraController.updateDataPagamento);
 
 
 

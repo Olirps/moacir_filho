@@ -48,6 +48,17 @@ class MovimentacaoFinanceiraController {
         }
     }
 
+    static updateDataPagamento = async (req, res) => {
+        try {
+            const { id } = req.params; // ID da movimentação financeira
+            const { data_pagamento } = req.body; // Nova data de pagamento
+            const movimentacaoAtualizada = await MovimentacaoFinanceiraService.updateDataPagamento(id, data_pagamento);
+            res.status(200).json(movimentacaoAtualizada);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+
     /**
      * Deleta uma movimentação financeira.
      * @param {Object} req - Objeto de requisição do Express.
