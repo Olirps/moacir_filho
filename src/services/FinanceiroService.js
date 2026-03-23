@@ -18,6 +18,48 @@ const UnificarLancamento = require('../models/UnificaLancamento');
 
 
 class FinanceiroService {
+  static parseValorMonetario(valor) {
+    if (valor === null || valor === undefined || valor === '') {
+      return null;
+    }
+
+    if (typeof valor === 'number') {
+      return Number.isFinite(valor) ? valor : null;
+    }
+
+    if (typeof valor === 'string') {
+      let valorNormalizado = valor.trim();
+
+      if (!valorNormalizado) {
+        return null;
+      }
+
+      const temVirgula = valorNormalizado.includes(',');
+      const temPonto = valorNormalizado.includes('.');
+
+      if (temVirgula && temPonto) {
+        if (valorNormalizado.lastIndexOf(',') > valorNormalizado.lastIndexOf('.')) {
+          valorNormalizado = valorNormalizado.replace(/\./g, '').replace(',', '.');
+        } else {
+          valorNormalizado = valorNormalizado.replace(/,/g, '');
+        }
+      } else if (temVirgula) {
+        valorNormalizado = valorNormalizado.replace(',', '.');
+      }
+
+      valorNormalizado = valorNormalizado.replace(/[^\d.-]/g, '');
+      const convertido = parseFloat(valorNormalizado);
+
+      return Number.isNaN(convertido) ? null : convertido;
+    }
+
+    return null;
+  }
+
+  static arredondarValorMonetario(valor) {
+    return Math.round((Number(valor) + Number.EPSILON) * 100) / 100;
+  }
+
   static async createLancamentos(dadosFinanceiro) {
     try {
 
@@ -713,45 +755,92 @@ class FinanceiroService {
 
   static async updateMovimentacaoFinanceira(id, dadosAtualizados) {
     try {
-      const movimentacao = await MovimentacaoFinanceira.findByPk(id);
+      return await sequelize.transaction(async (transaction) => {
+        const movimentacao = await MovimentacaoFinanceira.findByPk(id, { transaction });
 
-      if (!movimentacao) {
-        throw new Error('Movimenta√ß√£o financeira n√£o encontrada');
-      }
+        if (!movimentacao) {
+          throw new Error('MovimentaÁ„o financeira n„o encontrada');
+        }
 
-      const parcelaLiquidada = await movimentacao.update(dadosAtualizados);
+        const dadosParaUpdate = { ...dadosAtualizados };
+        const acrescimo = FinanceiroService.parseValorMonetario(dadosAtualizados.acrescimo) || 0;
+        const desconto = FinanceiroService.parseValorMonetario(dadosAtualizados.desconto) || 0;
+        const valorPagoInformado = FinanceiroService.parseValorMonetario(
+          dadosAtualizados.valor_pago !== undefined ? dadosAtualizados.valor_pago : dadosAtualizados.valorPago
+        );
+        const valorParcelaAtual = FinanceiroService.parseValorMonetario(movimentacao.valor_parcela) || 0;
+        const totalComAjustes = FinanceiroService.arredondarValorMonetario(valorParcelaAtual + acrescimo - desconto);
 
-      if (parcelaLiquidada) {
-        const movimentacoes = await MovimentacaoFinanceira.findAll({
+        if (totalComAjustes < 0) {
+          throw new Error('Desconto maior que o valor da parcela com acrÈscimo.');
+        }
+
+        delete dadosParaUpdate.acrescimo;
+        delete dadosParaUpdate.desconto;
+        delete dadosParaUpdate.valorPago;
+
+        if (valorPagoInformado !== null) {
+          dadosParaUpdate.valor_pago = FinanceiroService.arredondarValorMonetario(valorPagoInformado);
+        } else if (dadosParaUpdate.status === 'liquidado') {
+          dadosParaUpdate.valor_pago = totalComAjustes;
+        }
+
+        const parcelaLiquidada = await movimentacao.update(dadosParaUpdate, { transaction });
+
+        const valorPagoFinal = FinanceiroService.parseValorMonetario(parcelaLiquidada.valor_pago) || 0;
+        const valorRestante = FinanceiroService.arredondarValorMonetario(totalComAjustes - valorPagoFinal);
+        const houvePagamentoParcial = parcelaLiquidada.status === 'liquidado' && valorPagoFinal > 0 && valorRestante > 0;
+
+        if (houvePagamentoParcial) {
+          const novaDataVencimento = new Date(movimentacao.vencimento);
+          novaDataVencimento.setMonth(novaDataVencimento.getMonth() + 1);
+
+          const maiorParcela = await MovimentacaoFinanceira.max('parcela', {
+            where: { financeiro_id: movimentacao.financeiro_id },
+            transaction
+          });
+
+          await MovimentacaoFinanceira.create({
+            descricao: movimentacao.descricao,
+            parcela: (Number(maiorParcela) || Number(movimentacao.parcela) || 0) + 1,
+            financeiro_id: movimentacao.financeiro_id,
+            valor_parcela: valorRestante,
+            vencimento: novaDataVencimento,
+            status: 'pendente'
+          }, { transaction });
+        }
+
+        const movimentacoesPendentes = await MovimentacaoFinanceira.findAll({
           where: {
             financeiro_id: movimentacao.financeiro_id,
             status: 'pendente'
           },
-          raw: true
+          transaction
         });
-        if (movimentacoes.length === 0) {
-          const financeiro = await Financeiro.findByPk(movimentacao.financeiro_id)
+
+        if (movimentacoesPendentes.length === 0) {
+          const financeiro = await Financeiro.findByPk(movimentacao.financeiro_id, { transaction });
           if (financeiro.pagamento === 'recorrente') {
             const novaDataVencimento = new Date(movimentacao.vencimento);
             novaDataVencimento.setMonth(novaDataVencimento.getMonth() + 1);
-            const parcelas = await MovimentacaoFinanceira.create({
+            await MovimentacaoFinanceira.create({
               descricao: movimentacao.descricao,
               parcela: Number(movimentacao.parcela) + 1,
               financeiro_id: movimentacao.financeiro_id,
               valor_parcela: movimentacao.valor_parcela,
               vencimento: novaDataVencimento,
               status: 'pendente'
-            });
+            }, { transaction });
           } else {
-            financeiro.update({ status: 'liquidado' })
+            await financeiro.update({ status: 'liquidado' }, { transaction });
           }
         }
-      }
 
-      return movimentacao;
+        return parcelaLiquidada;
+      });
     } catch (error) {
-      console.error('Erro ao atualizar movimenta√ß√£o financeira:', error);
-      throw new Error('Erro ao atualizar movimenta√ß√£o financeira');
+      console.error('Erro ao atualizar movimentaÁ„o financeira:', error);
+      throw new Error('Erro ao atualizar movimentaÁ„o financeira');
     }
   }
 
